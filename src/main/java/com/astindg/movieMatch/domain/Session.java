@@ -1,0 +1,126 @@
+package com.astindg.movieMatch.domain;
+
+import com.astindg.movieMatch.model.Movie;
+import com.astindg.movieMatch.model.User;
+import com.astindg.movieMatch.services.MovieService;
+import lombok.Getter;
+import lombok.Setter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
+import java.util.stream.Collectors;
+
+@Getter
+@Setter
+public class Session {
+    private User user;
+    private User currentFriend;
+    private String inviteCode;
+    private LocalDateTime timeOfInitCode;
+    private List<Movie> movieList;
+    private Boolean processingInviteCode = false;
+    private Set<Movie> moviesMatchWithCurrentFriend;
+    private Movie lastMovieShown;
+    private final MovieService movieService;
+
+    private static final Logger log = LoggerFactory.getLogger(Session.class);
+
+    protected static final int INVITE_CODE_LENGTH = 5;
+    protected static final int INVITE_CODE_MAX_AGE_IN_MINUTES = 10;
+
+    public Session(MovieService movieService) {
+        this.movieService = movieService;
+    }
+
+    protected void initializeMovieList() {
+        List<Movie> movieList = new ArrayList<>();
+
+        Set<Movie> moviesShownBefore = new HashSet<>();
+        if (this.user.getFavoriteMovies() != null) {
+            moviesShownBefore.addAll(this.user.getFavoriteMovies());
+        }
+        if (this.user.getDislikedMovies() != null) {
+            moviesShownBefore.addAll(this.user.getDislikedMovies());
+        }
+
+        for (Movie movie : movieService.findAll()) {
+            if (!moviesShownBefore.contains(movie)) {
+                movieList.add(movie);
+            }
+        }
+
+        this.movieList = movieList;
+    }
+
+    protected boolean isCorrectLengthCode(int length) {
+        return INVITE_CODE_LENGTH == length;
+    }
+
+    protected boolean isLookingForFriend() {
+        return this.processingInviteCode;
+    }
+
+    protected void enableProcessingCode() {
+        this.processingInviteCode = true;
+    }
+
+    protected void disableProcessingCode() {
+        this.processingInviteCode = false;
+    }
+
+    protected int getInviteCodeMaxAge() {
+        return INVITE_CODE_MAX_AGE_IN_MINUTES;
+    }
+
+    protected Optional<User> selectFriend(int index) {
+        if (this.user.getFriends() != null && this.user.getFriends().size() > index) {
+            User friend = this.user.getFriends().get(index);
+            this.currentFriend = friend;
+            this.moviesMatchWithCurrentFriend = getNewMatches();
+
+            return Optional.of(friend);
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    protected Set<Movie> getNewMatches() {
+        Set<Movie> movieMatches = new HashSet<>();
+
+        if (this.user.getFavoriteMovies() != null && this.currentFriend != null) {
+            if (this.currentFriend.getFavoriteMovies() != null) {
+                Set<Movie> movies = this.user.getFavoriteMovies();
+                Set<Movie> moviesFriend = this.currentFriend.getFavoriteMovies();
+
+                if (!movies.isEmpty() && !moviesFriend.isEmpty()) {
+                    movieMatches = movies.stream().filter(moviesFriend::contains)
+                            .collect(Collectors.toSet());
+                }
+
+                this.moviesMatchWithCurrentFriend = movieMatches;
+            }
+        }
+        return movieMatches;
+    }
+
+    protected boolean isCodeValid() {
+        long minutesPassed = ChronoUnit.MINUTES.between(this.timeOfInitCode, LocalDateTime.now());
+        return INVITE_CODE_MAX_AGE_IN_MINUTES > minutesPassed;
+    }
+
+    protected Optional<User> getFriendByIndex(int index) {
+        if (this.user.getFriends() != null && this.user.getFriends().size() > index) {
+            User user = this.user.getFriends().get(index);
+            return Optional.of(user);
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    protected void releaseLastMovieShown() {
+        this.lastMovieShown = null;
+    }
+}
