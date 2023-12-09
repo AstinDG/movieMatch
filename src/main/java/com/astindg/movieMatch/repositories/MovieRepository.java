@@ -2,8 +2,11 @@ package com.astindg.movieMatch.repositories;
 
 import com.astindg.movieMatch.model.Movie;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MovieRepository extends JpaRepository<Movie, Integer> {
+    @Query(value = "select count(*) from Movies", nativeQuery = true)
+    Integer getMoviesAmount();
 }

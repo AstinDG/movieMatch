@@ -20,6 +20,10 @@ public class MovieService {
         return movieRepository.findAll();
     }
 
+    public Integer getMoviesAmount(){
+        return movieRepository.getMoviesAmount();
+    }
+
     /*public List<Movie> getAll(){
         List<Movie> movieList = new ArrayList<>();
 
