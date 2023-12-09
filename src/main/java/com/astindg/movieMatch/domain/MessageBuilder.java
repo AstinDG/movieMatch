@@ -1,15 +1,13 @@
 package com.astindg.movieMatch.domain;
 
-import com.astindg.movieMatch.model.Language;
-import com.astindg.movieMatch.model.Message;
-import com.astindg.movieMatch.model.Movie;
-import com.astindg.movieMatch.model.User;
+import com.astindg.movieMatch.model.*;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 @Component
 public class MessageBuilder {
@@ -44,26 +42,23 @@ public class MessageBuilder {
         int number = 1;
 
         String template = MessageTemplateKeeper.getMessageOrTemplateByKey(MessageTemplateKeeper.FAVORITE_MOVIES_KEY, this.language);
+        Function<Movie, MovieDetails> getMovieDetailsFunc = null;
+        switch (this.language) {
+            case EN -> getMovieDetailsFunc = Movie::getDetailsEn;
 
-        if (this.language == Language.EN) {
-            for (Movie movie : session.getUser().getFavoriteMovies()) {
-                movies.append(String.format(template,
-                        number, movie.getNameEn(), movie.getGenreEn(), movie.getYearOfRelease()));
-                number++;
-            }
-        } else if (this.language == Language.UA) {
-            for (Movie movie : session.getUser().getFavoriteMovies()) {
-                movies.append(String.format(template,
-                        number, movie.getNameUa(), movie.getGenreUa(), movie.getYearOfRelease()));
-                number++;
-            }
-        } else if (this.language == Language.RU) {
-            for (Movie movie : session.getUser().getFavoriteMovies()) {
-                movies.append(String.format(template,
-                        number, movie.getNameRu(), movie.getGenreRu(), movie.getYearOfRelease()));
-                number++;
-            }
+            case UA -> getMovieDetailsFunc = Movie::getDetailsUa;
+
+            case RU -> getMovieDetailsFunc = Movie::getDetailsRu;
         }
+
+        for (Movie movie : session.getUser().getFavoriteMovies()) {
+            MovieDetails movieDetails = getMovieDetailsFunc.apply(movie);
+            movies.append(String.format(template,
+                    number,
+                    movieDetails.getName(), movieDetails.getGenre(), movieDetails.getYearOfRelease()));
+            number++;
+        }
+
 
         this.messageText = movies.toString();
         return this;
@@ -144,7 +139,7 @@ public class MessageBuilder {
         return this;
     }
 
-    protected MessageBuilder withFriendNotSelectedError(){
+    protected MessageBuilder withFriendNotSelectedError() {
         this.messageText = MessageTemplateKeeper.getMessageOrTemplateByKey(MessageTemplateKeeper.ERROR_MESSAGE_FRIEND_NOT_SELECTED_KEY, this.language);
         return this;
     }
@@ -208,22 +203,30 @@ public class MessageBuilder {
         return this;
     }
 
-    protected MessageBuilder withRandomMovie(Session session) {
+   protected MessageBuilder withRandomMovie(Session session) {
         Movie movie = session.getLastMovieShown();
         String template = MessageTemplateKeeper.getMessageOrTemplateByKey(MessageTemplateKeeper.MOVIE_MESSAGE_KEY, this.language);
-        if (this.language == Language.EN) {
-            this.messageText = String.format(template, movie.getNameEn(), movie.getGenreEn(), movie.getYearOfRelease(), movie.getDescriptionEn());
-        } else if (this.language == Language.UA) {
-            this.messageText = String.format(template, movie.getNameUa(), movie.getGenreUa(), movie.getYearOfRelease(), movie.getDescriptionUa());
-        } else if (this.language == Language.RU) {
-            this.messageText = String.format(template, movie.getNameRu(), movie.getGenreRu(), movie.getYearOfRelease(), movie.getDescriptionRu());
-        }
-        this.messageImage = movie.getImage();
+        MovieDetails movieDetails = switch (this.language) {
+            case EN -> movie.getDetailsEn();
+
+            case UA -> movie.getDetailsUa();
+
+            case RU -> movie.getDetailsRu();
+        };
+
+       this.messageText = String.format(template,
+               movieDetails.getName(),
+               movieDetails.getGenre(),
+               movieDetails.getYearOfRelease(),
+               movieDetails.getDescription()
+       );
+
+        this.messageImage = movieDetails.getImage();
 
         return this;
     }
 
-    protected MessageBuilder withNoMoviesText(){
+    protected MessageBuilder withNoMoviesText() {
         this.messageText = MessageTemplateKeeper.getMessageOrTemplateByKey(MessageTemplateKeeper.NO_NEW_MOVIES_KEY, this.language);
         return this;
     }

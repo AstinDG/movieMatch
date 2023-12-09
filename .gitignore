@@ -37,3 +37,4 @@ src/main/java/com/astindg/movieMatch/telegram/TemporaryKeyKeeper.java
 /src/main/resources/sql/
 /src/main/resources/img/
 /src/main/resources/application.properties
+/src/main/resources/cert/
