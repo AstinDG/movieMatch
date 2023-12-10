@@ -38,4 +38,15 @@ public class Movie {
         this.detailsUa = detailsUa;
         this.detailsRu = detailsRu;
     }
+
+    public MovieDetails getMovieDetails(Language language){
+        MovieDetails details = null;
+        switch (language){
+            case EN -> details = this.detailsEn;
+            case UA -> details = this.detailsUa;
+            case RU -> details = this.detailsRu;
+            //TODO throw exception
+        }
+        return details;
+    }
 }

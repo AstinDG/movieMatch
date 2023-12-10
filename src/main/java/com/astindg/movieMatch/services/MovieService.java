@@ -29,8 +29,7 @@ public class MovieService {
         return movieRepository.getMoviesAmount();
     }
 
-   /* public List<Movie> findAll(){
->>>>>>> main
+    /*public List<Movie> findAll(){
         List<Movie> movieList = new ArrayList<>();
 
         Movie movie = new Movie();
