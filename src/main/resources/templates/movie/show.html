@@ -1,10 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <title>Movie</title>
+    </head>
+    <body>
+        <header class="header p-3 bg-dark text-white"
+                style="padding:15px; position:fixed; top:0px; width:100%;border: 2px solid black;">
+            <div style="display:flex;justify-content:space-evenly; ">
+                <div class="user_amount">Amount of users: <span>[[${usersAmount}]]</span></div>
+                <div class="message_count">Messages for last 5 minutes: <span>[[${countMessages}]]</span></div>
+                <div class="movie_amount">Amount of movies: <span>[[${moviesAmount}]]</span></div>
+            </div>
+        </header>
+
+        <div th:if="${movieIsPresent}"
+             class="movie">
+            <div th:with="movieDetails=${movie.getDetailsEn}" class="movieEn">
+                <h3 th:text="${movieDetails.getName()}">Name</h3>
+                <span th:text="${movieDetails.getGenre()}">Genre</span>
+                <span th:text="${movie.getYearOfRelease()}">Year of release</span>
+                <p th:text="${movieDetails.getDescription()}">Description</p>
+            </div>
+            <div class="movieUa"></div>
+            <div class="movieRu"></div>
+        </div>>
+
+    </body>
 </html>

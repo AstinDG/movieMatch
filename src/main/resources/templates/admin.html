@@ -3,11 +3,24 @@
     <head>
         <meta charset="UTF-8">
         <title>Admin Panel</title>
+        <style>
+            body{
+                margin: 0px;
+            }
+        </style>
     </head>
     <body>
-        Hello!<br>
-        Amount of users: <span>[[${usersAmount}]]</span><br>
-        Messages for last 5 minutes: <span>[[${countMessages}]]</span><br>
-        Amount of movies: <span>[[${moviesAmount}]]</span><br>
+        <header class="header" style="display:flex; justify-content:space-evenly; padding:15px; position:fixed; top:0px; width:100%;border: 2px solid black;">
+            <div class="user_amount">Amount of users: <span>[[${usersAmount}]]</span></div>
+            <div class="message_count">Messages for last 5 minutes: <span>[[${countMessages}]]</span></div>
+            <div class="movie_amount">Amount of movies: <span>[[${moviesAmount}]]</span></div>
+        </header>
+
+
+
+        <footer>
+
+        </footer>
+
     </body>
 </html>
