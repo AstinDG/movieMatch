@@ -20,18 +20,14 @@ import java.util.Optional;
 @RequestMapping("admin/movie")
 public class MovieController {
     private final MovieService movieService;
-    private final UserService userService;
 
     @Autowired
-    public MovieController(MovieService movieService, UserService userService) {
+    public MovieController(MovieService movieService) {
         this.movieService = movieService;
-        this.userService = userService;
     }
 
     @GetMapping()
     public String all(Model model) {
-
-        setHeaderParams(model);
 
         List<Movie> movieList = movieService.findAll();
 
@@ -42,7 +38,6 @@ public class MovieController {
 
     @GetMapping("/{id}")
     public String show(@PathVariable("id") Integer id, Model model){
-        setHeaderParams(model);
 
         Optional<Movie> movie = movieService.findById(id);
         if(movie.isPresent()){
@@ -52,15 +47,5 @@ public class MovieController {
             model.addAttribute("movieIsPresent", false);
         }
         return "movie/show";
-    }
-
-    private void setHeaderParams(Model model) {
-        Integer usersAmount = userService.getUsersAmount();
-        Integer countMessages = userService.getMessageCount(5);
-        Integer moviesAmount = movieService.getMoviesAmount();
-
-        model.addAttribute("usersAmount", usersAmount);
-        model.addAttribute("countMessages", countMessages);
-        model.addAttribute("moviesAmount", moviesAmount);
     }
 }

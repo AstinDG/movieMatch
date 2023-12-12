@@ -16,17 +16,13 @@ import java.util.Optional;
 @RequestMapping("/admin/user")
 public class UserController {
     private final UserService userService;
-    private final MovieService movieService;
 
-    public UserController(UserService userService, MovieService movieService) {
+    public UserController(UserService userService) {
         this.userService = userService;
-        this.movieService = movieService;
     }
 
     @GetMapping
     public String all(Model model) {
-        setHeaderParams(model);
-
         List<User> userList = userService.findAll();
         model.addAttribute("userList", userList);
 
@@ -35,7 +31,6 @@ public class UserController {
 
     @GetMapping("/{id}")
     public String show(@PathVariable Integer id, Model model) {
-        setHeaderParams(model);
 
         Optional<User> user = userService.findById(id);
         if (user.isPresent()) {
@@ -46,16 +41,5 @@ public class UserController {
         }
 
         return "user/show";
-    }
-
-
-    private void setHeaderParams(Model model) {
-        Integer usersAmount = userService.getUsersAmount();
-        Integer countMessages = userService.getMessageCount(5);
-        Integer moviesAmount = movieService.getMoviesAmount();
-
-        model.addAttribute("usersAmount", usersAmount);
-        model.addAttribute("countMessages", countMessages);
-        model.addAttribute("moviesAmount", moviesAmount);
     }
 }
