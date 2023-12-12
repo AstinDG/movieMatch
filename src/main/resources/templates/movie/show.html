@@ -3,9 +3,20 @@
     <head>
         <meta charset="UTF-8">
         <title>Movie</title>
+        <style>
+            body{
+                margin: 0px;
+            }
+            .movie{
+                width: 80%;
+                display: flex;
+                margin: 65px;
+
+            }
+        </style>
     </head>
     <body>
-        <header class="header p-3 bg-dark text-white"
+        <header class="header"
                 style="padding:15px; position:fixed; top:0px; width:100%;border: 2px solid black;">
             <div style="display:flex;justify-content:space-evenly; ">
                 <div class="user_amount">Amount of users: <span>[[${usersAmount}]]</span></div>
@@ -16,14 +27,27 @@
 
         <div th:if="${movieIsPresent}"
              class="movie">
-            <div th:with="movieDetails=${movie.getDetailsEn}" class="movieEn">
+            <div th:with="movieDetails=${movie.getDetailsEn()}" class="movie-details movie-details-en">
+                <img th:src="@{'data:image/jpeg;base64,'+${movieDetails.generateBase64Image()}}" />
                 <h3 th:text="${movieDetails.getName()}">Name</h3>
                 <span th:text="${movieDetails.getGenre()}">Genre</span>
-                <span th:text="${movie.getYearOfRelease()}">Year of release</span>
+                <span th:text="${movieDetails.getYearOfRelease()}">Year of release</span>
                 <p th:text="${movieDetails.getDescription()}">Description</p>
             </div>
-            <div class="movieUa"></div>
-            <div class="movieRu"></div>
+            <div th:with="movieDetails=${movie.getDetailsUa()}" class="movie-details movie-details-ua">
+                <img th:src="@{'data:image/jpeg;base64,'+${movieDetails.generateBase64Image()}}" />
+                <h3 th:text="${movieDetails.getName()}">Name</h3>
+                <span th:text="${movieDetails.getGenre()}">Genre</span>
+                <span th:text="${movieDetails.getYearOfRelease()}">Year of release</span>
+                <p th:text="${movieDetails.getDescription()}">Description</p>
+            </div>
+            <div th:with="movieDetails=${movie.getDetailsRu()}" class="movie-details movie-details-ru">
+                <img th:src="@{'data:image/jpeg;base64,'+${movieDetails.generateBase64Image()}}" />
+                <h3 th:text="${movieDetails.getName()}">Name</h3>
+                <span th:text="${movieDetails.getGenre()}">Genre</span>
+                <span th:text="${movieDetails.getYearOfRelease()}">Year of release</span>
+                <p th:text="${movieDetails.getDescription()}">Description</p>
+            </div>
         </div>>
 
     </body>
