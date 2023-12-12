@@ -7,7 +7,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.ListIterator;
+import java.util.Optional;
 
 import static java.time.temporal.ChronoUnit.MINUTES;
 
@@ -38,6 +40,10 @@ public class UserService {
         this.userRepository.saveFriendByIds(userId, friendId);
     }
 
+    public List<User> findAll(){
+        return this.userRepository.findAll();
+    }
+
     public void incrementMessageCounter(){
         this.messageCounter.add(LocalDateTime.now());
     }
@@ -63,5 +69,9 @@ public class UserService {
         }
 
         return count;
+    }
+
+    public Optional<User> findById(Integer id) {
+        return this.userRepository.findById(id);
     }
 }

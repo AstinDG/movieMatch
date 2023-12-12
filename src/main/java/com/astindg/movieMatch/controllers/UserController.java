@@ -1,58 +1,53 @@
 package com.astindg.movieMatch.controllers;
 
-import com.astindg.movieMatch.model.Language;
-import com.astindg.movieMatch.model.Movie;
+import com.astindg.movieMatch.model.User;
 import com.astindg.movieMatch.services.MovieService;
 import com.astindg.movieMatch.services.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.nio.file.Files;
 import java.util.List;
 import java.util.Optional;
 
 @Controller
-@RequestMapping("admin/movie")
-public class MovieController {
-    private final MovieService movieService;
+@RequestMapping("/admin/user")
+public class UserController {
     private final UserService userService;
+    private final MovieService movieService;
 
-    @Autowired
-    public MovieController(MovieService movieService, UserService userService) {
-        this.movieService = movieService;
+    public UserController(UserService userService, MovieService movieService) {
         this.userService = userService;
+        this.movieService = movieService;
     }
 
-    @GetMapping()
+    @GetMapping
     public String all(Model model) {
-
         setHeaderParams(model);
 
-        List<Movie> movieList = movieService.findAll();
+        List<User> userList = userService.findAll();
+        model.addAttribute("userList", userList);
 
-        model.addAttribute("movieList", movieList);
-
-        return "movie/all";
+        return "user/all";
     }
 
     @GetMapping("/{id}")
-    public String show(@PathVariable("id") Integer id, Model model){
+    public String show(@PathVariable Integer id, Model model) {
         setHeaderParams(model);
 
-        Optional<Movie> movie = movieService.findById(id);
-        if(movie.isPresent()){
-            model.addAttribute("movie", movie.get());
-            model.addAttribute("movieIsPresent", true);
+        Optional<User> user = userService.findById(id);
+        if (user.isPresent()) {
+            model.addAttribute("user", user.get());
+            model.addAttribute("userIsPresent", true);
         } else {
-            model.addAttribute("movieIsPresent", false);
+            model.addAttribute("userIsPresent", false);
         }
-        return "movie/show";
+
+        return "user/show";
     }
+
 
     private void setHeaderParams(Model model) {
         Integer usersAmount = userService.getUsersAmount();

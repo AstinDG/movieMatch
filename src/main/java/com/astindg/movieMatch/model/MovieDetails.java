@@ -8,4 +8,5 @@ public interface MovieDetails {
     File getImage();
     String getGenre();
     Integer getYearOfRelease();
+    String generateBase64Image();
 }

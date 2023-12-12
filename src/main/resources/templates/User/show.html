@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <title>User</title>
+        <style>
+            body{
+                margin: 0px;
+            }
+            .user{
+                width: 80%;
+                display: flex;
+                margin: 65px;
+            }
+        </style>
+    </head>
+    <body>
+        <header class="header"
+                style="padding:15px; position:fixed; top:0px; width:100%;border: 2px solid black;">
+            <div style="display:flex;justify-content:space-evenly; ">
+                <div class="user_amount">Amount of users: <span>[[${usersAmount}]]</span></div>
+                <div class="message_count">Messages for last 5 minutes: <span>[[${countMessages}]]</span></div>
+                <div class="movie_amount">Amount of movies: <span>[[${moviesAmount}]]</span></div>
+            </div>
+        </header>
+
+        <div th:if="${userIsPresent}" class="user-card">
+            <span th:text="${user.getId()}">Id</span>
+            <h3 th:text="${user.getName()}">Name</h3>
+        </div>
+
+    </body>
+</html>

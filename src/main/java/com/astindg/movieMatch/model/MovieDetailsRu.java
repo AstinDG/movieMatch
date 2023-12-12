@@ -1,18 +1,20 @@
 package com.astindg.movieMatch.model;
 
-
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.FileUtils;
 
 import javax.persistence.*;
 import java.io.File;
+import java.io.IOException;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
+@EqualsAndHashCode(exclude = "movie")
+@ToString(exclude = "movie")
 @Entity
 @Table(name = "Movie_details_ru")
-@EqualsAndHashCode(exclude = "movie")
 public class MovieDetailsRu implements MovieDetails{
     @Id
     @Column(name = "id")
@@ -48,5 +50,15 @@ public class MovieDetailsRu implements MovieDetails{
             return 0;
         }
         return this.movie.getYearOfRelease();
+    }
+    @Override
+    public String generateBase64Image() {
+        byte[] bytes = null;
+        try {
+            bytes = FileUtils.readFileToByteArray(this.image);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return (bytes == null) ? "" : Base64.encodeBase64String(bytes);
     }
 }

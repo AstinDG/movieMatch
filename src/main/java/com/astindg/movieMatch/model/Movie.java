@@ -20,17 +20,18 @@ public class Movie {
     @Column(name = "year_of_release")
     private Integer yearOfRelease;
 
-    @OneToOne(mappedBy = "movie")
+    @OneToOne(mappedBy = "movie", fetch = FetchType.LAZY)
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
     private MovieDetailsEn detailsEn;
 
-    @OneToOne(mappedBy = "movie")
+    @OneToOne(mappedBy = "movie", fetch = FetchType.LAZY)
+    @Cascade(org.hibernate.annotations.CascadeType.ALL)
+    private MovieDetailsRu detailsRu;
+
+    @OneToOne(mappedBy = "movie", fetch = FetchType.LAZY)
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
     private MovieDetailsUa detailsUa;
 
-    @OneToOne(mappedBy = "movie")
-    @Cascade(org.hibernate.annotations.CascadeType.ALL)
-    private MovieDetailsRu detailsRu;
 
     public Movie(Integer yearOfRelease, MovieDetailsEn detailsEn, MovieDetailsUa detailsUa, MovieDetailsRu detailsRu) {
         this.yearOfRelease = yearOfRelease;
