@@ -34,14 +34,19 @@ public class MovieDetailsEn implements MovieDetails{
     @Column(name = "description")
     private String description;
 
-    @Column(name = "image")
-    private File image;
+    @Column(name = "image_path")
+    private String imagePath;
 
-    public MovieDetailsEn(String name, String genre, String description, File image) {
+    public MovieDetailsEn(String name, String genre, String description, String imagePath) {
         this.name = name;
         this.genre = genre;
         this.description = description;
-        this.image = image;
+        this.imagePath = imagePath;
+    }
+
+    @Override
+    public File getImage() {
+        return new File(this.imagePath);
     }
 
     @Override
@@ -56,7 +61,7 @@ public class MovieDetailsEn implements MovieDetails{
     public String generateBase64Image() {
         byte[] bytes = null;
         try {
-            bytes = FileUtils.readFileToByteArray(this.image);
+            bytes = FileUtils.readFileToByteArray(new File(this.imagePath));
         } catch (IOException e) {
             e.printStackTrace();
         }

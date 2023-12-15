@@ -44,21 +44,21 @@
             </div>
             <div class="row">
                 <div th:with="movieDetails=${movie.getDetailsEn()}" class="movie-details movie-details-en col-md-4">
-                    <img th:src="@{'data:image/jpeg;base64,'+${movieDetails.generateBase64Image()}}"/>
+                    <img th:src="@{'data:image/jpeg;base64,'+${movieDetails.generateBase64Image()}}" style="width:200px;height:300px;"/>
                     <h3 th:text="${movieDetails.getName()}">Name</h3>
                     <span th:text="${movieDetails.getGenre()}">Genre</span>
                     <span th:text="${movieDetails.getYearOfRelease()}">Year of release</span>
                     <p th:text="${movieDetails.getDescription()}">Description</p>
                 </div>
                 <div th:with="movieDetails=${movie.getDetailsUa()}" class="movie-details movie-details-ua col-md-4">
-                    <img th:src="@{'data:image/jpeg;base64,'+${movieDetails.generateBase64Image()}}"/>
+                    <img th:src="@{'data:image/jpeg;base64,'+${movieDetails.generateBase64Image()}}" style="width:200px;height:300px;"/>
                     <h3 th:text="${movieDetails.getName()}">Name</h3>
                     <span th:text="${movieDetails.getGenre()}">Genre</span>
                     <span th:text="${movieDetails.getYearOfRelease()}">Year of release</span>
                     <p th:text="${movieDetails.getDescription()}">Description</p>
                 </div>
                 <div th:with="movieDetails=${movie.getDetailsRu()}" class="movie-details movie-details-ru col-md-4">
-                    <img th:src="@{'data:image/jpeg;base64,'+${movieDetails.generateBase64Image()}}"/>
+                    <img th:src="@{'data:image/jpeg;base64,'+${movieDetails.generateBase64Image()}}" style="width:200px;height:300px;"/>
                     <h3 th:text="${movieDetails.getName()}">Name</h3>
                     <span th:text="${movieDetails.getGenre()}">Genre</span>
                     <span th:text="${movieDetails.getYearOfRelease()}">Year of release</span>
@@ -66,7 +66,6 @@
                 </div>
             </div>
         </div>
-        >
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
                 integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
