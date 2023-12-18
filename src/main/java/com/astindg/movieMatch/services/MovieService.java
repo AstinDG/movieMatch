@@ -171,7 +171,7 @@ public class MovieService {
         this.movieRepository.save(movie);
     }
 
-    private String buildPath(Language language, String fileName){
+    private String buildPath(Language language, String fileName) {
         StringBuilder pathSB = new StringBuilder();
         pathSB.append("./src/main/resources/img/movie/");
         switch (language) {
@@ -183,7 +183,7 @@ public class MovieService {
         return pathSB.toString();
     }
 
-    private void saveNewImage(MovieDetails details, String path, byte[] newImageBytes){
+    private void saveNewImage(MovieDetails details, String path, byte[] newImageBytes) {
         File newImage = new File(path);
 
         try (OutputStream os = new FileOutputStream(newImage)) {
@@ -194,21 +194,24 @@ public class MovieService {
 
         details.setImagePath(path);
     }
-    private void checkDescriptionAndSave(MovieDetails movieDetails, MovieDetails actualDetails){
+
+    private void checkDescriptionAndSave(MovieDetails movieDetails, MovieDetails actualDetails) {
         if (!movieDetails.getDescription().isEmpty()) {
             if (!movieDetails.getDescription().equals(actualDetails.getDescription())) {
                 actualDetails.setDescription(movieDetails.getDescription());
             }
         }
     }
-    private void checkNameAndSave(MovieDetails movieDetails, MovieDetails actualDetails){
+
+    private void checkNameAndSave(MovieDetails movieDetails, MovieDetails actualDetails) {
         if (!movieDetails.getName().isEmpty()) {
             if (!movieDetails.getName().equals(actualDetails.getName())) {
                 actualDetails.setName(movieDetails.getName());
             }
         }
     }
-    private void checkGenreAndSave(MovieDetails movieDetails, MovieDetails actualDetails){
+
+    private void checkGenreAndSave(MovieDetails movieDetails, MovieDetails actualDetails) {
         if (!movieDetails.getGenre().isEmpty()) {
             if (!movieDetails.getGenre().equals(actualDetails.getGenre())) {
                 actualDetails.setGenre(movieDetails.getGenre());
@@ -228,5 +231,40 @@ public class MovieService {
         Movie movie = foundMovie.get();
         movie.setYearOfRelease(updatedYearRelease);
         this.movieRepository.save(movie);
+    }
+
+    public void save(Movie movie) {
+        this.movieRepository.save(movie);
+    }
+
+    public void save(Movie movie, MultipartFile imageEn, MultipartFile imageUa, MultipartFile imageRu) {
+        Arrays.stream(Language.values()).forEach(language ->
+                movie.getMovieDetails(language).setMovie(movie)
+        );
+
+        byte[] imageEnBytes = null;
+        byte[] imageUaBytes = null;
+        byte[] imageRuBytes = null;
+        try {
+            imageEnBytes = imageEn.getBytes();
+            imageUaBytes = imageUa.getBytes();
+            imageRuBytes = imageRu.getBytes();
+        } catch (IOException exception) {
+            exception.printStackTrace();
+        }
+
+        if (imageEnBytes != null) {
+            String path = buildPath(Language.EN, imageEn.getOriginalFilename());
+            saveNewImage(movie.getDetailsEn(), path, imageEnBytes);
+        }
+        if (imageUaBytes != null) {
+            String path = buildPath(Language.UA, imageUa.getOriginalFilename());
+            saveNewImage(movie.getDetailsUa(), path, imageUaBytes);
+        }
+        if (imageRuBytes != null) {
+            String path = buildPath(Language.RU, imageRu.getOriginalFilename());
+            saveNewImage(movie.getDetailsRu(), path, imageRuBytes);
+        }
+        this.save(movie);
     }
 }

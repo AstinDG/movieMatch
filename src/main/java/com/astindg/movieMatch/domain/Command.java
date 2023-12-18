@@ -49,7 +49,7 @@ public enum Command {
         public Message getAnswer(Session session) {
             if (session.getCurrentFriend() == null) {
                 return MESSAGE_BUILDER.setLanguage(session.getUser().getLanguage()).withFriendNotSelectedError().withInitialKeyboard().build();
-            } else if (session.getMovieList() == null || session.getMovieList().isEmpty()) {
+            } else if (session.getMovieList() == null || session.getLastMovieShown() == null) {
                 return MESSAGE_BUILDER.setLanguage(session.getUser().getLanguage()).withNoMoviesText().withMovieMatchKeyboard().build();
             } else {
                 return MESSAGE_BUILDER.setLanguage(session.getUser().getLanguage()).withRandomMovie(session).withMovieMatchKeyboard().build();

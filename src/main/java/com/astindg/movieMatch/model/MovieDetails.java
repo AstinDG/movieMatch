@@ -3,6 +3,7 @@ package com.astindg.movieMatch.model;
 import java.io.File;
 
 public interface MovieDetails {
+    void setMovie(Movie movie);
     String getName();
     void setName(String name);
     String getDescription();

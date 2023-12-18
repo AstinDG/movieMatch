@@ -32,6 +32,25 @@ public class MovieController {
         return "movie/all";
     }
 
+    @GetMapping("/add")
+    public String newMovie(@ModelAttribute("movie") Movie movie){
+        return "movie/add";
+    }
+
+    @PostMapping()
+    public String create(@ModelAttribute("movie") Movie movie,
+                         @RequestParam("imageEn") MultipartFile imageEn,
+                         @RequestParam("imageUa") MultipartFile imageUa,
+                         @RequestParam("imageRu") MultipartFile imageRu,
+                         BindingResult bindingResult){
+        if(bindingResult.hasErrors()){
+            return "movie/add";
+        }
+
+        this.movieService.save(movie, imageEn, imageUa, imageRu);
+        return "redirect:/admin/movie";
+    }
+
     @GetMapping("/{id}")
     public String show(@PathVariable("id") Integer id, Model model) {
 
