@@ -3,6 +3,7 @@ package com.astindg.movieMatch.model;
 import lombok.*;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
+import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
 import java.io.File;
@@ -26,12 +27,16 @@ public class MovieDetailsRu implements MovieDetails{
     private Movie movie;
 
     @Column(name = "name")
+    @Length(min = 1, max = 250, message = "Movie name must be between 1 and 250 characters.")
     private String name;
 
     @Column(name = "genre")
+    //TODO write regexp for "Genre/Genre/Genre"
+    @Length(min = 1, max = 250, message = "Movie genre must be between 1 and 250 characters.")
     private String genre;
 
     @Column(name = "description")
+    @Length(min = 1, max = 500, message = "Movie description must be between 1 and 500 characters.")
     private String description;
 
     @Column(name = "image_path")

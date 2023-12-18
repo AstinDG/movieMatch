@@ -4,6 +4,9 @@ import lombok.*;
 import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
+import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 
 @Data
 @NoArgsConstructor
@@ -18,16 +21,21 @@ public class Movie {
     private Integer id;
 
     @Column(name = "year_of_release")
+    @Min(value = 1895, message = "Year of release must be later than 1895")
+    @Max(value = 2100, message = "Year of release must be earlier than 2100")
     private Integer yearOfRelease;
 
+    @Valid
     @OneToOne(mappedBy = "movie", fetch = FetchType.LAZY)
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
     private MovieDetailsEn detailsEn;
 
+    @Valid
     @OneToOne(mappedBy = "movie", fetch = FetchType.LAZY)
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
     private MovieDetailsRu detailsRu;
 
+    @Valid
     @OneToOne(mappedBy = "movie", fetch = FetchType.LAZY)
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
     private MovieDetailsUa detailsUa;

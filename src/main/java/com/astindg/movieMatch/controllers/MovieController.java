@@ -9,6 +9,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,11 +39,11 @@ public class MovieController {
     }
 
     @PostMapping()
-    public String create(@ModelAttribute("movie") Movie movie,
+    public String create(@ModelAttribute("movie") @Valid Movie movie,
+                         BindingResult bindingResult,
                          @RequestParam("imageEn") MultipartFile imageEn,
                          @RequestParam("imageUa") MultipartFile imageUa,
-                         @RequestParam("imageRu") MultipartFile imageRu,
-                         BindingResult bindingResult){
+                         @RequestParam("imageRu") MultipartFile imageRu){
         if(bindingResult.hasErrors()){
             return "movie/add";
         }
