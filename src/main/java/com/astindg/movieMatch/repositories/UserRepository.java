@@ -17,4 +17,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     @Query(value = "insert into Friends (user_id, friend) VALUES (:userId,:friendId)", nativeQuery = true)
     @Transactional
     void saveFriendByIds(@Param("userId") Integer userId, @Param("friendId") Integer friendId);
+
+    @Query(value = "select count(*) from Users", nativeQuery = true)
+    Integer getUsersAmount();
 }

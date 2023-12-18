@@ -54,18 +54,22 @@ public class CommandHandlerImpl implements CommandHandler {
                 sessionHandler.selectRandomMovieAndRemoveFromList(session);
             }
         }
-
+        userService.incrementMessageCounter();
         return command.getAnswer(session);
     }
 
-    public Message getReply(User user, String message) {
+    public Message getReply(User user, String text) {
         Session session = sessionHandler.getUserSession(user);
+        Message message;
 
         if (!session.isLookingForFriend()) {
-            return messageBuilder.setLanguage(session.getUser().getLanguage()).withErrorUnknownCommand().withInitialKeyboard().build();
+            message =  messageBuilder.setLanguage(session.getUser().getLanguage()).withErrorUnknownCommand().withInitialKeyboard().build();
         } else {
-            return addFriendByCode(session, message);
+            message = addFriendByCode(session, text);
         }
+
+        userService.incrementMessageCounter();
+        return message;
     }
 
     public Message getReplyCallbackQuery(User user, String callbackQuery) {
@@ -86,6 +90,7 @@ public class CommandHandlerImpl implements CommandHandler {
             message = new Message("Button temperary does`t work");
         }
 
+        userService.incrementMessageCounter();
         return message;
     }
 

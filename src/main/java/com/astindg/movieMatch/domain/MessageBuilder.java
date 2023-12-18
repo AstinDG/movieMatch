@@ -7,7 +7,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 @Component
 public class MessageBuilder {
@@ -42,17 +41,10 @@ public class MessageBuilder {
         int number = 1;
 
         String template = MessageTemplateKeeper.getMessageOrTemplateByKey(MessageTemplateKeeper.FAVORITE_MOVIES_KEY, this.language);
-        Function<Movie, MovieDetails> getMovieDetailsFunc = null;
-        switch (this.language) {
-            case EN -> getMovieDetailsFunc = Movie::getDetailsEn;
-
-            case UA -> getMovieDetailsFunc = Movie::getDetailsUa;
-
-            case RU -> getMovieDetailsFunc = Movie::getDetailsRu;
-        }
 
         for (Movie movie : session.getUser().getFavoriteMovies()) {
-            MovieDetails movieDetails = getMovieDetailsFunc.apply(movie);
+            MovieDetails movieDetails = movie.getMovieDetails(this.language);
+
             movies.append(String.format(template,
                     number,
                     movieDetails.getName(), movieDetails.getGenre(), movieDetails.getYearOfRelease()));
@@ -206,13 +198,7 @@ public class MessageBuilder {
    protected MessageBuilder withRandomMovie(Session session) {
         Movie movie = session.getLastMovieShown();
         String template = MessageTemplateKeeper.getMessageOrTemplateByKey(MessageTemplateKeeper.MOVIE_MESSAGE_KEY, this.language);
-        MovieDetails movieDetails = switch (this.language) {
-            case EN -> movie.getDetailsEn();
-
-            case UA -> movie.getDetailsUa();
-
-            case RU -> movie.getDetailsRu();
-        };
+        MovieDetails movieDetails = movie.getMovieDetails(language);
 
        this.messageText = String.format(template,
                movieDetails.getName(),
