@@ -11,11 +11,17 @@ import java.util.Map;
 @Component
 public class MessageBuilder {
 
+    private final MessageKeeper messageKeeper;
+
     private Language language;
     private String messageText;
     private List<List<String>> keyboard;
     private List<Map<String, String>> buttons;
     private File messageImage;
+
+    public MessageBuilder(MessageKeeper messageKeeper) {
+        this.messageKeeper = messageKeeper;
+    }
 
     protected MessageBuilder setLanguage(Language language) {
         this.language = language;
@@ -32,15 +38,14 @@ public class MessageBuilder {
     protected MessageBuilder withFavoritesMoviesText(Session session) {
         if (session.getUser().getFavoriteMovies() == null || session.getUser().getFavoriteMovies().isEmpty()) {
 
-            this.messageText = MessageTemplateKeeper.getMessageOrTemplateByKey(
-                    MessageTemplateKeeper.FAVORITE_MOVIE_EMPTY_KEY, this.language);
+            this.messageText = messageKeeper.getMessage("movie.error.empty.favorite", this.language);
             return this;
         }
 
         StringBuilder movies = new StringBuilder();
         int number = 1;
 
-        String template = MessageTemplateKeeper.getMessageOrTemplateByKey(MessageTemplateKeeper.FAVORITE_MOVIES_KEY, this.language);
+        String template = messageKeeper.getMessage("movie.favorite", this.language);
 
         for (Movie movie : session.getUser().getFavoriteMovies()) {
             MovieDetails movieDetails = movie.getMovieDetails(this.language);
@@ -74,7 +79,7 @@ public class MessageBuilder {
         String friendName = (friend != null) ? friend.getName() : "---";
         int countFriends = (user.getFriends() != null) ? user.getFriends().size() : 0;
 
-        String template = MessageTemplateKeeper.getMessageOrTemplateByKey(MessageTemplateKeeper.INITIAL_KEY, this.language);
+        String template = messageKeeper.getMessage("initial", this.language);
         this.messageText = String.format(template, user.getName(), friendName, countFriends);
 
         return this;
