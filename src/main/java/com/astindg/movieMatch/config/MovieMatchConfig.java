@@ -1,6 +1,7 @@
 package com.astindg.movieMatch.config;
 
-import com.astindg.movieMatch.domain.MessageKeeper;
+import com.astindg.movieMatch.domain.KeyboardsKeeper;
+import com.astindg.movieMatch.domain.MessagesKeeper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
@@ -17,8 +18,14 @@ public class MovieMatchConfig {
 
     @Bean
     @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
-    public MessageKeeper getMessageKeeper(){
-        return new MessageKeeper(this.environment);
+    public MessagesKeeper getMessageKeeper(){
+        return new MessagesKeeper(this.environment);
+    }
+
+    @Bean(initMethod = "initializeKeyboardsMap")
+    @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
+    public KeyboardsKeeper getKeyboardsKeeper(){
+        return new KeyboardsKeeper(this.environment);
     }
 
 

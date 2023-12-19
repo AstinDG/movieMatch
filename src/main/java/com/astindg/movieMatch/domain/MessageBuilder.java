@@ -11,7 +11,7 @@ import java.util.Map;
 @Component
 public class MessageBuilder {
 
-    private final MessageKeeper messageKeeper;
+    private final MessagesKeeper messagesKeeper;
 
     private Language language;
     private String messageText;
@@ -19,8 +19,8 @@ public class MessageBuilder {
     private List<Map<String, String>> buttons;
     private File messageImage;
 
-    public MessageBuilder(MessageKeeper messageKeeper) {
-        this.messageKeeper = messageKeeper;
+    public MessageBuilder(MessagesKeeper messagesKeeper) {
+        this.messagesKeeper = messagesKeeper;
     }
 
     protected MessageBuilder setLanguage(Language language) {
@@ -38,14 +38,14 @@ public class MessageBuilder {
     protected MessageBuilder withFavoritesMoviesText(Session session) {
         if (session.getUser().getFavoriteMovies() == null || session.getUser().getFavoriteMovies().isEmpty()) {
 
-            this.messageText = messageKeeper.getMessage("movie.error.empty.favorite", this.language);
+            this.messageText = messagesKeeper.getMessage("movie.error.empty.favorite", this.language);
             return this;
         }
 
         StringBuilder movies = new StringBuilder();
         int number = 1;
 
-        String template = messageKeeper.getMessage("movie.favorite", this.language);
+        String template = messagesKeeper.getMessage("movie.favorite", this.language);
 
         for (Movie movie : session.getUser().getFavoriteMovies()) {
             MovieDetails movieDetails = movie.getMovieDetails(this.language);
@@ -79,7 +79,7 @@ public class MessageBuilder {
         String friendName = (friend != null) ? friend.getName() : "---";
         int countFriends = (user.getFriends() != null) ? user.getFriends().size() : 0;
 
-        String template = messageKeeper.getMessage("initial", this.language);
+        String template = messagesKeeper.getMessage("initial", this.language);
         this.messageText = String.format(template, user.getName(), friendName, countFriends);
 
         return this;

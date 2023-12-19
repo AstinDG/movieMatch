@@ -3,12 +3,12 @@ package com.astindg.movieMatch.domain;
 import com.astindg.movieMatch.model.Language;
 import org.springframework.core.env.Environment;
 
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-import static java.nio.charset.StandardCharsets.*;
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
-public class MessageKeeper {
+public class MessagesKeeper {
 
     private final Map<String, Map<Language, String>> messages;
     private static final String MESSAGES_PROPERTY_KEY = "user.message.";
@@ -32,7 +32,7 @@ public class MessageKeeper {
         keys.add("error.unknown_command");
     }
 
-    public MessageKeeper(Environment env) {
+    public MessagesKeeper(Environment env) {
         this.messages = new HashMap<>();
 
         for (String key : keys) {
