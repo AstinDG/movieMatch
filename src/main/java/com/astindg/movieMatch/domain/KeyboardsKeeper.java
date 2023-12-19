@@ -8,7 +8,7 @@ import java.util.*;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-public class KeyboardsKeeper {
+public record KeyboardsKeeper(Environment env) {
     private static final String KEYBOARDS_PROPERTY_KEY = "user.keyboard.";
     private static final String RETURN_BUTTON_KEY = "user.keyboard.button.return_main";
     private static final Map<String, List<List<String>>> KEYBOARDS_TEMPLATES = new HashMap<>();
@@ -48,13 +48,7 @@ public class KeyboardsKeeper {
         KEYBOARDS_TEMPLATES.put("match", matchKeyboardTemplate);
         KEYBOARDS_TEMPLATES.put("settings", settingsKeyboardTemplate);
     }
-
-    private final Environment env;
-    private final Map<String, Map<Language, List<List<String>>>> keyboards = new HashMap<>();
-
-    public KeyboardsKeeper(Environment env) {
-        this.env = env;
-    }
+    private static final Map<String, Map<Language, List<List<String>>>> keyboards = new HashMap<>();
 
     public List<List<String>> getKeyboard(String key, Language language) {
         return keyboards.get(key).get(language);

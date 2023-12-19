@@ -17,7 +17,7 @@ public class MovieMatchConfig {
     @Autowired
     Environment environment;
 
-    @Bean
+    @Bean(initMethod = "initializeMessages")
     @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
     public MessagesKeeper getMessageKeeper(){
         return new MessagesKeeper(this.environment);

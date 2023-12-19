@@ -33,9 +33,13 @@ public class MessageBuilder {
     private static final String KBD_MATCH = "match";
     private static final String KBD_SETTINGS = "settings";
 
+    private static final String BTN_INVITE = "friend.invite_code.";
+    private static final String BTN_LANGUAGE = "settings.select_language.";
+
 
     private final MessagesKeeper messagesKeeper;
     private final KeyboardsKeeper keyboardsKeeper;
+    private final ButtonsKeeper buttonsKeeper;
 
     private Language language;
     private String messageText;
@@ -44,9 +48,10 @@ public class MessageBuilder {
     private File messageImage;
 
     @Autowired
-    public MessageBuilder(MessagesKeeper messagesKeeper, KeyboardsKeeper keyboardsKeeper) {
+    public MessageBuilder(MessagesKeeper messagesKeeper, KeyboardsKeeper keyboardsKeeper, ButtonsKeeper buttonsKeeper) {
         this.messagesKeeper = messagesKeeper;
         this.keyboardsKeeper = keyboardsKeeper;
+        this.buttonsKeeper = buttonsKeeper;
     }
 
     protected MessageBuilder setLanguage(Language language) {
@@ -140,7 +145,7 @@ public class MessageBuilder {
 
     protected MessageBuilder withEnterInviteCodeButton() {
 
-        this.buttons = MessageTemplateKeeper.getButtonsByKey(MessageTemplateKeeper.INVITE_FRIEND_BUTTON_KEY, this.language);
+        this.buttons = buttonsKeeper.getButton(BTN_INVITE, this.language);
 
         return this;
     }
@@ -273,7 +278,7 @@ public class MessageBuilder {
     }
 
     public MessageBuilder withSelectLanguageButtons() {
-        this.buttons = MessageTemplateKeeper.getButtonsByKey(MessageTemplateKeeper.SELECT_LANGUAGE_BUTTONS_KEY, this.language);
+        this.buttons = buttonsKeeper.getButton(BTN_LANGUAGE, this.language);
         return this;
     }
 

@@ -3,13 +3,12 @@ package com.astindg.movieMatch.domain;
 import com.astindg.movieMatch.model.Language;
 import org.springframework.core.env.Environment;
 
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-public class ButtonsKeeper {
+public record ButtonsKeeper(Environment env) {
 
     private static final String BUTTONS_PROPERTY_KEY = "user.button.";
     private static final String INVITE_BUTTON_KEY = "friend.invite_code.";
@@ -17,22 +16,17 @@ public class ButtonsKeeper {
     private static final String CALLBACK_KEY = "callback";
     private static final Map<String, Map<Language, List<Map<String, String>>>> BUTTONS = new HashMap<>();
 
-    private final Environment env;
-
-    public ButtonsKeeper(Environment env) {
-        this.env = env;
-    }
-
-    public static List<Map<String, String>> getButton(String key, Language language) {
+    public List<Map<String, String>> getButton(String key, Language language) {
         return BUTTONS.get(key).get(language);
     }
+
     //initial method
-    public void initializeButtons(){
+    public void initializeButtons() {
         initializeInviteButtons();
         initializeLanguageButtons();
     }
 
-    private void initializeInviteButtons(){
+    private void initializeInviteButtons() {
         Map<Language, List<Map<String, String>>> inviteButtons = new HashMap<>();
         String buttonPropertyKey = BUTTONS_PROPERTY_KEY + INVITE_BUTTON_KEY;
 
@@ -41,7 +35,7 @@ public class ButtonsKeeper {
                 Objects.requireNonNull(env.getProperty(buttonCallbackKey)).getBytes(ISO_8859_1), UTF_8
         );
 
-        for(Language language : Language.values()){
+        for (Language language : Language.values()) {
             List<Map<String, String>> button = new ArrayList<>();
 
             String buttonValueKey = buttonPropertyKey + language.toString().toLowerCase();
@@ -56,14 +50,14 @@ public class ButtonsKeeper {
         BUTTONS.put(INVITE_BUTTON_KEY, inviteButtons);
     }
 
-    private void initializeLanguageButtons(){
+    private void initializeLanguageButtons() {
         Map<Language, List<Map<String, String>>> languageButtons = new HashMap<>();
         String buttonPropertyKey = BUTTONS_PROPERTY_KEY + LANGUAGE_BUTTON_KEY;
 
-        for(Language language : Language.values()){
+        for (Language language : Language.values()) {
             List<Map<String, String>> button = new ArrayList<>();
-            for(Language languageKey : Language.values()) {
-                if(!languageKey.equals(language)) {
+            for (Language languageKey : Language.values()) {
+                if (!languageKey.equals(language)) {
                     String languagePropertyKey = switch (languageKey) {
                         case EN -> "english";
                         case UA -> "ukrainian";

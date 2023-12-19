@@ -8,9 +8,9 @@ import java.util.*;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-public class MessagesKeeper {
+public record MessagesKeeper(Environment env) {
 
-    private final Map<String, Map<Language, String>> messages;
+    private static final Map<String, Map<Language, String>> messages = new HashMap<>();
     private static final String MESSAGES_PROPERTY_KEY = "user.message.";
     private static final List<String> keys = new ArrayList<>();
 
@@ -32,9 +32,11 @@ public class MessagesKeeper {
         keys.add("error.unknown_command");
     }
 
-    public MessagesKeeper(Environment env) {
-        this.messages = new HashMap<>();
-
+    public String getMessage(String key, Language language) {
+        return messages.get(key).get(language);
+    }
+    //initial method
+    private void initializeMessages(){
         for (String key : keys) {
             String message_key = MESSAGES_PROPERTY_KEY + key;
 
@@ -52,12 +54,7 @@ public class MessagesKeeper {
                 );
                 map.put(language, message);
             }
-            this.messages.put(key, map);
+            messages.put(key, map);
         }
-
-    }
-
-    public String getMessage(String key, Language language) {
-        return messages.get(key).get(language);
     }
 }
