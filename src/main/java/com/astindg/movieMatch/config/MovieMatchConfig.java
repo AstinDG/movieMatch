@@ -1,5 +1,6 @@
 package com.astindg.movieMatch.config;
 
+import com.astindg.movieMatch.domain.ButtonsKeeper;
 import com.astindg.movieMatch.domain.KeyboardsKeeper;
 import com.astindg.movieMatch.domain.MessagesKeeper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,5 +29,9 @@ public class MovieMatchConfig {
         return new KeyboardsKeeper(this.environment);
     }
 
-
+    @Bean(initMethod = "initializeButtons")
+    @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
+    public ButtonsKeeper getButtonsKeeper(){
+        return new ButtonsKeeper(this.environment);
+    }
 }
