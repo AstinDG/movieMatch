@@ -1,6 +1,7 @@
 package com.astindg.movieMatch.domain;
 
 import com.astindg.movieMatch.model.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -26,8 +27,15 @@ public class MessageBuilder {
     private static final String MSG_SETTINGS_LANG = "settings.select_language";
     private static final String MSG_UNKNOWN_COMMAND_ERROR = "error.unknown_command";
 
+    private static final String KBD_INITIAL = "initial";
+    private static final String KBD_FRIEND = "friend";
+    private static final String KBD_MOVIE = "movie";
+    private static final String KBD_MATCH = "match";
+    private static final String KBD_SETTINGS = "settings";
+
 
     private final MessagesKeeper messagesKeeper;
+    private final KeyboardsKeeper keyboardsKeeper;
 
     private Language language;
     private String messageText;
@@ -35,8 +43,10 @@ public class MessageBuilder {
     private List<Map<String, String>> buttons;
     private File messageImage;
 
-    public MessageBuilder(MessagesKeeper messagesKeeper) {
+    @Autowired
+    public MessageBuilder(MessagesKeeper messagesKeeper, KeyboardsKeeper keyboardsKeeper) {
         this.messagesKeeper = messagesKeeper;
+        this.keyboardsKeeper = keyboardsKeeper;
     }
 
     protected MessageBuilder setLanguage(Language language) {
@@ -67,8 +77,7 @@ public class MessageBuilder {
             MovieDetails movieDetails = movie.getMovieDetails(this.language);
 
             movies.append(String.format(template,
-                    number,
-                    movieDetails.getName(), movieDetails.getGenre(), movieDetails.getYearOfRelease()));
+                    number, movieDetails.getName(), movieDetails.getGenre(), movieDetails.getYearOfRelease()));
             number++;
         }
 
@@ -116,7 +125,7 @@ public class MessageBuilder {
 
     protected MessageBuilder withInitialKeyboard() {
 
-        this.keyboard = MessageTemplateKeeper.getKeyboardByKey(MessageTemplateKeeper.INITIAL_KEYBOARD_KEY, this.language);
+        this.keyboard = keyboardsKeeper.getKeyboard(KBD_INITIAL, this.language);
 
         return this;
     }
@@ -239,22 +248,22 @@ public class MessageBuilder {
     }
 
     protected MessageBuilder withMovieMatchKeyboard() {
-        this.keyboard = MessageTemplateKeeper.getKeyboardByKey(MessageTemplateKeeper.MOVIE_MATCH_KEYBOARD_KEY, this.language);
+        this.keyboard = keyboardsKeeper.getKeyboard(KBD_MATCH, this.language);
         return this;
     }
 
     protected MessageBuilder withFriendMenuKeyboard() {
-        this.keyboard = MessageTemplateKeeper.getKeyboardByKey(MessageTemplateKeeper.FRIEND_KEYBOARD_KEY, this.language);
+        this.keyboard = keyboardsKeeper.getKeyboard(KBD_FRIEND, this.language);
         return this;
     }
 
-    protected MessageBuilder withMovieMenuKeyBoard() {
-        this.keyboard = MessageTemplateKeeper.getKeyboardByKey(MessageTemplateKeeper.MOVIE_KEYBOARD_KEY, this.language);
+    protected MessageBuilder withMovieMenuKeyboard() {
+        this.keyboard = keyboardsKeeper.getKeyboard(KBD_MOVIE, this.language);
         return this;
     }
 
     protected MessageBuilder withSettingsKeyboard() {
-        this.keyboard = MessageTemplateKeeper.getKeyboardByKey(MessageTemplateKeeper.SETTINGS_KEYBOARD_KEY, this.language);
+        this.keyboard = keyboardsKeeper.getKeyboard(KBD_SETTINGS, this.language);
         return this;
     }
 

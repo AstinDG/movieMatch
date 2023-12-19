@@ -59,7 +59,7 @@ public class KeyboardsKeeper {
     public List<List<String>> getKeyboard(String key, Language language) {
         return keyboards.get(key).get(language);
     }
-
+    //initial method
     public void initializeKeyboardsMap(){
         for (String key : KEYBOARDS_TEMPLATES.keySet()) {
             Map<Language, List<List<String>>> mapKeyboardByLang = new HashMap<>();

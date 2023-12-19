@@ -41,7 +41,7 @@ public enum Command {
     MOVIE_MENU {
         @Override
         public Message getAnswer(Session session, MessageBuilder messageBuilder) {
-            return messageBuilder.setLanguage(session.getUser().getLanguage()).withSelectOptionText().withMovieMenuKeyBoard().build();
+            return messageBuilder.setLanguage(session.getUser().getLanguage()).withSelectOptionText().withMovieMenuKeyboard().build();
         }
     },
     MOVIE_MATCH {
@@ -77,7 +77,7 @@ public enum Command {
     MOVIE_FAVORITES {
         @Override
         public Message getAnswer(Session session, MessageBuilder messageBuilder) {
-            return messageBuilder.setLanguage(session.getUser().getLanguage()).withFavoritesMoviesText(session).withMovieMenuKeyBoard().build();
+            return messageBuilder.setLanguage(session.getUser().getLanguage()).withFavoritesMoviesText(session).withMovieMenuKeyboard().build();
         }
     },
     RETURN_MAIN_MENU {
@@ -86,7 +86,6 @@ public enum Command {
             return messageBuilder.setLanguage(session.getUser().getLanguage()).withSelectOptionText().withInitialKeyboard().build();
         }
     },
-
     SETTINGS{
         @Override
         public Message getAnswer(Session session, MessageBuilder messageBuilder){
