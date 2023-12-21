@@ -13,7 +13,7 @@ public class CommandTranslator {
     private static final String ADD_FRIEND_COMMAND_EN = "Add friend";
     private static final String ADD_FRIEND_COMMAND_UA = "Додати друга";
     private static final String ADD_FRIEND_COMMAND_RU = "Добавить друга";
-    private static final String RETURN_COMMAND_EN = "Go back";
+    private static final String RETURN_COMMAND_EN = "Return to main menu";
     private static final String RETURN_COMMAND_UA = "До головного меню";
     private static final String RETURN_COMMAND_RU = "Венуться в главное меню";
     private static final String SELECT_FRIEND_COMMAND_EN = "Set friend";

@@ -1,6 +1,7 @@
 package com.astindg.movieMatch.domain;
 
 import com.astindg.movieMatch.model.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -10,12 +11,48 @@ import java.util.Map;
 
 @Component
 public class MessageBuilder {
+    private static final String MSG_INITIAL = "initial";
+    private static final String MSG_OPTION = "select_option";
+    private static final String MSG_FRIEND_INVITE = "friend.invite";
+    private static final String MSG_FRIEND_SELECT = "friend.select";
+    private static final String MSG_FRIEND_SELECTED = "friend.selected";
+    private static final String MSG_FRIEND_DELETE = "friend.delete";
+    private static final String MSG_FRIEND_NEW = "friend.new";
+    private static final String MSG_FRIEND_SET_ERROR = "friend.error.set_friend";
+    private static final String MSG_MOVIE = "movie";
+    private static final String MSG_MOVIE_FAVORITE = "movie.favorite";
+    private static final String MSG_MOVIE_EMPTY_ERROR = "movie.error.empty.list";
+    private static final String MSG_MOVIE_FAVORITE_EMPTY_ERROR = "movie.error.empty.favorite";
+    private static final String MSG_MOVIE_FRIEND_NOT_SELECTED_ERROR = "movie.error.friend_not_selected";
+    private static final String MSG_SETTINGS_LANG = "settings.select_language";
+    private static final String MSG_UNKNOWN_COMMAND_ERROR = "error.unknown_command";
+
+    private static final String KBD_INITIAL = "initial";
+    private static final String KBD_FRIEND = "friend";
+    private static final String KBD_MOVIE = "movie";
+    private static final String KBD_MATCH = "match";
+    private static final String KBD_SETTINGS = "settings";
+
+    private static final String BTN_INVITE = "friend.invite_code.";
+    private static final String BTN_LANGUAGE = "settings.select_language.";
+
+
+    private final MessagesKeeper messagesKeeper;
+    private final KeyboardsKeeper keyboardsKeeper;
+    private final ButtonsKeeper buttonsKeeper;
 
     private Language language;
     private String messageText;
     private List<List<String>> keyboard;
     private List<Map<String, String>> buttons;
     private File messageImage;
+
+    @Autowired
+    public MessageBuilder(MessagesKeeper messagesKeeper, KeyboardsKeeper keyboardsKeeper, ButtonsKeeper buttonsKeeper) {
+        this.messagesKeeper = messagesKeeper;
+        this.keyboardsKeeper = keyboardsKeeper;
+        this.buttonsKeeper = buttonsKeeper;
+    }
 
     protected MessageBuilder setLanguage(Language language) {
         this.language = language;
@@ -32,22 +69,20 @@ public class MessageBuilder {
     protected MessageBuilder withFavoritesMoviesText(Session session) {
         if (session.getUser().getFavoriteMovies() == null || session.getUser().getFavoriteMovies().isEmpty()) {
 
-            this.messageText = MessageTemplateKeeper.getMessageOrTemplateByKey(
-                    MessageTemplateKeeper.FAVORITE_MOVIE_EMPTY_KEY, this.language);
+            this.messageText = messagesKeeper.getMessage(MSG_MOVIE_FAVORITE_EMPTY_ERROR, this.language);
             return this;
         }
 
         StringBuilder movies = new StringBuilder();
         int number = 1;
 
-        String template = MessageTemplateKeeper.getMessageOrTemplateByKey(MessageTemplateKeeper.FAVORITE_MOVIES_KEY, this.language);
+        String template = messagesKeeper.getMessage(MSG_MOVIE_FAVORITE, this.language);
 
         for (Movie movie : session.getUser().getFavoriteMovies()) {
             MovieDetails movieDetails = movie.getMovieDetails(this.language);
 
             movies.append(String.format(template,
-                    number,
-                    movieDetails.getName(), movieDetails.getGenre(), movieDetails.getYearOfRelease()));
+                    number, movieDetails.getName(), movieDetails.getGenre(), movieDetails.getYearOfRelease()));
             number++;
         }
 
@@ -57,12 +92,12 @@ public class MessageBuilder {
     }
 
     protected MessageBuilder withSelectOptionText() {
-        this.messageText = MessageTemplateKeeper.getMessageOrTemplateByKey(MessageTemplateKeeper.SELECT_OPTION_KEY, this.language);
+        this.messageText = messagesKeeper.getMessage(MSG_OPTION, this.language);
         return this;
     }
 
     protected MessageBuilder withNotifyNewFriendText(Session friendsSession) {
-        String template = MessageTemplateKeeper.getMessageOrTemplateByKey(MessageTemplateKeeper.NOTIFY_NEW_FRIEND_KEY, this.language);
+        String template = messagesKeeper.getMessage(MSG_FRIEND_NEW, this.language);
         this.messageText = String.format(template, friendsSession.getUser().getName());
         return this;
     }
@@ -74,7 +109,7 @@ public class MessageBuilder {
         String friendName = (friend != null) ? friend.getName() : "---";
         int countFriends = (user.getFriends() != null) ? user.getFriends().size() : 0;
 
-        String template = MessageTemplateKeeper.getMessageOrTemplateByKey(MessageTemplateKeeper.INITIAL_KEY, this.language);
+        String template = messagesKeeper.getMessage(MSG_INITIAL, this.language);
         this.messageText = String.format(template, user.getName(), friendName, countFriends);
 
         return this;
@@ -95,14 +130,14 @@ public class MessageBuilder {
 
     protected MessageBuilder withInitialKeyboard() {
 
-        this.keyboard = MessageTemplateKeeper.getKeyboardByKey(MessageTemplateKeeper.INITIAL_KEYBOARD_KEY, this.language);
+        this.keyboard = keyboardsKeeper.getKeyboard(KBD_INITIAL, this.language);
 
         return this;
     }
 
     protected MessageBuilder withInviteFriendTemplate(Session session) {
         if (session.getInviteCode() != null) {
-            String template = MessageTemplateKeeper.getMessageOrTemplateByKey(MessageTemplateKeeper.INVITE_FRIEND_KEY, this.language);
+            String template = messagesKeeper.getMessage(MSG_FRIEND_INVITE, this.language);
             this.messageText = String.format(template, session.getInviteCode(), session.getInviteCodeMaxAge());
         }
         return this;
@@ -110,29 +145,29 @@ public class MessageBuilder {
 
     protected MessageBuilder withEnterInviteCodeButton() {
 
-        this.buttons = MessageTemplateKeeper.getButtonsByKey(MessageTemplateKeeper.INVITE_FRIEND_BUTTON_KEY, this.language);
+        this.buttons = buttonsKeeper.getButton(BTN_INVITE, this.language);
 
         return this;
     }
 
     protected MessageBuilder withSelectFriendText() {
-        this.messageText = MessageTemplateKeeper.getMessageOrTemplateByKey(MessageTemplateKeeper.SELECT_FRIEND_KEY, this.language);
+        this.messageText = messagesKeeper.getMessage(MSG_FRIEND_SELECT, this.language);
         return this;
     }
 
     protected MessageBuilder withErrorSelectFriendText() {
-        this.messageText = MessageTemplateKeeper.getMessageOrTemplateByKey(MessageTemplateKeeper.ERROR_MESSAGE_SETTING_FRIEND_KEY, this.language);
+        this.messageText = messagesKeeper.getMessage(MSG_FRIEND_SET_ERROR, this.language);
         return this;
     }
 
     protected MessageBuilder withFriendSelectedText(Session session) {
-        String template = MessageTemplateKeeper.getMessageOrTemplateByKey(MessageTemplateKeeper.FRIEND_SELECTED_KEY, this.language);
+        String template = messagesKeeper.getMessage(MSG_FRIEND_SELECTED, this.language);
         this.messageText = String.format(template, session.getCurrentFriend().getName());
         return this;
     }
 
     protected MessageBuilder withFriendNotSelectedError() {
-        this.messageText = MessageTemplateKeeper.getMessageOrTemplateByKey(MessageTemplateKeeper.ERROR_MESSAGE_FRIEND_NOT_SELECTED_KEY, this.language);
+        this.messageText = messagesKeeper.getMessage(MSG_MOVIE_FRIEND_NOT_SELECTED_ERROR, this.language);
         return this;
     }
 
@@ -155,7 +190,7 @@ public class MessageBuilder {
     }
 
     protected MessageBuilder withFriendRemoveText() {
-        this.messageText = MessageTemplateKeeper.getMessageOrTemplateByKey(MessageTemplateKeeper.SELECT_FRIEND_TO_DELETE_KEY, this.language);
+        this.messageText = messagesKeeper.getMessage(MSG_FRIEND_DELETE, this.language);
         return this;
     }
 
@@ -191,13 +226,13 @@ public class MessageBuilder {
     }
 
     protected MessageBuilder withErrorUnknownCommand() {
-        this.messageText = MessageTemplateKeeper.getMessageOrTemplateByKey(MessageTemplateKeeper.ERROR_MESSAGE_UNKNOWN_COMMAND_KEY, this.language);
+        this.messageText = messagesKeeper.getMessage(MSG_UNKNOWN_COMMAND_ERROR, this.language);
         return this;
     }
 
    protected MessageBuilder withRandomMovie(Session session) {
         Movie movie = session.getLastMovieShown();
-        String template = MessageTemplateKeeper.getMessageOrTemplateByKey(MessageTemplateKeeper.MOVIE_MESSAGE_KEY, this.language);
+        String template = messagesKeeper.getMessage(MSG_MOVIE, this.language);
         MovieDetails movieDetails = movie.getMovieDetails(language);
 
        this.messageText = String.format(template,
@@ -213,37 +248,37 @@ public class MessageBuilder {
     }
 
     protected MessageBuilder withNoMoviesText() {
-        this.messageText = MessageTemplateKeeper.getMessageOrTemplateByKey(MessageTemplateKeeper.NO_NEW_MOVIES_KEY, this.language);
+        this.messageText = messagesKeeper.getMessage(MSG_MOVIE_EMPTY_ERROR, this.language);
         return this;
     }
 
     protected MessageBuilder withMovieMatchKeyboard() {
-        this.keyboard = MessageTemplateKeeper.getKeyboardByKey(MessageTemplateKeeper.MOVIE_MATCH_KEYBOARD_KEY, this.language);
+        this.keyboard = keyboardsKeeper.getKeyboard(KBD_MATCH, this.language);
         return this;
     }
 
     protected MessageBuilder withFriendMenuKeyboard() {
-        this.keyboard = MessageTemplateKeeper.getKeyboardByKey(MessageTemplateKeeper.FRIEND_KEYBOARD_KEY, this.language);
+        this.keyboard = keyboardsKeeper.getKeyboard(KBD_FRIEND, this.language);
         return this;
     }
 
-    protected MessageBuilder withMovieMenuKeyBoard() {
-        this.keyboard = MessageTemplateKeeper.getKeyboardByKey(MessageTemplateKeeper.MOVIE_KEYBOARD_KEY, this.language);
+    protected MessageBuilder withMovieMenuKeyboard() {
+        this.keyboard = keyboardsKeeper.getKeyboard(KBD_MOVIE, this.language);
         return this;
     }
 
     protected MessageBuilder withSettingsKeyboard() {
-        this.keyboard = MessageTemplateKeeper.getKeyboardByKey(MessageTemplateKeeper.SETTINGS_KEYBOARD_KEY, this.language);
+        this.keyboard = keyboardsKeeper.getKeyboard(KBD_SETTINGS, this.language);
         return this;
     }
 
     public MessageBuilder withSelectLanguageText() {
-        this.messageText = MessageTemplateKeeper.getMessageOrTemplateByKey(MessageTemplateKeeper.SELECT_LANGUAGE_KEY, this.language);
+        this.messageText = messagesKeeper.getMessage(MSG_SETTINGS_LANG, this.language);
         return this;
     }
 
     public MessageBuilder withSelectLanguageButtons() {
-        this.buttons = MessageTemplateKeeper.getButtonsByKey(MessageTemplateKeeper.SELECT_LANGUAGE_BUTTONS_KEY, this.language);
+        this.buttons = buttonsKeeper.getButton(BTN_LANGUAGE, this.language);
         return this;
     }
 

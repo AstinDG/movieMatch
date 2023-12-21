@@ -55,7 +55,7 @@ public class CommandHandlerImpl implements CommandHandler {
             }
         }
         userService.incrementMessageCounter();
-        return command.getAnswer(session);
+        return command.getAnswer(session, this.messageBuilder);
     }
 
     public Message getReply(User user, String text) {
