@@ -1,5 +1,6 @@
 package com.astindg.movieMatch.domain;
 
+import com.astindg.movieMatch.model.Language;
 import com.astindg.movieMatch.model.Message;
 
 public enum Command {
@@ -47,24 +48,29 @@ public enum Command {
     MOVIE_MATCH {
         @Override
         public Message getAnswer(Session session, MessageBuilder messageBuilder) {
+            Language language = session.getUser().getLanguage();
             if (session.getCurrentFriend() == null) {
-                return messageBuilder.setLanguage(session.getUser().getLanguage()).withFriendNotSelectedError().withInitialKeyboard().build();
+                return messageBuilder.setLanguage(language).withFriendNotSelectedError().withInitialKeyboard().build();
             } else if (session.getMovieList() == null || session.getLastMovieShown() == null) {
-                return messageBuilder.setLanguage(session.getUser().getLanguage()).withNoMoviesText().withMovieMatchKeyboard().build();
+                return messageBuilder.setLanguage(language).withNoMoviesText().withMovieMatchKeyboard().build();
             } else {
-                return messageBuilder.setLanguage(session.getUser().getLanguage()).withRandomMovie(session).withMovieMatchKeyboard().build();
+                return messageBuilder.setLanguage(language).withRandomMovie(session).withMovieMatchKeyboard().build();
             }
         }
     }, //special
     MOVIE_LiKE {
         @Override
         public Message getAnswer(Session session, MessageBuilder messageBuilder) {
-            if (session.getLastMovieShown() != null) {
-                return messageBuilder.setLanguage(session.getUser().getLanguage()).withRandomMovie(session).withMovieMatchKeyboard().build();
+            Language language = session.getUser().getLanguage();
+
+            if(session.getHasNewMatches()){
+                return messageBuilder.setLanguage(language).withNewMatchMovieMessage(session).withNewMatchKeyBoard().build();
+            } else if (session.getLastMovieShown() != null) {
+                return messageBuilder.setLanguage(language).withRandomMovie(session).withMovieMatchKeyboard().build();
             } else if (session.getMovieList() == null) {
-                return messageBuilder.setLanguage(session.getUser().getLanguage()).withText("No films have been shown to you").withInitialKeyboard().build();
+                return messageBuilder.setLanguage(language).withMovieMatchNotStarted().withInitialKeyboard().build();
             } else {
-                return messageBuilder.setLanguage(session.getUser().getLanguage()).withText("No new movies for you yet :(").withMovieMatchKeyboard().build();
+                return messageBuilder.setLanguage(language).withNoMoviesText().withMovieMatchKeyboard().build();
             }
         }
     }, //special

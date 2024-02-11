@@ -1,8 +1,10 @@
 package com.astindg.movieMatch.services;
 
+import com.astindg.movieMatch.model.Movie;
 import com.astindg.movieMatch.model.User;
 import com.astindg.movieMatch.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -38,6 +40,14 @@ public class UserService {
 
     public void saveFriendByIds(Integer userId, Integer friendId){
         this.userRepository.saveFriendByIds(userId, friendId);
+    }
+
+    public void saveLikedMovie(User user, Movie movie){
+        this.userRepository.saveFavoriteMovie(user.getId(), movie.getId());
+    }
+
+    public void saveDislikedMovie(User user, Movie movie){
+        this.userRepository.saveDislikedMovie(user.getId(), movie.getId());
     }
 
     public List<User> findAll(){

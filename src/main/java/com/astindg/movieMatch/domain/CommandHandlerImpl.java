@@ -36,26 +36,23 @@ public class CommandHandlerImpl implements CommandHandler {
         Session session = sessionHandler.getUserSession(user);
 
         switch (command) {
-            case FRIEND_ADD ->
-                    //initialise invite code
-                    sessionHandler.initializeInviteCode(session);
+            case FRIEND_ADD -> {
+                //initialise invite code
+                sessionHandler.initializeInviteCode(session);
+            }
             case MOVIE_MATCH -> {
                 session.initializeMovieList();
-                sessionHandler.selectRandomMovieAndRemoveFromList(session);
+                sessionHandler.selectRandomMovie(session);
             }
-            //TODO fix bug with unselected friend
             case MOVIE_LiKE -> {
                 sessionHandler.setLikeLastMovieSown(session);
-                sessionHandler.selectRandomMovieAndRemoveFromList(session);
-                checkMatchesWithFriendAndNotify(session);
             }
             case MOVIE_DISLIKE -> {
                 sessionHandler.setDislikeLastMovieShown(session);
-                sessionHandler.selectRandomMovieAndRemoveFromList(session);
             }
         }
         userService.incrementMessageCounter();
-        return command.getAnswer(session, this.messageBuilder);
+        return command.getAnswer(session, messageBuilder);
     }
 
     public Message getReply(User user, String text) {

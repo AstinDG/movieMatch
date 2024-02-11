@@ -29,7 +29,7 @@ public class SessionHandler {
         if (!sessions.containsKey(user.getChatId())) {
             User foundUser = userService.findByChatId(user.getChatId());
 
-            if(foundUser != null){
+            if (foundUser != null) {
                 user = foundUser;
             }
 
@@ -87,7 +87,7 @@ public class SessionHandler {
         } else {
             User foundUser = userService.findByChatId(user.getChatId());
 
-            if(foundUser != null){
+            if (foundUser != null) {
                 user = foundUser;
                 Session session = new Session(movieService);
                 session.setUser(user);
@@ -99,33 +99,15 @@ public class SessionHandler {
         }
     }
 
-    protected void selectRandomMovieAndRemoveFromList(Session session) {
+    protected void selectRandomMovie(Session session) {
         if (session.getMovieList() != null && !session.getMovieList().isEmpty()) {
             if (session.getCurrentFriend() != null) {
                 List<Movie> movieList = session.getMovieList();
                 int randomIndex = (int) (Math.random() * movieList.size());
 
                 session.setLastMovieShown(movieList.get(randomIndex));
-
-                movieList.remove(randomIndex);
             }
         }
-    }
-
-    protected void setLikeLastMovieSown(Session session) {
-        if (session.getLastMovieShown() == null) {
-            return;
-            //TODO trow exception
-        }
-
-        User user = session.getUser();
-        if (user.getFavoriteMovies() == null) {
-            user.setFavoriteMovies(new HashSet<>());
-        }
-
-        user.getFavoriteMovies().add(session.getLastMovieShown());
-        session.releaseLastMovieShown();
-        userService.save(user);
     }
 
     public void setDislikeLastMovieShown(Session session) {
@@ -135,12 +117,57 @@ public class SessionHandler {
         }
 
         User user = session.getUser();
-        if (user.getDislikedMovies() == null) {
-            user.setDislikedMovies(new HashSet<>());
-        }
 
         user.getDislikedMovies().add(session.getLastMovieShown());
+
+        userService.saveDislikedMovie(user, session.getLastMovieShown());
+
         session.releaseLastMovieShown();
+        selectRandomMovie(session);
     }
 
+    protected void setLikeLastMovieSown(Session session) {
+        if (session.getLastMovieShown() == null) {
+            return;
+            //TODO trow exception
+        }
+
+        User user = session.getUser();
+
+        user.getFavoriteMovies().add(session.getLastMovieShown());
+
+        userService.saveLikedMovie(user, session.getLastMovieShown());
+
+        checkMatches(session);
+
+        session.releaseLastMovieShown();
+        selectRandomMovie(session);
+
+    }
+
+    private void checkMatches(Session session) {
+        Optional<Session> friendSessionOp = findSession(session.getCurrentFriend());
+
+        if (friendSessionOp.isEmpty()) {
+            return;
+        }
+
+        Set<Movie> friendMovies = friendSessionOp.get().getUser().getFavoriteMovies();
+
+
+        if (friendMovies.contains(session.getLastMovieShown())) {
+            //notify user
+            session.setNewMatchMovie(session.getLastMovieShown());
+            session.getMoviesMatchWithCurrentFriend().add(session.getLastMovieShown());
+
+            //notify friend if we`re his/her current friend
+            Session friendSession = friendSessionOp.get();
+
+            if (friendSession.getCurrentFriend().equals(session.getUser())) {
+                friendSession.setNewMatchMovie(session.getLastMovieShown());
+                friendSession.getMoviesMatchWithCurrentFriend().add(session.getLastMovieShown());
+            }
+        }
+
+    }
 }

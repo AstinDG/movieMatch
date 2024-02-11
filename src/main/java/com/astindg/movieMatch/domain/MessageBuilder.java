@@ -1,5 +1,6 @@
 package com.astindg.movieMatch.domain;
 
+import antlr.debug.MessageAdapter;
 import com.astindg.movieMatch.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,6 +22,8 @@ public class MessageBuilder {
     private static final String MSG_FRIEND_SET_ERROR = "friend.error.set_friend";
     private static final String MSG_MOVIE = "movie";
     private static final String MSG_MOVIE_FAVORITE = "movie.favorite";
+    private static final String MSG_MOVIE_NEW_MATCH = "movie.notify_new_match";
+    private static final String MSG_MOVIE_MATCH_NOT_STARTED_ERROR = "movie.error.null.list";
     private static final String MSG_MOVIE_EMPTY_ERROR = "movie.error.empty.list";
     private static final String MSG_MOVIE_FAVORITE_EMPTY_ERROR = "movie.error.empty.favorite";
     private static final String MSG_MOVIE_FRIEND_NOT_SELECTED_ERROR = "movie.error.friend_not_selected";
@@ -30,6 +33,7 @@ public class MessageBuilder {
     private static final String KBD_INITIAL = "initial";
     private static final String KBD_FRIEND = "friend";
     private static final String KBD_MOVIE = "movie";
+    private static final String KBD_NEW_MATCH = "new_match";
     private static final String KBD_MATCH = "match";
     private static final String KBD_SETTINGS = "settings";
 
@@ -209,6 +213,22 @@ public class MessageBuilder {
         return this;
     }
 
+    protected MessageBuilder withNewMatchMovieMessage(Session session) {
+        Movie movie = session.getNewMatchMovie();
+        String movieName = movie.getMovieDetails(this.language).getName();
+        User friend = session.getCurrentFriend();
+
+        String template = messagesKeeper.getMessage(MSG_MOVIE_NEW_MATCH, this.language);
+
+        this.messageText = String.format(template, friend.getName(), movieName);
+        return this;
+    }
+
+    protected MessageBuilder withNewMatchKeyBoard() {
+        this.keyboard = keyboardsKeeper.getKeyboard(KBD_NEW_MATCH, this.language);
+        return this;
+    }
+
     protected MessageBuilder withFriendListText(Session session) {
         if (session.getUser().getFriends() == null || session.getUser().getFriends().isEmpty()) {
             this.messageText = "You have no friends yet";
@@ -230,20 +250,25 @@ public class MessageBuilder {
         return this;
     }
 
-   protected MessageBuilder withRandomMovie(Session session) {
+    protected MessageBuilder withRandomMovie(Session session) {
         Movie movie = session.getLastMovieShown();
         String template = messagesKeeper.getMessage(MSG_MOVIE, this.language);
         MovieDetails movieDetails = movie.getMovieDetails(language);
 
-       this.messageText = String.format(template,
-               movieDetails.getName(),
-               movieDetails.getGenre(),
-               movieDetails.getYearOfRelease(),
-               movieDetails.getDescription()
-       );
+        this.messageText = String.format(template,
+                movieDetails.getName(),
+                movieDetails.getGenre(),
+                movieDetails.getYearOfRelease(),
+                movieDetails.getDescription()
+        );
 
         this.messageImage = movieDetails.getImage();
 
+        return this;
+    }
+
+    protected MessageBuilder withMovieMatchNotStarted(){
+        this.messageText = messagesKeeper.getMessage(MSG_MOVIE_MATCH_NOT_STARTED_ERROR, this.language);
         return this;
     }
 
