@@ -63,7 +63,7 @@ public enum Command {
         public Message getAnswer(Session session, MessageBuilder messageBuilder) {
             Language language = session.getUser().getLanguage();
 
-            if(session.getHasNewMatches()){
+            if (session.getHasNewMatches()) {
                 return messageBuilder.setLanguage(language).withNewMatchMovieMessage(session).withNewMatchKeyBoard().build();
             } else if (session.getLastMovieShown() != null) {
                 return messageBuilder.setLanguage(language).withRandomMovie(session).withMovieMatchKeyboard().build();
@@ -86,21 +86,27 @@ public enum Command {
             return messageBuilder.setLanguage(session.getUser().getLanguage()).withFavoritesMoviesText(session).withMovieMenuKeyboard().build();
         }
     },
+    MOVIE_MATCHES {
+        @Override
+        public Message getAnswer(Session session, MessageBuilder messageBuilder) {
+            return messageBuilder.setLanguage(session.getUser().getLanguage()).withMovieMatchesWithFriend(session).withMovieMenuKeyboard().build();
+        }
+    },
     RETURN_MAIN_MENU {
         @Override
         public Message getAnswer(Session session, MessageBuilder messageBuilder) {
             return messageBuilder.setLanguage(session.getUser().getLanguage()).withSelectOptionText().withInitialKeyboard().build();
         }
     },
-    SETTINGS{
+    SETTINGS {
         @Override
-        public Message getAnswer(Session session, MessageBuilder messageBuilder){
+        public Message getAnswer(Session session, MessageBuilder messageBuilder) {
             return messageBuilder.setLanguage(session.getUser().getLanguage()).withSelectOptionText().withSettingsKeyboard().build();
         }
     },
-    LANGUAGE{
+    LANGUAGE {
         @Override
-        public Message getAnswer(Session session, MessageBuilder messageBuilder){
+        public Message getAnswer(Session session, MessageBuilder messageBuilder) {
             return messageBuilder.setLanguage(session.getUser().getLanguage()).withSelectLanguageText().withSelectLanguageButtons().build();
         }
 

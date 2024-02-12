@@ -9,6 +9,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Component
 public class MessageBuilder {
@@ -63,13 +64,6 @@ public class MessageBuilder {
         return this;
     }
 
-    protected MessageBuilder withText(String text) {
-
-        this.messageText = text;
-
-        return this;
-    }
-
     protected MessageBuilder withFavoritesMoviesText(Session session) {
         if (session.getUser().getFavoriteMovies() == null || session.getUser().getFavoriteMovies().isEmpty()) {
 
@@ -77,22 +71,38 @@ public class MessageBuilder {
             return this;
         }
 
-        StringBuilder movies = new StringBuilder();
+        this.messageText = getMovieListText(session.getUser().getFavoriteMovies());
+        return this;
+    }
+
+    protected MessageBuilder withMovieMatchesWithFriend(Session session) {
+        Set<Movie> movies = session.getMoviesMatchWithCurrentFriend();
+
+        if(movies == null || movies.isEmpty()){
+            //TODO messageText = ERROR message
+            return this;
+        }
+
+        this.messageText = getMovieListText(session.getMoviesMatchWithCurrentFriend());
+        return this;
+    }
+
+    private String getMovieListText(Set<Movie> movies){
+        StringBuilder moviesSB = new StringBuilder();
         int number = 1;
 
+        //TODO rename MSG_MOVIE_FAVORITE (used in withFavoritesMoviesText and withMovieMatchesWithFriend methods)
         String template = messagesKeeper.getMessage(MSG_MOVIE_FAVORITE, this.language);
 
-        for (Movie movie : session.getUser().getFavoriteMovies()) {
+        for (Movie movie : movies) {
             MovieDetails movieDetails = movie.getMovieDetails(this.language);
 
-            movies.append(String.format(template,
+            moviesSB.append(String.format(template,
                     number, movieDetails.getName(), movieDetails.getGenre(), movieDetails.getYearOfRelease()));
             number++;
         }
 
-
-        this.messageText = movies.toString();
-        return this;
+        return moviesSB.toString();
     }
 
     protected MessageBuilder withSelectOptionText() {

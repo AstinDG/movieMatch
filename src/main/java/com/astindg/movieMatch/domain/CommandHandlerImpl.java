@@ -216,33 +216,4 @@ public class CommandHandlerImpl implements CommandHandler {
 
         return getReply(user, Command.INITIAL);
     }
-
-    private void checkMatchesWithFriendAndNotify(Session session) {
-
-        Set<Movie> movies = session.getNewMatches();
-        if (movies.size() > 0) {
-            this.notifyQueue.add(Pair.of(
-                            session.getUser().getChatId(), messageBuilder.setLanguage(session.getUser().getLanguage())
-                                    .withText("You have " + movies.size()
-                                            + " matches with your friend "
-                                            + session.getCurrentFriend().getName()
-                                            + "!\n" + movies).build()
-                    )
-            ); //TODO make separate method in MessageBuilder
-            Session sessionFriend = this.sessionHandler.getUserSession(session.getCurrentFriend());
-            if (sessionFriend.getCurrentFriend() != null) {
-                if (sessionFriend.getCurrentFriend().equals(session.getUser())) {
-                    this.notifyQueue.add(Pair.of(
-                                    sessionFriend.getUser().getChatId(), messageBuilder.setLanguage(sessionFriend.getUser().getLanguage())
-                                            .withText("You have " + movies.size()
-                                                    + " matches with your friend "
-                                                    + sessionFriend.getCurrentFriend().getName()
-                                                    + "!\n" + movies).build()
-                            )
-                    ); //TODO make separate method in MessageBuilder
-                }
-            }
-
-        }
-    }
 }
