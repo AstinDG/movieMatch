@@ -18,6 +18,16 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     @Transactional
     void saveFriendByIds(@Param("userId") Integer userId, @Param("friendId") Integer friendId);
 
+    @Modifying
+    @Query(value = "insert into Favorite_movies(user_id, movie_id) VALUES (:userId, :movieId)", nativeQuery = true)
+    @Transactional
+    void saveFavoriteMovie(@Param("userId") Integer userId, @Param("movieId") Integer movieId);
+
+    @Modifying
+    @Query(value = "insert into Disliked_movies(user_id, movie_id) VALUES (:userId, :movieId)", nativeQuery = true)
+    @Transactional
+    void saveDislikedMovie(@Param("userId") Integer userId, @Param("movieId") Integer movieId);
+
     @Query(value = "select count(*) from Users", nativeQuery = true)
     Integer getUsersAmount();
 }

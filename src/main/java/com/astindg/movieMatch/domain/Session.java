@@ -23,6 +23,8 @@ public class Session {
     private List<Movie> movieList;
     private Boolean processingInviteCode = false;
     private Set<Movie> moviesMatchWithCurrentFriend;
+    private Boolean hasNewMatches = false;
+    private Movie newMatchMovie;
     private Movie lastMovieShown;
     private final MovieService movieService;
 
@@ -87,6 +89,20 @@ public class Session {
         }
     }
 
+    protected void setNewMatchMovie(Movie movie) {
+        this.newMatchMovie = movie;
+        this.hasNewMatches = true;
+    }
+
+    protected Movie getNewMatchMovie() {
+        Movie movie = this.newMatchMovie;
+
+        this.newMatchMovie = null;
+        this.hasNewMatches = false;
+
+        return movie;
+    }
+
     protected Set<Movie> getNewMatches() {
         Set<Movie> movieMatches = new HashSet<>();
 
@@ -99,8 +115,6 @@ public class Session {
                     movieMatches = movies.stream().filter(moviesFriend::contains)
                             .collect(Collectors.toSet());
                 }
-
-                this.moviesMatchWithCurrentFriend = movieMatches;
             }
         }
         return movieMatches;
@@ -121,6 +135,7 @@ public class Session {
     }
 
     protected void releaseLastMovieShown() {
-        this.lastMovieShown = null;
+        movieList.remove(lastMovieShown);
+        lastMovieShown = null;
     }
 }

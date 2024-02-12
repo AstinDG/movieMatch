@@ -22,6 +22,9 @@ public class CommandTranslator {
     private static final String START_MATCH_COMMAND_EN = "Start match!";
     private static final String START_MATCH_COMMAND_UA = "Почати підбір!";
     private static final String START_MATCH_COMMAND_RU = "Начать подбор!";
+    private static final String CONTINUE_MATCH_COMMAND_EN = "Continue";
+    private static final String CONTINUE_MATCH_COMMAND_UA = "Продовжити";
+    private static final String CONTINUE_MATCH_COMMAND_RU = "Продолжить";
     private static final String LIKE_COMMAND_EN = "Like";
     private static final String LIKE_COMMAND_UA = "Подобається";
     private static final String LIKE_COMMAND_RU = "Нравится";
@@ -43,6 +46,9 @@ public class CommandTranslator {
     private static final String FAVORITES_MOVIES_COMMAND_EN = "My movies";
     private static final String FAVORITES_MOVIES_COMMAND_UA = "Мої фільми";
     private static final String FAVORITES_MOVIES_COMMAND_RU = "Мои фильмы";
+    private static final String MATCHES_WITH_CURRENT_FRIEND_EN = "Matches with current friend";
+    private static final String MATCHES_WITH_CURRENT_FRIEND_UA = "Спільні фільми з обраним другом";
+    private static final String MATCHES_WITH_CURRENT_FRIEND_RU = "Общие фильмы с выбранным другом";
     private static final String SETTINGS_COMMAND_EN = "Settings";
     private static final String SETTINGS_COMMAND_UA = "Налаштування";
     private static final String SETTINGS_COMMAND_RU = "Настройки";
@@ -64,6 +70,9 @@ public class CommandTranslator {
         commandMap.put(START_MATCH_COMMAND_EN, Command.MOVIE_MATCH);
         commandMap.put(START_MATCH_COMMAND_UA, Command.MOVIE_MATCH);
         commandMap.put(START_MATCH_COMMAND_RU, Command.MOVIE_MATCH);
+        commandMap.put(CONTINUE_MATCH_COMMAND_EN, Command.MOVIE_MATCH);
+        commandMap.put(CONTINUE_MATCH_COMMAND_UA, Command.MOVIE_MATCH);
+        commandMap.put(CONTINUE_MATCH_COMMAND_RU, Command.MOVIE_MATCH);
         commandMap.put(LIKE_COMMAND_EN, Command.MOVIE_LiKE);
         commandMap.put(LIKE_COMMAND_UA, Command.MOVIE_LiKE);
         commandMap.put(LIKE_COMMAND_RU, Command.MOVIE_LiKE);
@@ -85,6 +94,9 @@ public class CommandTranslator {
         commandMap.put(FAVORITES_MOVIES_COMMAND_EN, Command.MOVIE_FAVORITES);
         commandMap.put(FAVORITES_MOVIES_COMMAND_UA, Command.MOVIE_FAVORITES);
         commandMap.put(FAVORITES_MOVIES_COMMAND_RU, Command.MOVIE_FAVORITES);
+        commandMap.put(MATCHES_WITH_CURRENT_FRIEND_EN, Command.MOVIE_MATCHES);
+        commandMap.put(MATCHES_WITH_CURRENT_FRIEND_UA, Command.MOVIE_MATCHES);
+        commandMap.put(MATCHES_WITH_CURRENT_FRIEND_RU, Command.MOVIE_MATCHES);
         commandMap.put(SETTINGS_COMMAND_EN, Command.SETTINGS);
         commandMap.put(SETTINGS_COMMAND_UA, Command.SETTINGS);
         commandMap.put(SETTINGS_COMMAND_RU, Command.SETTINGS);

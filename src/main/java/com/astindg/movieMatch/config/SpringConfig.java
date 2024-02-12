@@ -43,12 +43,4 @@ public class SpringConfig {
         return bot;
     }
 
-    @Bean
-    public TelegramNotifier startThreadTelegramNotifier(TelegramBot bot, CommandHandler handler){
-        TelegramNotifier telegramNotifier = new TelegramNotifier(bot, handler);
-        telegramNotifier.setName("Telegram Notifier");
-        telegramNotifier.start();
-        return telegramNotifier;
-    }
-
 }

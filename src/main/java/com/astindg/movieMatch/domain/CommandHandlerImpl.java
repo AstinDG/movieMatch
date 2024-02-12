@@ -36,26 +36,23 @@ public class CommandHandlerImpl implements CommandHandler {
         Session session = sessionHandler.getUserSession(user);
 
         switch (command) {
-            case FRIEND_ADD ->
-                    //initialise invite code
-                    sessionHandler.initializeInviteCode(session);
+            case FRIEND_ADD -> {
+                //initialise invite code
+                sessionHandler.initializeInviteCode(session);
+            }
             case MOVIE_MATCH -> {
                 session.initializeMovieList();
-                sessionHandler.selectRandomMovieAndRemoveFromList(session);
+                sessionHandler.selectRandomMovie(session);
             }
-            //TODO fix bug with unselected friend
             case MOVIE_LiKE -> {
                 sessionHandler.setLikeLastMovieSown(session);
-                sessionHandler.selectRandomMovieAndRemoveFromList(session);
-                checkMatchesWithFriendAndNotify(session);
             }
             case MOVIE_DISLIKE -> {
                 sessionHandler.setDislikeLastMovieShown(session);
-                sessionHandler.selectRandomMovieAndRemoveFromList(session);
             }
         }
         userService.incrementMessageCounter();
-        return command.getAnswer(session, this.messageBuilder);
+        return command.getAnswer(session, messageBuilder);
     }
 
     public Message getReply(User user, String text) {
@@ -218,34 +215,5 @@ public class CommandHandlerImpl implements CommandHandler {
         userService.save(user);
 
         return getReply(user, Command.INITIAL);
-    }
-
-    private void checkMatchesWithFriendAndNotify(Session session) {
-
-        Set<Movie> movies = session.getNewMatches();
-        if (movies.size() > 0) {
-            this.notifyQueue.add(Pair.of(
-                            session.getUser().getChatId(), messageBuilder.setLanguage(session.getUser().getLanguage())
-                                    .withText("You have " + movies.size()
-                                            + " matches with your friend "
-                                            + session.getCurrentFriend().getName()
-                                            + "!\n" + movies).build()
-                    )
-            ); //TODO make separate method in MessageBuilder
-            Session sessionFriend = this.sessionHandler.getUserSession(session.getCurrentFriend());
-            if (sessionFriend.getCurrentFriend() != null) {
-                if (sessionFriend.getCurrentFriend().equals(session.getUser())) {
-                    this.notifyQueue.add(Pair.of(
-                                    sessionFriend.getUser().getChatId(), messageBuilder.setLanguage(sessionFriend.getUser().getLanguage())
-                                            .withText("You have " + movies.size()
-                                                    + " matches with your friend "
-                                                    + sessionFriend.getCurrentFriend().getName()
-                                                    + "!\n" + movies).build()
-                            )
-                    ); //TODO make separate method in MessageBuilder
-                }
-            }
-
-        }
     }
 }

@@ -1,6 +1,7 @@
 package com.astindg.movieMatch.model;
 
 import lombok.*;
+import org.apache.commons.lang3.builder.EqualsExclude;
 import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
@@ -14,6 +15,7 @@ import static org.hibernate.annotations.CascadeType.DELETE;
 @NoArgsConstructor
 @ToString(exclude = {"friends", "favoriteMovies", "dislikedMovies"})
 @Entity
+@EqualsAndHashCode(exclude = {"language", "friends", "favoriteMovies", "dislikedMovies"})
 @Table(name = "Users")
 public class User {
 
