@@ -18,6 +18,7 @@ public record MessagesKeeper(Environment env) {
         keys.add("initial");
         keys.add("select_option");
         keys.add("friend.invite");
+        keys.add("friend.invite.btn");
         keys.add("friend.select");
         keys.add("friend.selected");
         keys.add("friend.delete");

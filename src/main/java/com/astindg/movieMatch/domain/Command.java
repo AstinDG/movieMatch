@@ -50,7 +50,11 @@ public enum Command {
         public Message getAnswer(Session session, MessageBuilder messageBuilder) {
             Language language = session.getUser().getLanguage();
             if (session.getCurrentFriend() == null) {
-                return messageBuilder.setLanguage(language).withFriendNotSelectedError().withInitialKeyboard().build();
+                Message message = Command.FRIEND_SELECT.getAnswer(session, messageBuilder);
+                String errorText = messageBuilder.setLanguage(language).withFriendNotSelectedError().build().getText();
+                message.setText(errorText + "\n\n" + message.getText());
+
+                return message;
             } else if (session.getMovieList() == null || session.getLastMovieShown() == null) {
                 return messageBuilder.setLanguage(language).withNoMoviesText().withMovieMatchKeyboard().build();
             } else {

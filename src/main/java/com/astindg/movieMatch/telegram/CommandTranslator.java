@@ -1,111 +1,58 @@
 package com.astindg.movieMatch.telegram;
 
 import com.astindg.movieMatch.domain.Command;
+import com.astindg.movieMatch.model.Language;
+import org.springframework.core.env.Environment;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
-public class CommandTranslator {
-    private static final Map<String, Command> commandMap = new HashMap<>();
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static java.nio.charset.StandardCharsets.UTF_8;
+
+public record CommandTranslator(Environment env) {
+    private static final Map<String, Command> commandMapTemplate = new HashMap<>();
 
     private static final String INITIAL_COMMAND = "/start";
-    private static final String ADD_FRIEND_COMMAND_EN = "Add friend";
-    private static final String ADD_FRIEND_COMMAND_UA = "Додати друга";
-    private static final String ADD_FRIEND_COMMAND_RU = "Добавить друга";
-    private static final String RETURN_COMMAND_EN = "Return to main menu";
-    private static final String RETURN_COMMAND_UA = "До головного меню";
-    private static final String RETURN_COMMAND_RU = "Венуться в главное меню";
-    private static final String SELECT_FRIEND_COMMAND_EN = "Set friend";
-    private static final String SELECT_FRIEND_COMMAND_UA = "Обрати друга";
-    private static final String SELECT_FRIEND_COMMAND_RU = "Выбрать друга";
-    private static final String START_MATCH_COMMAND_EN = "Start match!";
-    private static final String START_MATCH_COMMAND_UA = "Почати підбір!";
-    private static final String START_MATCH_COMMAND_RU = "Начать подбор!";
-    private static final String CONTINUE_MATCH_COMMAND_EN = "Continue";
-    private static final String CONTINUE_MATCH_COMMAND_UA = "Продовжити";
-    private static final String CONTINUE_MATCH_COMMAND_RU = "Продолжить";
-    private static final String LIKE_COMMAND_EN = "Like";
-    private static final String LIKE_COMMAND_UA = "Подобається";
-    private static final String LIKE_COMMAND_RU = "Нравится";
-    private static final String DISLIKE_COMMAND_EN = "Dislike";
-    private static final String DISLIKE_COMMAND_UA = "Не подобається";
-    private static final String DISLIKE_COMMAND_RU = "Не нравится";
-    private static final String FRIENDS_MENU_COMMAND_EN = "Friends";
-    private static final String FRIENDS_MENU_COMMAND_UA = "Друзі";
-    private static final String FRIENDS_MENU_COMMAND_RU = "Друзья";
-    private static final String MOVIE_MENU_COMMAND_EN = "Movie";
-    private static final String MOVIE_MENU_COMMAND_UA = "Фільми";
-    private static final String MOVIE_MENU_COMMAND_RU = "Фильмы";
-    private static final String LIST_FRIEND_COMMAND_EN = "List friends";
-    private static final String LIST_FRIEND_COMMAND_UA = "Мої друзі";
-    private static final String LIST_FRIEND_COMMAND_RU = "Мои друзья";
-    private static final String REMOVE_FRIEND_COMMAND_EN = "Remove friend";
-    private static final String REMOVE_FRIEND_COMMAND_UA = "Видалити друга";
-    private static final String REMOVE_FRIEND_COMMAND_RU = "Удалить друга";
-    private static final String FAVORITES_MOVIES_COMMAND_EN = "My movies";
-    private static final String FAVORITES_MOVIES_COMMAND_UA = "Мої фільми";
-    private static final String FAVORITES_MOVIES_COMMAND_RU = "Мои фильмы";
-    private static final String MATCHES_WITH_CURRENT_FRIEND_EN = "Matches with current friend";
-    private static final String MATCHES_WITH_CURRENT_FRIEND_UA = "Спільні фільми з обраним другом";
-    private static final String MATCHES_WITH_CURRENT_FRIEND_RU = "Общие фильмы с выбранным другом";
-    private static final String SETTINGS_COMMAND_EN = "Settings";
-    private static final String SETTINGS_COMMAND_UA = "Налаштування";
-    private static final String SETTINGS_COMMAND_RU = "Настройки";
-    private static final String SETTINGS_LANGUAGE_COMMAND_EN = "Language";
-    private static final String SETTINGS_LANGUAGE_COMMAND_UA = "Мова";
-    private static final String SETTINGS_LANGUAGE_COMMAND_RU = "Язык";
+    private static final String ADD_FRIEND = "user.keyboard.friend.add.";
+    private static final String RETURN = "user.keyboard.button.return_main.";
+    private static final String SELECT_FRIEND = "user.keyboard.friend.set.";
+    private static final String START_MATCH = "user.keyboard.movie.start_match.";
+    private static final String CONTINUE_MATCH = "user.keyboard.new_match.continue.";
+    private static final String LIKE = "user.keyboard.match.like.";
+    private static final String DISLIKE = "user.keyboard.match.dislike.";
+    private static final String FRIENDS_MENU = "user.keyboard.initial.friends.";
+    private static final String MOVIE_MENU = "user.keyboard.initial.movie.";
+    private static final String LIST_FRIEND = "user.keyboard.friend.list.";
+    private static final String REMOVE_FRIEND = "user.keyboard.friend.delete.";
+    private static final String FAVORITES_MOVIES = "user.keyboard.movie.my.";
+    private static final String MATCHES_WITH_CURRENT_FRIEND = "user.keyboard.movie.matches_friend.";
+    private static final String SETTINGS = "user.keyboard.initial.settings.";
+    private static final String SETTINGS_LANGUAGE = "user.keyboard.settings.language.";
 
     static {
-        commandMap.put(INITIAL_COMMAND, Command.INITIAL);
-        commandMap.put(ADD_FRIEND_COMMAND_EN, Command.FRIEND_ADD);
-        commandMap.put(ADD_FRIEND_COMMAND_UA, Command.FRIEND_ADD);
-        commandMap.put(ADD_FRIEND_COMMAND_RU, Command.FRIEND_ADD);
-        commandMap.put(RETURN_COMMAND_EN, Command.RETURN_MAIN_MENU);
-        commandMap.put(RETURN_COMMAND_UA, Command.RETURN_MAIN_MENU);
-        commandMap.put(RETURN_COMMAND_RU, Command.RETURN_MAIN_MENU);
-        commandMap.put(SELECT_FRIEND_COMMAND_EN, Command.FRIEND_SELECT);
-        commandMap.put(SELECT_FRIEND_COMMAND_UA, Command.FRIEND_SELECT);
-        commandMap.put(SELECT_FRIEND_COMMAND_RU, Command.FRIEND_SELECT);
-        commandMap.put(START_MATCH_COMMAND_EN, Command.MOVIE_MATCH);
-        commandMap.put(START_MATCH_COMMAND_UA, Command.MOVIE_MATCH);
-        commandMap.put(START_MATCH_COMMAND_RU, Command.MOVIE_MATCH);
-        commandMap.put(CONTINUE_MATCH_COMMAND_EN, Command.MOVIE_MATCH);
-        commandMap.put(CONTINUE_MATCH_COMMAND_UA, Command.MOVIE_MATCH);
-        commandMap.put(CONTINUE_MATCH_COMMAND_RU, Command.MOVIE_MATCH);
-        commandMap.put(LIKE_COMMAND_EN, Command.MOVIE_LiKE);
-        commandMap.put(LIKE_COMMAND_UA, Command.MOVIE_LiKE);
-        commandMap.put(LIKE_COMMAND_RU, Command.MOVIE_LiKE);
-        commandMap.put(DISLIKE_COMMAND_EN, Command.MOVIE_DISLIKE);
-        commandMap.put(DISLIKE_COMMAND_UA, Command.MOVIE_DISLIKE);
-        commandMap.put(DISLIKE_COMMAND_RU, Command.MOVIE_DISLIKE);
-        commandMap.put(FRIENDS_MENU_COMMAND_EN, Command.FRIENDS_MENU);
-        commandMap.put(FRIENDS_MENU_COMMAND_UA, Command.FRIENDS_MENU);
-        commandMap.put(FRIENDS_MENU_COMMAND_RU, Command.FRIENDS_MENU);
-        commandMap.put(MOVIE_MENU_COMMAND_EN, Command.MOVIE_MENU);
-        commandMap.put(MOVIE_MENU_COMMAND_UA, Command.MOVIE_MENU);
-        commandMap.put(MOVIE_MENU_COMMAND_RU, Command.MOVIE_MENU);
-        commandMap.put(LIST_FRIEND_COMMAND_EN, Command.FRIENDS_LIST);
-        commandMap.put(LIST_FRIEND_COMMAND_UA, Command.FRIENDS_LIST);
-        commandMap.put(LIST_FRIEND_COMMAND_RU, Command.FRIENDS_LIST);
-        commandMap.put(REMOVE_FRIEND_COMMAND_EN, Command.FRIEND_REMOVE);
-        commandMap.put(REMOVE_FRIEND_COMMAND_UA, Command.FRIEND_REMOVE);
-        commandMap.put(REMOVE_FRIEND_COMMAND_RU, Command.FRIEND_REMOVE);
-        commandMap.put(FAVORITES_MOVIES_COMMAND_EN, Command.MOVIE_FAVORITES);
-        commandMap.put(FAVORITES_MOVIES_COMMAND_UA, Command.MOVIE_FAVORITES);
-        commandMap.put(FAVORITES_MOVIES_COMMAND_RU, Command.MOVIE_FAVORITES);
-        commandMap.put(MATCHES_WITH_CURRENT_FRIEND_EN, Command.MOVIE_MATCHES);
-        commandMap.put(MATCHES_WITH_CURRENT_FRIEND_UA, Command.MOVIE_MATCHES);
-        commandMap.put(MATCHES_WITH_CURRENT_FRIEND_RU, Command.MOVIE_MATCHES);
-        commandMap.put(SETTINGS_COMMAND_EN, Command.SETTINGS);
-        commandMap.put(SETTINGS_COMMAND_UA, Command.SETTINGS);
-        commandMap.put(SETTINGS_COMMAND_RU, Command.SETTINGS);
-        commandMap.put(SETTINGS_LANGUAGE_COMMAND_EN, Command.LANGUAGE);
-        commandMap.put(SETTINGS_LANGUAGE_COMMAND_UA, Command.LANGUAGE);
-        commandMap.put(SETTINGS_LANGUAGE_COMMAND_RU, Command.LANGUAGE);
+        commandMapTemplate.put(ADD_FRIEND, Command.FRIEND_ADD);
+        commandMapTemplate.put(RETURN, Command.RETURN_MAIN_MENU);
+        commandMapTemplate.put(SELECT_FRIEND, Command.FRIEND_SELECT);
+        commandMapTemplate.put(START_MATCH, Command.MOVIE_MATCH);
+        commandMapTemplate.put(CONTINUE_MATCH, Command.MOVIE_MATCH);
+        commandMapTemplate.put(LIKE, Command.MOVIE_LiKE);
+        commandMapTemplate.put(DISLIKE, Command.MOVIE_DISLIKE);
+        commandMapTemplate.put(FRIENDS_MENU, Command.FRIENDS_MENU);
+        commandMapTemplate.put(MOVIE_MENU, Command.MOVIE_MENU);
+        commandMapTemplate.put(LIST_FRIEND, Command.FRIENDS_LIST);
+        commandMapTemplate.put(REMOVE_FRIEND, Command.FRIEND_REMOVE);
+        commandMapTemplate.put(FAVORITES_MOVIES, Command.MOVIE_FAVORITES);
+        commandMapTemplate.put(MATCHES_WITH_CURRENT_FRIEND, Command.MOVIE_MATCHES);
+        commandMapTemplate.put(SETTINGS, Command.SETTINGS);
+        commandMapTemplate.put(SETTINGS_LANGUAGE, Command.LANGUAGE);
     }
 
-    protected static Optional<Command> translateCommand(String command) {
+    private static final Map<String, Command> commandMap = new HashMap<>();
+
+    public Optional<Command> translateCommand(String command) {
         Optional<Command> translatedCommand;
         if (commandMap.containsKey(command)) {
             translatedCommand = Optional.of(commandMap.get(command));
@@ -113,5 +60,20 @@ public class CommandTranslator {
             translatedCommand = Optional.empty();
         }
         return translatedCommand;
+    }
+    //initial method
+    private void initializeCommandMap(){
+        for(String key : commandMapTemplate.keySet()){
+            for(Language language : Language.values()){
+                String propKey = key + language.toString().toLowerCase();
+                String commandValue = new String(
+                        Objects.requireNonNull(
+                                env.getProperty(propKey)
+                        ).getBytes(ISO_8859_1), UTF_8
+                );
+                commandMap.put(commandValue, commandMapTemplate.get(key));
+            }
+        }
+        commandMap.put(INITIAL_COMMAND, Command.INITIAL);
     }
 }

@@ -4,6 +4,7 @@ import com.astindg.movieMatch.domain.Command;
 import com.astindg.movieMatch.domain.CommandHandler;
 import com.astindg.movieMatch.model.Message;
 import com.astindg.movieMatch.model.User;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
@@ -11,18 +12,19 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.*;
 
-import static com.astindg.movieMatch.telegram.CommandTranslator.translateCommand;
 import static com.astindg.movieMatch.telegram.MessageTranslator.*;
 
 public class TelegramBot extends TelegramLongPollingBot {
 
     private final CommandHandler commandHandler;
     private final String botName;
-
-    public TelegramBot(String botToken, String botName, CommandHandler commandHandler) {
+    private final CommandTranslator translator;
+    @Autowired
+    public TelegramBot(String botToken, String botName, CommandHandler commandHandler, CommandTranslator translator) {
         super(botToken);
         this.botName = botName;
         this.commandHandler = commandHandler;
+        this.translator = translator;
     }
 
     @Override
@@ -56,7 +58,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     private void sendReply(Update update) {
-        Optional<Command> command = translateCommand(update.getMessage().getText());
+        Optional<Command> command = translator.translateCommand(update.getMessage().getText());
 
         String name = update.getMessage().getFrom().getFirstName() + " " + update.getMessage().getFrom().getLastName();
         Long chatId = update.getMessage().getChatId();

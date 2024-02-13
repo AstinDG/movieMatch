@@ -15,8 +15,11 @@ import java.util.List;
 import java.util.Map;
 
 public class MessageTranslator {
+    private static final String PARSE_MODE = "html";
+
     protected static SendMessage getSendMessage(Message message) {
         SendMessage sendMessage = new SendMessage();
+        sendMessage.setParseMode(PARSE_MODE);
         if(message.hasText()){
             sendMessage.setText(message.getText());
             if (message.hasButtons()) {
@@ -37,6 +40,7 @@ public class MessageTranslator {
         InputFile image = new InputFile().setMedia(message.getImage());
         sendPhoto.setPhoto(image);
         sendPhoto.setCaption(message.getText());
+        sendPhoto.setParseMode(PARSE_MODE);
 
         if (message.hasButtons()) {
             InlineKeyboardMarkup buttons = convertButtons(message.getButtons());

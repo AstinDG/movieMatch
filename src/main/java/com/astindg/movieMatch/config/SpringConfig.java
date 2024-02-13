@@ -1,8 +1,8 @@
 package com.astindg.movieMatch.config;
 
 import com.astindg.movieMatch.domain.CommandHandler;
+import com.astindg.movieMatch.telegram.CommandTranslator;
 import com.astindg.movieMatch.telegram.TelegramBot;
-import com.astindg.movieMatch.telegram.TelegramNotifier;
 import com.astindg.movieMatch.telegram.TemporaryKeyKeeper;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Bean;
@@ -33,8 +33,8 @@ public class SpringConfig {
     }
 
     @Bean
-    public TelegramBot getTelegramBot(TelegramBotsApi api, CommandHandler commandHandler){
-        TelegramBot bot = new TelegramBot(TemporaryKeyKeeper.BOT_TOKEN, TemporaryKeyKeeper.BOT_NAME, commandHandler);
+    public TelegramBot getTelegramBot(TelegramBotsApi api, CommandHandler commandHandler, CommandTranslator translator){
+        TelegramBot bot = new TelegramBot(TemporaryKeyKeeper.BOT_TOKEN, TemporaryKeyKeeper.BOT_NAME, commandHandler, translator);
         try {
             api.registerBot(bot);
         } catch (TelegramApiException e) {
