@@ -76,7 +76,7 @@ public class CommandHandlerImpl implements CommandHandler {
         Message message;
         if (callbackQuery.equals("code_process")) {
             session.enableProcessingCode();
-            message = new Message("Enter code:");
+            message = messageBuilder.setLanguage(session.getUser().getLanguage()).withEnterInviteCodeText().build();
         } else if (callbackQuery.startsWith("friend_delete_")) {
             message = deleteFriend(user, callbackQuery);
         } else if (callbackQuery.startsWith("friend_")) {
@@ -84,6 +84,7 @@ public class CommandHandlerImpl implements CommandHandler {
         } else if (callbackQuery.startsWith("set_language_")) {
             message = setLanguage(user, callbackQuery);
         } else {
+            //TODO make separate method in MessageBuilder
             message = new Message("Button temperary does`t work");
         }
 
@@ -180,18 +181,21 @@ public class CommandHandlerImpl implements CommandHandler {
         try {
             index = Integer.parseInt(callBackQuery.substring("friend_delete_".length()));
         } catch (NumberFormatException ex) {
+            //TODO make separate method in MessageBuilder
             return new Message("Something went wrong til deleting a friend");
         }
 
         Session sessionUser = sessionHandler.getUserSession(user);
         Optional<User> friend = sessionUser.getFriendByIndex(index);
         if (friend.isEmpty()) {
+            //TODO make separate method in MessageBuilder
             return new Message("Friend not found!");
         }
 
         user.getFriends().remove(friend.get());
         friend.get().getFriends().remove(user);
 
+        //TODO make separate method in MessageBuilder
         return new Message(String.format("Friend %s was deleted successfully", friend.get().getName()));
     }
 
@@ -208,6 +212,7 @@ public class CommandHandlerImpl implements CommandHandler {
             language = Language.valueOf(callBackQuery.substring("set_language_".length()));
         } catch (IllegalArgumentException exception) {
             exception.printStackTrace();
+            //TODO make separate method in MessageBuilder
             return new Message("Unknown language!");
         }
 

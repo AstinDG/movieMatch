@@ -16,6 +16,7 @@ public class MessageBuilder {
     private static final String MSG_INITIAL = "initial";
     private static final String MSG_OPTION = "select_option";
     private static final String MSG_FRIEND_INVITE = "friend.invite";
+    private static final String MSG_FRIEND_INVITE_BTN = "friend.invite.btn";
     private static final String MSG_FRIEND_SELECT = "friend.select";
     private static final String MSG_FRIEND_SELECTED = "friend.selected";
     private static final String MSG_FRIEND_DELETE = "friend.delete";
@@ -164,6 +165,11 @@ public class MessageBuilder {
         return this;
     }
 
+    public MessageBuilder withEnterInviteCodeText(){
+        this.messageText = messagesKeeper.getMessage(MSG_FRIEND_INVITE_BTN, this.language);
+        return this;
+    }
+
     protected MessageBuilder withSelectFriendText() {
         this.messageText = messagesKeeper.getMessage(MSG_FRIEND_SELECT, this.language);
         return this;
@@ -193,11 +199,13 @@ public class MessageBuilder {
             for (int i = 0; i < user.getFriends().size(); i++) {
                 User friend = user.getFriends().get(i);
 
+                //TODO make separate method in ButtonsKeeper
                 friends.add(Map.of(friend.getName(), String.format("friend_%d", i)));
             }
             this.buttons = friends;
 
         } else {
+            //TODO make separate method in MessageKeeper
             this.messageText = "You have no friend yet...";
         }
         return this;
@@ -211,10 +219,12 @@ public class MessageBuilder {
     protected MessageBuilder withFriendRemoveButtons(Session session) {
         List<Map<String, String>> buttons = new ArrayList<>();
         if (session.getUser().getFriends() == null) {
+            //TODO make separate method in MessageKeeper
             this.messageText = "You have no friend yet...";
         } else {
             int index = 0;
             for (User friend : session.getUser().getFriends()) {
+                //TODO make separate method in ButtonsKeeper
                 buttons.add(Map.of(friend.getName(), String.format("friend_delete_%d", index)));
                 index++;
             }
@@ -241,6 +251,7 @@ public class MessageBuilder {
 
     protected MessageBuilder withFriendListText(Session session) {
         if (session.getUser().getFriends() == null || session.getUser().getFriends().isEmpty()) {
+            //TODO make separate method in MessageKeeper
             this.messageText = "You have no friends yet";
             return this;
         }
@@ -248,6 +259,7 @@ public class MessageBuilder {
         StringBuilder friendList = new StringBuilder();
         int number = 1;
         for (User friend : session.getUser().getFriends()) {
+            //TODO make separate method in MessageKeeper
             friendList.append(String.format("%d. %s\n", number, friend.getName()));
             number++;
         }
