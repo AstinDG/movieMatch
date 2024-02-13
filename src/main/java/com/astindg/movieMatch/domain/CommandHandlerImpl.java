@@ -166,7 +166,7 @@ public class CommandHandlerImpl implements CommandHandler {
         return messageBuilder.setLanguage(user.getLanguage())
                 .withFriendSelectedText(session.get())
                 .appendWithInitialMessage(session.get())
-                .withInitialKeyboard().build();
+                .withMovieMenuKeyboard().build();
     }
 
     private Message deleteFriend(User user, String callBackQuery) {

@@ -3,6 +3,7 @@ package com.astindg.movieMatch.config;
 import com.astindg.movieMatch.domain.ButtonsKeeper;
 import com.astindg.movieMatch.domain.KeyboardsKeeper;
 import com.astindg.movieMatch.domain.MessagesKeeper;
+import com.astindg.movieMatch.telegram.CommandTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
@@ -33,5 +34,11 @@ public class MovieMatchConfig {
     @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
     public ButtonsKeeper getButtonsKeeper(){
         return new ButtonsKeeper(this.environment);
+    }
+
+    @Bean(initMethod = "initializeCommandMap")
+    @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
+    public CommandTranslator getCommandTranslator(){
+        return new CommandTranslator(this.environment);
     }
 }
