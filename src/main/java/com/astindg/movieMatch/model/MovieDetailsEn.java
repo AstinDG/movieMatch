@@ -51,6 +51,11 @@ public class MovieDetailsEn implements MovieDetails{
     }
 
     @Override
+    public String getGenre(){
+        return this.movie.getGenres(Language.EN);
+    }
+
+    @Override
     public File getImage() {
         return new File(this.imagePath);
     }
