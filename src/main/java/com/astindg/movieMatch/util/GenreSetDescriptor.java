@@ -5,10 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.type.descriptor.WrapperOptions;
 import org.hibernate.type.descriptor.java.AbstractTypeDescriptor;
 
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class GenreSetDescriptor extends AbstractTypeDescriptor<EnumSet> {
@@ -20,10 +17,11 @@ public class GenreSetDescriptor extends AbstractTypeDescriptor<EnumSet> {
 
     @Override
     public String toString(EnumSet value) {
-        return (String) value.stream()
-                .map(Enum.class::cast)
-                .map(v -> Integer.toString(((Enum) v).ordinal()))
-                .collect(Collectors.joining(SEPARATOR));
+        StringJoiner joiner = new StringJoiner(SEPARATOR);
+        for(Object v : value){
+            joiner.add(v.toString());
+        }
+        return joiner.toString();
     }
 
     @Override

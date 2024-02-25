@@ -31,11 +31,6 @@ public class MovieDetailsEn implements MovieDetails{
     @Length(min = 1, max = 250, message = "Movie name must be between 1 and 250 characters.")
     private String name;
 
-    @Column(name = "genre")
-    //TODO write regexp for "Genre/Genre/Genre"
-    @Length(min = 1, max = 250, message = "Movie genre must be between 1 and 250 characters.")
-    private String genre;
-
     @Column(name = "description")
     @Length(min = 1, max = 500, message = "Movie description must be between 1 and 500 characters.")
     private String description;
@@ -43,9 +38,8 @@ public class MovieDetailsEn implements MovieDetails{
     @Column(name = "image_path")
     private String imagePath;
 
-    public MovieDetailsEn(String name, String genre, String description, String imagePath) {
+    public MovieDetailsEn(String name, String description, String imagePath) {
         this.name = name;
-        this.genre = genre;
         this.description = description;
         this.imagePath = imagePath;
     }

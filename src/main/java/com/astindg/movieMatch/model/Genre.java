@@ -24,7 +24,7 @@ public enum Genre {
         public String getName(Language language) {
             return switch (language) {
                 case EN -> "Biography";
-                case UA -> "";
+                case UA -> "Біографія";
                 case RU -> "";
             };
         }
@@ -34,8 +34,8 @@ public enum Genre {
         public String getName(Language language) {
             return switch (language) {
                 case EN -> "Western";
-                case UA -> "";
-                case RU -> "";
+                case UA -> "Вестерн";
+                case RU -> "Вестерн";
             };
         }
     },
@@ -44,8 +44,8 @@ public enum Genre {
         public String getName(Language language) {
             return switch (language) {
                 case EN -> "War";
-                case UA -> "";
-                case RU -> "";
+                case UA -> "Військовий";
+                case RU -> "Военный";
             };
         }
     },
@@ -54,8 +54,8 @@ public enum Genre {
         public String getName(Language language) {
             return switch (language) {
                 case EN -> "Detective";
-                case UA -> "";
-                case RU -> "";
+                case UA -> "Детектив";
+                case RU -> "Детектив";
             };
         }
     },
@@ -64,8 +64,8 @@ public enum Genre {
         public String getName(Language language) {
             return switch (language) {
                 case EN -> "Documentary";
-                case UA -> "";
-                case RU -> "";
+                case UA -> "Документальний";
+                case RU -> "Документальный";
             };
         }
     },
@@ -74,8 +74,8 @@ public enum Genre {
         public String getName(Language language) {
             return switch (language) {
                 case EN -> "Drama";
-                case UA -> "";
-                case RU -> "";
+                case UA -> "Драма";
+                case RU -> "Драма";
             };
         }
     },
@@ -84,8 +84,8 @@ public enum Genre {
         public String getName(Language language) {
             return switch (language) {
                 case EN -> "History";
-                case UA -> "";
-                case RU -> "";
+                case UA -> "Історичний";
+                case RU -> "Исторический";
             };
         }
     },
@@ -94,8 +94,8 @@ public enum Genre {
         public String getName(Language language) {
             return switch (language) {
                 case EN -> "Comedy";
-                case UA -> "";
-                case RU -> "";
+                case UA -> "Комедія";
+                case RU -> "Комедия";
             };
         }
     },
@@ -104,8 +104,8 @@ public enum Genre {
         public String getName(Language language) {
             return switch (language) {
                 case EN -> "Crime";
-                case UA -> "";
-                case RU -> "";
+                case UA -> "Кримінальний";
+                case RU -> "Криминальный";
             };
         }
     },
@@ -114,8 +114,8 @@ public enum Genre {
         public String getName(Language language) {
             return switch (language) {
                 case EN -> "Melodrama";
-                case UA -> "";
-                case RU -> "";
+                case UA -> "Мелодрама";
+                case RU -> "Мелодрама";
             };
         }
     },
@@ -124,8 +124,8 @@ public enum Genre {
         public String getName(Language language) {
             return switch (language) {
                 case EN -> "Animation";
-                case UA -> "";
-                case RU -> "";
+                case UA -> "Мультфільм";
+                case RU -> "Мультфильм";
             };
         }
     },
@@ -134,8 +134,8 @@ public enum Genre {
         public String getName(Language language) {
             return switch (language) {
                 case EN -> "Educational";
-                case UA -> "";
-                case RU -> "";
+                case UA -> "Навчальний";
+                case RU -> "Учебный";
             };
         }
     },
@@ -144,8 +144,8 @@ public enum Genre {
         public String getName(Language language) {
             return switch (language) {
                 case EN -> "Adventure";
-                case UA -> "";
-                case RU -> "";
+                case UA -> "Пригоди";
+                case RU -> "Приключения";
             };
         }
     },
@@ -154,8 +154,8 @@ public enum Genre {
         public String getName(Language language) {
             return switch (language) {
                 case EN -> "Romance";
-                case UA -> "";
-                case RU -> "";
+                case UA -> "Романтичний";
+                case RU -> "Романтический";
             };
         }
     },
@@ -164,8 +164,8 @@ public enum Genre {
         public String getName(Language language) {
             return switch (language) {
                 case EN -> "Family";
-                case UA -> "";
-                case RU -> "";
+                case UA -> "Сімейний";
+                case RU -> "Семейный";
             };
         }
     },
@@ -174,8 +174,8 @@ public enum Genre {
         public String getName(Language language) {
             return switch (language) {
                 case EN -> "Thriller";
-                case UA -> "";
-                case RU -> "";
+                case UA -> "Трилер";
+                case RU -> "Триллер ";
             };
         }
     },
@@ -184,8 +184,8 @@ public enum Genre {
         public String getName(Language language) {
             return switch (language) {
                 case EN -> "Horror";
-                case UA -> "";
-                case RU -> "";
+                case UA -> "Жахи";
+                case RU -> "Ужасы";
             };
         }
     },
@@ -194,8 +194,8 @@ public enum Genre {
         public String getName(Language language) {
             return switch (language) {
                 case EN -> "Sci-Fi";
-                case UA -> "";
-                case RU -> "";
+                case UA -> "Наукова фантастика";
+                case RU -> "Научная фантастика";
             };
         }
     },
@@ -204,8 +204,8 @@ public enum Genre {
         public String getName(Language language) {
             return switch (language) {
                 case EN -> "Fantasy";
-                case UA -> "";
-                case RU -> "";
+                case UA -> "Фентазі";
+                case RU -> "Фэнтази";
             };
         }
     };

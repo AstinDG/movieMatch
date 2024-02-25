@@ -10,7 +10,6 @@ public interface MovieDetails {
     void setDescription(String description);
     File getImage();
     String getGenre();
-    void setGenre(String genre);
     Integer getYearOfRelease();
     String generateBase64Image();
     String getImagePath();

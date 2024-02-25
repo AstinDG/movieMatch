@@ -26,13 +26,20 @@
             <input type="text" th:field="*{yearOfRelease}" id="yearOfRelease">
             <div style="color:red" th:if="${#fields.hasErrors('yearOfRelease')}" th:errors="*{yearOfRelease}">Year Error</div>
 
+            <ul>
+                <li th:each="genre: ${genreMap.keySet()}">
+                    <input type="checkbox"
+                           th:field="*{genres}"
+                           th:value="${genre}" />
+                    <label
+                            th:for="${#ids.prev('genres')}"
+                            th:text="${genreMap.get(genre)}"></label>
+                </li>
+            </ul>
+
             <label for="nameEn">Enter name: </label>
             <input type="text" th:field="*{detailsEn.name}" id="nameEn">
             <div style="color:red" th:if="${#fields.hasErrors('detailsEn.name')}" th:errors="*{detailsEn.name}">Name Error</div>
-
-            <label for="genreEn">Enter genre: </label>
-            <input type="text" th:field="*{detailsEn.genre}" id="genreEn">
-            <div style="color:red" th:if="${#fields.hasErrors('detailsEn.genre')}" th:errors="*{detailsEn.genre}">Genre Error</div>
 
             <label for="descriptionEn">Enter description: </label>
             <textarea th:field="*{detailsEn.description}" id="descriptionEn" cols="20" rows="5"></textarea>
@@ -45,10 +52,6 @@
             <input type="text" th:field="*{detailsUa.name}" id="nameUa">
             <div style="color:red" th:if="${#fields.hasErrors('detailsUa.name')}" th:errors="*{detailsUa.name}">Помилка назви</div>
 
-            <label for="genreUa">Жанр: </label>
-            <input type="text" th:field="*{detailsUa.genre}" id="genreUa">
-            <div style="color:red" th:if="${#fields.hasErrors('detailsUa.genre')}" th:errors="*{detailsUa.genre}">Помилка жанру</div>
-
             <label for="descriptionUa">Опис: </label>
             <textarea th:field="*{detailsUa.description}" id="descriptionUa" cols="20" rows="5"></textarea>
             <div style="color:red" th:if="${#fields.hasErrors('detailsUa.description')}" th:errors="*{detailsUa.description}">Помилка опису</div>
@@ -59,10 +62,6 @@
             <label for="nameRu">Название: </label>
             <input type="text" th:field="*{detailsRu.name}" id="nameRu">
             <div style="color:red" th:if="${#fields.hasErrors('detailsRu.name')}" th:errors="*{detailsRu.name}">Ошибка названия</div>
-
-            <label for="genreRu">Жанр: </label>
-            <input type="text" th:field="*{detailsRu.genre}" id="genreRu">
-            <div style="color:red" th:if="${#fields.hasErrors('detailsRu.genre')}" th:errors="*{detailsRu.genre}">Ошибка жанра</div>
 
             <label for="descriptionRu">Описание: </label>
             <textarea th:field="*{detailsRu.description}" id="descriptionRu" cols="20" rows="5"></textarea>
