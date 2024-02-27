@@ -78,12 +78,13 @@ public class MovieController {
             model.addAttribute("movieDetailsEn", movie.get().getDetailsEn());
             model.addAttribute("movieDetailsUa", movie.get().getDetailsUa());
             model.addAttribute("movieDetailsRu", movie.get().getDetailsRu());
+            model.addAttribute("genreMap", genreMap);
         }
         return "movie/edit";
     }
 
     @PatchMapping("{id}/updateYearRelease")
-    public String upDateYearRelease(@PathVariable("id") Integer id,
+    public String updateYearRelease(@PathVariable("id") Integer id,
                                     @ModelAttribute("movie") Movie updatedYearReleaseMovie, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return "movie/edit";
@@ -128,6 +129,15 @@ public class MovieController {
         }
 
         movieService.saveDetails(id, movieDetailsRu, file, Language.RU);
+        return "redirect:/admin/movie";
+    }
+    @PatchMapping("{id}/updateGenres")
+    public String updateGenres(@PathVariable("id") Integer id,
+                                    @ModelAttribute("movie") Movie updatedGenres, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return "movie/edit";
+        }
+        this.movieService.updateGenres(id, updatedGenres.getGenres());
         return "redirect:/admin/movie";
     }
 

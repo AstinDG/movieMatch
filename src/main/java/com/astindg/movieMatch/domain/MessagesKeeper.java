@@ -31,6 +31,7 @@ public record MessagesKeeper(Environment env) {
         keys.add("movie.error.empty.list");
         keys.add("movie.error.empty.favorite");
         keys.add("movie.error.friend_not_selected");
+        keys.add("movie.error.matches_friend_empty");
         keys.add("settings.select_language");
         keys.add("error.unknown_command");
     }

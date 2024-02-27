@@ -1,5 +1,6 @@
 package com.astindg.movieMatch.services;
 
+import com.astindg.movieMatch.model.Genre;
 import com.astindg.movieMatch.model.Language;
 import com.astindg.movieMatch.model.Movie;
 import com.astindg.movieMatch.model.MovieDetails;
@@ -15,6 +16,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -158,5 +160,15 @@ public class MovieService {
             saveNewImage(movie.getDetailsRu(), path, imageRuBytes);
         }
         this.save(movie);
+    }
+
+    public void updateGenres(Integer movieId, EnumSet<Genre> genres) {
+        Optional<Movie> foundMovie = findById(movieId);
+        if (foundMovie.isEmpty()) {
+            return;
+        }
+        Movie movie = foundMovie.get();
+        movie.setGenres(genres);
+        this.movieRepository.save(movie);
     }
 }
