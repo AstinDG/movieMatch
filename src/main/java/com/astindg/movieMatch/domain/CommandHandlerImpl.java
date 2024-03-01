@@ -8,6 +8,7 @@ import com.astindg.movieMatch.services.UserService;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 
 import java.util.*;
 
@@ -69,20 +70,21 @@ public class CommandHandlerImpl implements CommandHandler {
         return message;
     }
 
-    public Message getReplyCallbackQuery(User user, String callbackQuery) {
+    public Message getReplyCallbackQuery(User user, CallbackQuery callbackQuery) {
+        String callbackData = callbackQuery.getData();
 
         Session session = sessionHandler.getUserSession(user);
 
         Message message;
-        if (callbackQuery.equals("code_process")) {
+        if (callbackData.equals("code_process")) {
             session.enableProcessingCode();
             message = messageBuilder.setLanguage(session.getUser().getLanguage()).withEnterInviteCodeText().build();
-        } else if (callbackQuery.startsWith("friend_delete_")) {
-            message = deleteFriend(user, callbackQuery);
-        } else if (callbackQuery.startsWith("friend_")) {
-            message = setFriend(user, callbackQuery);
-        } else if (callbackQuery.startsWith("set_language_")) {
-            message = setLanguage(user, callbackQuery);
+        } else if (callbackData.startsWith("friend_delete_")) {
+            message = deleteFriend(user, callbackData);
+        } else if (callbackData.startsWith("friend_")) {
+            message = setFriend(user, callbackData);
+        } else if (callbackData.startsWith("set_language_")) {
+            message = setLanguage(user, callbackData);
         } else {
             //TODO make separate method in MessageBuilder
             message = new Message("Button temperary does`t work");

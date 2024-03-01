@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.*;
@@ -50,7 +51,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         User user = new User();
         user.setName(name);
         user.setChatId(chatId);
-        String callBackQuery = update.getCallbackQuery().getData();
+        CallbackQuery callBackQuery = update.getCallbackQuery();
 
         Message message = commandHandler.getReplyCallbackQuery(user, callBackQuery);
 

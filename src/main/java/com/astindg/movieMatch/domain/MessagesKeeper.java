@@ -25,6 +25,7 @@ public record MessagesKeeper(Environment env) {
         keys.add("friend.new");
         keys.add("friend.error.set_friend");
         keys.add("movie");
+        keys.add("movie.favorite_header");
         keys.add("movie.favorite");
         keys.add("movie.notify_new_match");
         keys.add("movie.error.null.list");

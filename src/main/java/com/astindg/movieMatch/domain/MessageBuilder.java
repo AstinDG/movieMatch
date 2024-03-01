@@ -22,7 +22,9 @@ public class MessageBuilder {
     private static final String MSG_FRIEND_NEW = "friend.new";
     private static final String MSG_FRIEND_SET_ERROR = "friend.error.set_friend";
     private static final String MSG_MOVIE = "movie";
+    private static final String MSG_MOVIE_FAVORITE_HEADER = "movie.favorite_header";
     private static final String MSG_MOVIE_FAVORITE = "movie.favorite";
+    private static final String MSG_MOVIE_FAVORITE_TEMPLATE = "%s\n\n%s";
     private static final String MSG_MOVIE_NEW_MATCH = "movie.notify_new_match";
     private static final String MSG_MOVIE_MATCH_NOT_STARTED_ERROR = "movie.error.null.list";
     private static final String MSG_MOVIE_EMPTY_ERROR = "movie.error.empty.list";
@@ -71,8 +73,33 @@ public class MessageBuilder {
             this.messageText = messagesKeeper.getMessage(MSG_MOVIE_FAVORITE_EMPTY_ERROR, this.language);
             return this;
         }
+        Set<Movie> favoriteMovies = session.getUser().getFavoriteMovies();
+        String headerTemplate = messagesKeeper.getMessage(MSG_MOVIE_FAVORITE_HEADER, this.language);
+        this.messageText = String.format(headerTemplate, favoriteMovies.size());
 
-        this.messageText = getMovieListText(session.getUser().getFavoriteMovies());
+        return this;
+    }
+
+    protected MessageBuilder withFavoriteMoviesButtons(Session session){
+        Set<Movie> favoriteMovies = session.getUser().getFavoriteMovies();
+        if(favoriteMovies == null || favoriteMovies.isEmpty()){
+            return this;
+        }
+
+        List<Map<String, String>> buttons = new ArrayList<>();
+        String movieButtonTemplate = messagesKeeper.getMessage(MSG_MOVIE_FAVORITE, this.language);
+        int counter = 1;
+        for(Movie movie : favoriteMovies){
+            MovieDetails details = movie.getMovieDetails(this.language);
+            String text = String.format(movieButtonTemplate, counter,
+                    details.getName(), details.getGenre(), movie.getYearOfRelease());
+            String callback = String.format("show_movie_%d", movie.getId());
+
+            buttons.add(Map.of(text, callback));
+            counter++;
+        }
+
+        this.buttons = buttons;
         return this;
     }
 

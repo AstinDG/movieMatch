@@ -87,7 +87,7 @@ public enum Command {
     MOVIE_FAVORITES {
         @Override
         public Message getAnswer(Session session, MessageBuilder messageBuilder) {
-            return messageBuilder.setLanguage(session.getUser().getLanguage()).withFavoritesMoviesText(session).withMovieMenuKeyboard().build();
+            return messageBuilder.setLanguage(session.getUser().getLanguage()).withFavoritesMoviesText(session).withFavoriteMoviesButtons(session).build();
         }
     },
     MOVIE_MATCHES {
