@@ -1,19 +1,28 @@
 package com.astindg.movieMatch.model;
 
+import com.astindg.movieMatch.util.GenreSet;
 import lombok.*;
 import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
 
 import javax.persistence.*;
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.StringJoiner;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name = "Movies")
+@TypeDef(name = "genre-set", typeClass = GenreSet.class)
 public class Movie {
+    private static final String GENRES_SEPARATOR = "/";
 
     @Id
     @Column(name = "id")
@@ -24,6 +33,12 @@ public class Movie {
     @Min(value = 1895, message = "Year of release must be later than 1895")
     @Max(value = 2100, message = "Year of release must be earlier than 2100")
     private Integer yearOfRelease;
+
+    @Column(name = "genres")
+    @Type(type = "genre-set", parameters = {
+            @org.hibernate.annotations.Parameter(name = "enumClass", value = "com.astindg.movieMatch.model.Genre")
+    })
+    private EnumSet<Genre> genres;
 
     @Valid
     @OneToOne(mappedBy = "movie", fetch = FetchType.LAZY)
@@ -57,5 +72,15 @@ public class Movie {
             //TODO throw exception
         }
         return details;
+    }
+
+    public String getGenres(Language language) {
+        StringJoiner genres = new StringJoiner(GENRES_SEPARATOR);
+
+        for (Genre genre : this.genres){
+            genres.add(genre.getName(language));
+        }
+
+        return genres.toString();
     }
 }

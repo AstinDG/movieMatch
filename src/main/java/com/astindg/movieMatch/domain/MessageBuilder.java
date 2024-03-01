@@ -1,6 +1,5 @@
 package com.astindg.movieMatch.domain;
 
-import antlr.debug.MessageAdapter;
 import com.astindg.movieMatch.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,7 +27,8 @@ public class MessageBuilder {
     private static final String MSG_MOVIE_MATCH_NOT_STARTED_ERROR = "movie.error.null.list";
     private static final String MSG_MOVIE_EMPTY_ERROR = "movie.error.empty.list";
     private static final String MSG_MOVIE_FAVORITE_EMPTY_ERROR = "movie.error.empty.favorite";
-    private static final String MSG_MOVIE_FRIEND_NOT_SELECTED_ERROR = "movie.error.friend_not_selected";
+    private static final String MSG_FRIEND_NOT_SELECTED_ERROR = "movie.error.friend_not_selected";
+    private static final String MSG_MATCHES_FRIEND_EMPTY_ERROR = "movie.error.matches_friend_empty";
     private static final String MSG_SETTINGS_LANG = "settings.select_language";
     private static final String MSG_UNKNOWN_COMMAND_ERROR = "error.unknown_command";
 
@@ -80,11 +80,12 @@ public class MessageBuilder {
         Set<Movie> movies = session.getMoviesMatchWithCurrentFriend();
 
         if(movies == null || movies.isEmpty()){
-            //TODO messageText = ERROR message
+            String template = messagesKeeper.getMessage(MSG_MATCHES_FRIEND_EMPTY_ERROR, this.language);
+            this.messageText = String.format(template, session.getCurrentFriend().getName());
             return this;
         }
 
-        this.messageText = getMovieListText(session.getMoviesMatchWithCurrentFriend());
+        this.messageText = getMovieListText(movies);
         return this;
     }
 
@@ -170,7 +171,12 @@ public class MessageBuilder {
         return this;
     }
 
-    protected MessageBuilder withSelectFriendText() {
+    protected MessageBuilder withSelectFriendText(Session session) {
+        if (session.getUser().getFriends() == null || session.getUser().getFriends().isEmpty()) {
+            //TODO make separate method
+            this.messageText = "You have no friend yet...";
+            return this;
+        }
         this.messageText = messagesKeeper.getMessage(MSG_FRIEND_SELECT, this.language);
         return this;
     }
@@ -187,26 +193,23 @@ public class MessageBuilder {
     }
 
     protected MessageBuilder withFriendNotSelectedError() {
-        this.messageText = messagesKeeper.getMessage(MSG_MOVIE_FRIEND_NOT_SELECTED_ERROR, this.language);
+        this.messageText = messagesKeeper.getMessage(MSG_FRIEND_NOT_SELECTED_ERROR, this.language);
         return this;
     }
 
     protected MessageBuilder withFriendListButtons(Session session) {
-        User user = session.getUser();
-        if (user.getFriends() != null && !user.getFriends().isEmpty()) {
+        if (session.getUser().getFriends() != null && !session.getUser().getFriends().isEmpty()) {
+            List<User> friendList = session.getUser().getFriends();
             List<Map<String, String>> friends = new ArrayList<>();
 
-            for (int i = 0; i < user.getFriends().size(); i++) {
-                User friend = user.getFriends().get(i);
+            for (int i = 0; i < session.getUser().getFriends().size(); i++) {
+                User friend = friendList.get(i);
 
                 //TODO make separate method in ButtonsKeeper
                 friends.add(Map.of(friend.getName(), String.format("friend_%d", i)));
             }
             this.buttons = friends;
 
-        } else {
-            //TODO make separate method in MessageKeeper
-            this.messageText = "You have no friend yet...";
         }
         return this;
     }
@@ -344,6 +347,8 @@ public class MessageBuilder {
 
         message.setImage(this.messageImage);
         this.messageImage = null;
+
+        this.language = null;
 
         return message;
     }

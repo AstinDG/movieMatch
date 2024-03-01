@@ -30,7 +30,7 @@ public enum Command {
     FRIEND_SELECT {
         @Override
         public Message getAnswer(Session session, MessageBuilder messageBuilder) {
-            return messageBuilder.setLanguage(session.getUser().getLanguage()).withSelectFriendText().withFriendListButtons(session).build();
+            return messageBuilder.setLanguage(session.getUser().getLanguage()).withSelectFriendText(session).withFriendListButtons(session).build();
         }
     },
     FRIEND_REMOVE {
@@ -93,7 +93,18 @@ public enum Command {
     MOVIE_MATCHES {
         @Override
         public Message getAnswer(Session session, MessageBuilder messageBuilder) {
-            return messageBuilder.setLanguage(session.getUser().getLanguage()).withMovieMatchesWithFriend(session).withMovieMenuKeyboard().build();
+            Language language = session.getUser().getLanguage();
+            if(session.getCurrentFriend() == null){
+                return messageBuilder.setLanguage(language)
+                        .withFriendNotSelectedError()
+                        .withFriendListButtons(session)
+                        .build();
+            }
+
+            return messageBuilder.setLanguage(language)
+                    .withMovieMatchesWithFriend(session)
+                    .withMovieMenuKeyboard()
+                    .build();
         }
     },
     RETURN_MAIN_MENU {

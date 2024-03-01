@@ -10,17 +10,22 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Controller
 @RequestMapping("admin/movie")
 public class MovieController {
+
+    private static Map<Genre, String> genreMap;
     private final MovieService movieService;
 
     @Autowired
     public MovieController(MovieService movieService) {
         this.movieService = movieService;
+        genreMap = generateGenreMap();
     }
 
     @GetMapping()
@@ -34,7 +39,9 @@ public class MovieController {
     }
 
     @GetMapping("/add")
-    public String newMovie(@ModelAttribute("movie") Movie movie){
+    public String newMovie(@ModelAttribute("movie") Movie movie, Model model) {
+        model.addAttribute("genreMap", genreMap);
+
         return "movie/add";
     }
 
@@ -43,8 +50,8 @@ public class MovieController {
                          BindingResult bindingResult,
                          @RequestParam("imageEn") MultipartFile imageEn,
                          @RequestParam("imageUa") MultipartFile imageUa,
-                         @RequestParam("imageRu") MultipartFile imageRu){
-        if(bindingResult.hasErrors()){
+                         @RequestParam("imageRu") MultipartFile imageRu) {
+        if (bindingResult.hasErrors()) {
             return "movie/add";
         }
 
@@ -71,13 +78,14 @@ public class MovieController {
             model.addAttribute("movieDetailsEn", movie.get().getDetailsEn());
             model.addAttribute("movieDetailsUa", movie.get().getDetailsUa());
             model.addAttribute("movieDetailsRu", movie.get().getDetailsRu());
+            model.addAttribute("genreMap", genreMap);
         }
         return "movie/edit";
     }
 
     @PatchMapping("{id}/updateYearRelease")
-    public String upDateYearRelease(@PathVariable("id") Integer id,
-            @ModelAttribute("movie") Movie updatedYearReleaseMovie, BindingResult bindingResult) {
+    public String updateYearRelease(@PathVariable("id") Integer id,
+                                    @ModelAttribute("movie") Movie updatedYearReleaseMovie, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return "movie/edit";
         }
@@ -122,5 +130,29 @@ public class MovieController {
 
         movieService.saveDetails(id, movieDetailsRu, file, Language.RU);
         return "redirect:/admin/movie";
+    }
+    @PatchMapping("{id}/updateGenres")
+    public String updateGenres(@PathVariable("id") Integer id,
+                                    @ModelAttribute("movie") Movie updatedGenres, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return "movie/edit";
+        }
+        this.movieService.updateGenres(id, updatedGenres.getGenres());
+        return "redirect:/admin/movie";
+    }
+
+
+    private static Map<Genre, String> generateGenreMap() {
+        Map<Genre, String> genreMap = new HashMap<>();
+
+        for (Genre genre : Genre.values()) {
+            String value = genre.getName(Language.EN) + "/"
+                    + genre.getName(Language.UA) + "/"
+                    + genre.getName(Language.RU);
+
+            genreMap.put(genre, value);
+        }
+
+        return genreMap;
     }
 }
