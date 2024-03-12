@@ -8,6 +8,7 @@ import com.astindg.movieMatch.services.UserService;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 
 import java.util.*;
 
@@ -60,7 +61,7 @@ public class CommandHandlerImpl implements CommandHandler {
         Message message;
 
         if (!session.isLookingForFriend()) {
-            message =  messageBuilder.setLanguage(session.getUser().getLanguage()).withErrorUnknownCommand().withInitialKeyboard().build();
+            message = messageBuilder.setLanguage(session.getUser().getLanguage()).withErrorUnknownCommand().withInitialKeyboard().build();
         } else {
             message = addFriendByCode(session, text);
         }
@@ -69,20 +70,27 @@ public class CommandHandlerImpl implements CommandHandler {
         return message;
     }
 
-    public Message getReplyCallbackQuery(User user, String callbackQuery) {
+    public Message getReplyCallbackQuery(User user, CallbackQuery callbackQuery) {
+        String callbackData = callbackQuery.getData();
 
         Session session = sessionHandler.getUserSession(user);
 
         Message message;
-        if (callbackQuery.equals("code_process")) {
+        if (callbackData.equals("code_process")) {
             session.enableProcessingCode();
             message = messageBuilder.setLanguage(session.getUser().getLanguage()).withEnterInviteCodeText().build();
-        } else if (callbackQuery.startsWith("friend_delete_")) {
-            message = deleteFriend(user, callbackQuery);
-        } else if (callbackQuery.startsWith("friend_")) {
-            message = setFriend(user, callbackQuery);
-        } else if (callbackQuery.startsWith("set_language_")) {
-            message = setLanguage(user, callbackQuery);
+        } else if (callbackData.startsWith("friend_delete_")) {
+            message = deleteFriend(user, callbackData);
+        } else if (callbackData.startsWith("friend_")) {
+            message = setFriend(user, callbackData);
+        } else if (callbackData.startsWith("set_language_")) {
+            message = setLanguage(user, callbackData);
+        } else if(callbackData.startsWith("show_movie_favorite_list_")){
+            message = editButtons(user, callbackQuery);
+        } else if (callbackData.startsWith("show_movie_favorite_")) {
+            message = showFavoriteMovie(user, callbackData);
+        } else if (callbackData.startsWith("remove_movie_favorite_")) {
+            message = deleteFavoriteMovie(user, callbackData);
         } else {
             //TODO make separate method in MessageBuilder
             message = new Message("Button temperary does`t work");
@@ -90,6 +98,66 @@ public class CommandHandlerImpl implements CommandHandler {
 
         userService.incrementMessageCounter();
         return message;
+    }
+
+    private Message editButtons(User user, CallbackQuery callback) {
+        Session session = sessionHandler.findSession(user).get();
+        int start;
+        try {
+            start = Integer.parseInt(callback.getData().substring("show_movie_favorite_list_".length()));
+        } catch (NumberFormatException ex) {
+            //TODO make separate method in MessageBuilder
+            return new Message("cant convert number");
+        }
+
+        Message editMessage = messageBuilder.setLanguage(session.getUser().getLanguage())
+                .withFavoriteMoviesButtons(session, start).build();;
+        editMessage.setEditMessageId(callback.getMessage().getMessageId());
+        editMessage.setHasEditButtons(true);
+
+        return editMessage;
+    }
+
+    private Message deleteFavoriteMovie(User user, String callbackQuery) {
+        Optional<Session> session = sessionHandler.findSession(user);
+        if (session.isEmpty()) {
+            return getReply(user, Command.INITIAL);
+        }
+        int movieId;
+        try {
+            movieId = Integer.parseInt(callbackQuery.substring("remove_movie_favorite_".length()));
+        } catch (NumberFormatException ex) {
+            //TODO make separate method in MessageBuilder
+            return new Message("cant find a movie with this id");
+        }
+        boolean isDeleted = this.sessionHandler.deleteFavoriteMovie(movieId, session.get());
+        if (isDeleted) {
+            return new Message("Movie was deleted from favorite successfully");
+        } else {
+            return new Message("Movie not found");
+        }
+    }
+
+    private Message showFavoriteMovie(User user, String callbackQuery) {
+        Optional<Session> session = sessionHandler.findSession(user);
+        if (session.isEmpty()) {
+            return getReply(user, Command.INITIAL);
+        }
+        int movieId;
+        try {
+            movieId = Integer.parseInt(callbackQuery.substring("show_movie_favorite_".length()));
+        } catch (NumberFormatException ex) {
+            //TODO make separate method in MessageBuilder
+            return new Message("cant find a movie with this id");
+        }
+
+        for (Movie movie : session.get().getUser().getFavoriteMovies()) {
+            if (movie.getId().equals(movieId)) {
+                return messageBuilder.setLanguage(session.get().getUser().getLanguage()).withMovieMessage(movie).withRemoveFromFavoriteButton(movieId).build();
+            }
+        }
+
+        return new Message("Movie not found in favorite list");
     }
 
     private Message addFriendByCode(Session session, String code) {
@@ -145,7 +213,7 @@ public class CommandHandlerImpl implements CommandHandler {
 
     }
 
-    private Message setFriend(User user, String callBackQuery) {
+    private Message setFriend(User user, String callbackQuery) {
         Optional<Session> session = sessionHandler.findSession(user);
         if (session.isEmpty()) {
             return getReply(user, Command.INITIAL);
@@ -153,7 +221,7 @@ public class CommandHandlerImpl implements CommandHandler {
 
         int index;
         try {
-            index = Integer.parseInt(callBackQuery.substring("friend_".length()));
+            index = Integer.parseInt(callbackQuery.substring("friend_".length()));
         } catch (NumberFormatException ex) {
             return messageBuilder.setLanguage(user.getLanguage()).withErrorSelectFriendText().build();
         }

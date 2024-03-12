@@ -34,6 +34,7 @@ public class SpringConfig {
 
     @Bean
     public TelegramBot getTelegramBot(TelegramBotsApi api, CommandHandler commandHandler, CommandTranslator translator){
+        //TODO move bot name and token to application.properties file
         TelegramBot bot = new TelegramBot(TemporaryKeyKeeper.BOT_TOKEN, TemporaryKeyKeeper.BOT_NAME, commandHandler, translator);
         try {
             api.registerBot(bot);

@@ -22,7 +22,7 @@ public class Session {
     private LocalDateTime timeOfInitCode;
     private List<Movie> movieList;
     private Boolean processingInviteCode = false;
-    private Set<Movie> moviesMatchWithCurrentFriend;
+    private List<Movie> moviesMatchWithCurrentFriend;
     private Boolean hasNewMatches = false;
     private Movie newMatchMovie;
     private Movie lastMovieShown;
@@ -103,17 +103,17 @@ public class Session {
         return movie;
     }
 
-    protected Set<Movie> getNewMatches() {
-        Set<Movie> movieMatches = new HashSet<>();
+    protected List<Movie> getNewMatches() {
+        List<Movie> movieMatches = new ArrayList<>();
 
         if (this.user.getFavoriteMovies() != null && this.currentFriend != null) {
             if (this.currentFriend.getFavoriteMovies() != null) {
-                Set<Movie> movies = this.user.getFavoriteMovies();
-                Set<Movie> moviesFriend = this.currentFriend.getFavoriteMovies();
+                List<Movie> movies = this.user.getFavoriteMovies();
+                List<Movie> moviesFriend = this.currentFriend.getFavoriteMovies();
 
                 if (!movies.isEmpty() && !moviesFriend.isEmpty()) {
                     movieMatches = movies.stream().filter(moviesFriend::contains)
-                            .collect(Collectors.toSet());
+                            .collect(Collectors.toList());
                 }
             }
         }

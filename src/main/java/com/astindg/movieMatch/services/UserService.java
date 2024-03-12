@@ -84,4 +84,9 @@ public class UserService {
     public Optional<User> findById(Integer id) {
         return this.userRepository.findById(id);
     }
+
+    public void deleteFavoriteMovies(User user, Movie movie) {
+        user.getFavoriteMovies().remove(movie);
+        this.userRepository.deleteFavoriteMovie(user.getId(), movie.getId());
+    }
 }

@@ -27,9 +27,14 @@ public record KeyboardsKeeper(Environment env) {
         ));
 
         List<List<String>> movieKeyboardTemplate = new ArrayList<>(List.of(
-                List.of(RETURN_BUTTON_KEY, "my"),
+                List.of(RETURN_BUTTON_KEY, "lists"),
                 List.of("matches_friend"),
                 List.of("start_match")
+        ));
+
+        List<List<String>> movieListsTemplate = new ArrayList<>(List.of(
+                List.of(RETURN_BUTTON_KEY),
+                List.of("favorites", "disliked")
         ));
 
         List<List<String>> movieNewMatchKeyboardTemplate = new ArrayList<>(List.of(
@@ -49,6 +54,7 @@ public record KeyboardsKeeper(Environment env) {
         KEYBOARDS_TEMPLATES.put("initial", initialKeyboardTemplate);
         KEYBOARDS_TEMPLATES.put("friend", friendKeyboardTemplate);
         KEYBOARDS_TEMPLATES.put("movie", movieKeyboardTemplate);
+        KEYBOARDS_TEMPLATES.put("movie.lists", movieListsTemplate);
         KEYBOARDS_TEMPLATES.put("new_match", movieNewMatchKeyboardTemplate);
         KEYBOARDS_TEMPLATES.put("match", matchKeyboardTemplate);
         KEYBOARDS_TEMPLATES.put("settings", settingsKeyboardTemplate);

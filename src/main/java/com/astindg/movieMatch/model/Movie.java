@@ -1,9 +1,10 @@
 package com.astindg.movieMatch.model;
 
 import com.astindg.movieMatch.util.GenreSet;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 
@@ -12,8 +13,8 @@ import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.StringJoiner;
+
 
 @Data
 @NoArgsConstructor

@@ -3,6 +3,7 @@ package com.astindg.movieMatch.telegram;
 import com.astindg.movieMatch.model.Message;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
@@ -52,6 +53,14 @@ public class MessageTranslator {
         }
 
         return sendPhoto;
+    }
+
+    protected static EditMessageReplyMarkup getEditMessageMarkup(Message message){
+        EditMessageReplyMarkup editMarkup = new EditMessageReplyMarkup();
+        InlineKeyboardMarkup buttons = convertButtons(message.getButtons());
+        editMarkup.setReplyMarkup(buttons);
+        editMarkup.setMessageId(message.getEditMessageId());
+        return editMarkup;
     }
 
     private static InlineKeyboardMarkup convertButtons(List<Map<String, String>> buttons){
