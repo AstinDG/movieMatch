@@ -4,11 +4,9 @@ import com.astindg.movieMatch.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Component
 public class MessageBuilder {
@@ -23,12 +21,14 @@ public class MessageBuilder {
     private static final String MSG_FRIEND_SET_ERROR = "friend.error.set_friend";
     private static final String MSG_MOVIE = "movie";
     private static final String MSG_MOVIE_FAVORITE_HEADER = "movie.favorite_header";
+    private static final String MSG_MOVIE_DISLIKED_HEADER = "movie.disliked_header";
+    private static final int LIST_MOVIES_BUTTONS_LENGTH = 4;
     private static final String MSG_MOVIE_FAVORITE = "movie.favorite";
-    private static final String MSG_MOVIE_FAVORITE_TEMPLATE = "%s\n\n%s";
     private static final String MSG_MOVIE_NEW_MATCH = "movie.notify_new_match";
     private static final String MSG_MOVIE_MATCH_NOT_STARTED_ERROR = "movie.error.null.list";
     private static final String MSG_MOVIE_EMPTY_ERROR = "movie.error.empty.list";
     private static final String MSG_MOVIE_FAVORITE_EMPTY_ERROR = "movie.error.empty.favorite";
+    private static final String MSG_MOVIE_DISLIKED_EMPTY_ERROR = "movie.error.empty.disliked";
     private static final String MSG_FRIEND_NOT_SELECTED_ERROR = "movie.error.friend_not_selected";
     private static final String MSG_MATCHES_FRIEND_EMPTY_ERROR = "movie.error.matches_friend_empty";
     private static final String MSG_SETTINGS_LANG = "settings.select_language";
@@ -37,6 +37,7 @@ public class MessageBuilder {
     private static final String KBD_INITIAL = "initial";
     private static final String KBD_FRIEND = "friend";
     private static final String KBD_MOVIE = "movie";
+    private static final String KBD_MOVIE_LISTS = "movie.lists";
     private static final String KBD_NEW_MATCH = "new_match";
     private static final String KBD_MATCH = "match";
     private static final String KBD_SETTINGS = "settings";
@@ -68,45 +69,75 @@ public class MessageBuilder {
     }
 
     protected MessageBuilder withFavoritesMoviesText(Session session) {
-        if (session.getUser().getFavoriteMovies() == null || session.getUser().getFavoriteMovies().isEmpty()) {
-
-            this.messageText = messagesKeeper.getMessage(MSG_MOVIE_FAVORITE_EMPTY_ERROR, this.language);
-            return this;
-        }
-        Set<Movie> favoriteMovies = session.getUser().getFavoriteMovies();
-        String headerTemplate = messagesKeeper.getMessage(MSG_MOVIE_FAVORITE_HEADER, this.language);
-        this.messageText = String.format(headerTemplate, favoriteMovies.size());
-
+        this.messageText = getMovieListHeaderText(MSG_MOVIE_FAVORITE_HEADER, MSG_MOVIE_FAVORITE_EMPTY_ERROR,
+                session.getUser().getFavoriteMovies()
+        );
         return this;
     }
 
-    protected MessageBuilder withFavoriteMoviesButtons(Session session){
-        Set<Movie> favoriteMovies = session.getUser().getFavoriteMovies();
-        if(favoriteMovies == null || favoriteMovies.isEmpty()){
-            return this;
-        }
+    protected MessageBuilder withDislikedMoviesText(Session session) {
+        this.messageText = getMovieListHeaderText(MSG_MOVIE_DISLIKED_HEADER, MSG_MOVIE_DISLIKED_EMPTY_ERROR,
+                session.getUser().getDislikedMovies()
+        );
+        return this;
+    }
 
+    private String getMovieListHeaderText(String headerKey, String listEmptyKey, List<Movie> list) {
+        if (list == null || list.isEmpty()) {
+            return messagesKeeper.getMessage(listEmptyKey, this.language);
+        }
+        String headerTemplate = messagesKeeper.getMessage(headerKey, this.language);
+        return String.format(headerTemplate, list.size());
+    }
+
+    protected MessageBuilder withFavoriteMoviesButtons(Session session, Integer start) {
+        this.buttons = getMovieButtons(start, "favorite",
+                session.getUser().getFavoriteMovies());
+        return this;
+    }
+
+    protected MessageBuilder withDislikedMoviesButtons(Session session, Integer start) {
+        this.buttons = getMovieButtons(start, "disliked",
+                session.getUser().getDislikedMovies());
+        return this;
+    }
+
+    private List<Map<String, String>> getMovieButtons(int start, String type, List<Movie> movieList) {
+        String callbackTemplate = "show_movie_%s_list_%d";
         List<Map<String, String>> buttons = new ArrayList<>();
         String movieButtonTemplate = messagesKeeper.getMessage(MSG_MOVIE_FAVORITE, this.language);
-        int counter = 1;
-        for(Movie movie : favoriteMovies){
+
+        int end = start + LIST_MOVIES_BUTTONS_LENGTH;
+        end = Math.min(end, movieList.size()); //check index out of Bounds
+
+
+        for (int index = start; index < end; index++) {
+            Movie movie = movieList.get(index);
             MovieDetails details = movie.getMovieDetails(this.language);
-            String text = String.format(movieButtonTemplate, counter,
+            String text = String.format(movieButtonTemplate, index + 1,
                     details.getName(), details.getGenre(), movie.getYearOfRelease());
-            String callback = String.format("show_movie_%d", movie.getId());
+
+            String callback = String.format("show_movie_%s_%d", type, movie.getId());
 
             buttons.add(Map.of(text, callback));
-            counter++;
         }
 
-        this.buttons = buttons;
-        return this;
+        if (start > 0) {
+            String callbackPrev = String.format(callbackTemplate, type, start - LIST_MOVIES_BUTTONS_LENGTH);
+            buttons.add(Map.of("Prev", callbackPrev));
+        }
+        if (end < movieList.size()) {
+            String callbackNext = String.format(callbackTemplate, type, start + LIST_MOVIES_BUTTONS_LENGTH);
+            buttons.add(Map.of("Next", callbackNext));
+        }
+
+        return (buttons.size() > 0) ? buttons : null;
     }
 
     protected MessageBuilder withMovieMatchesWithFriend(Session session) {
-        Set<Movie> movies = session.getMoviesMatchWithCurrentFriend();
+        List<Movie> movies = session.getMoviesMatchWithCurrentFriend();
 
-        if(movies == null || movies.isEmpty()){
+        if (movies == null || movies.isEmpty()) {
             String template = messagesKeeper.getMessage(MSG_MATCHES_FRIEND_EMPTY_ERROR, this.language);
             this.messageText = String.format(template, session.getCurrentFriend().getName());
             return this;
@@ -116,7 +147,7 @@ public class MessageBuilder {
         return this;
     }
 
-    private String getMovieListText(Set<Movie> movies){
+    private String getMovieListText(List<Movie> movies) {
         StringBuilder moviesSB = new StringBuilder();
         int number = 1;
 
@@ -193,7 +224,7 @@ public class MessageBuilder {
         return this;
     }
 
-    public MessageBuilder withEnterInviteCodeText(){
+    public MessageBuilder withEnterInviteCodeText() {
         this.messageText = messagesKeeper.getMessage(MSG_FRIEND_INVITE_BTN, this.language);
         return this;
     }
@@ -304,6 +335,11 @@ public class MessageBuilder {
 
     protected MessageBuilder withRandomMovie(Session session) {
         Movie movie = session.getLastMovieShown();
+
+        return withMovieMessage(movie);
+    }
+
+    protected MessageBuilder withMovieMessage(Movie movie) {
         String template = messagesKeeper.getMessage(MSG_MOVIE, this.language);
         MovieDetails movieDetails = movie.getMovieDetails(language);
 
@@ -319,7 +355,27 @@ public class MessageBuilder {
         return this;
     }
 
-    protected MessageBuilder withMovieMatchNotStarted(){
+    public MessageBuilder withRemoveFromFavoriteButton(int movieId) {
+        this.buttons = getRemoveFromListButton(movieId, "Remove from favorite", "remove_movie_favorite_%d");
+        return this;
+    }
+
+    public MessageBuilder withRemoveFromDislikedButton(int movieId) {
+        this.buttons = getRemoveFromListButton(movieId, "Remove from disliked", "remove_movie_disliked_%d");
+        return this;
+    }
+
+    private List<Map<String, String>> getRemoveFromListButton(int movieId, String message, String callbackTemplate) {
+        List<Map<String, String>> button = new ArrayList<>();
+
+        button.add(
+                Map.of(message, String.format(callbackTemplate, movieId))
+        );
+
+        return button;
+    }
+
+    protected MessageBuilder withMovieMatchNotStarted() {
         this.messageText = messagesKeeper.getMessage(MSG_MOVIE_MATCH_NOT_STARTED_ERROR, this.language);
         return this;
     }
@@ -341,6 +397,11 @@ public class MessageBuilder {
 
     protected MessageBuilder withMovieMenuKeyboard() {
         this.keyboard = keyboardsKeeper.getKeyboard(KBD_MOVIE, this.language);
+        return this;
+    }
+
+    protected MessageBuilder withMovieListsKeyboard() {
+        this.keyboard = keyboardsKeeper.getKeyboard(KBD_MOVIE_LISTS, this.language);
         return this;
     }
 
@@ -379,5 +440,4 @@ public class MessageBuilder {
 
         return message;
     }
-
 }

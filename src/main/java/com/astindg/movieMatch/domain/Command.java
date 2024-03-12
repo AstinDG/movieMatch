@@ -84,10 +84,22 @@ public enum Command {
             return MOVIE_LiKE.getAnswer(session, messageBuilder);
         }
     }, //special
+    MOVIE_LIST {
+        @Override
+        public Message getAnswer(Session session, MessageBuilder messageBuilder) {
+            return messageBuilder.setLanguage(session.getUser().getLanguage()).withSelectOptionText().withMovieListsKeyboard().build();
+        }
+    },
     MOVIE_FAVORITES {
         @Override
         public Message getAnswer(Session session, MessageBuilder messageBuilder) {
-            return messageBuilder.setLanguage(session.getUser().getLanguage()).withFavoritesMoviesText(session).withFavoriteMoviesButtons(session).build();
+            return messageBuilder.setLanguage(session.getUser().getLanguage()).withFavoritesMoviesText(session).withFavoriteMoviesButtons(session, 0).build();
+        }
+    },
+    MOVIE_DISLIKED {
+        @Override
+        public Message getAnswer(Session session, MessageBuilder messageBuilder) {
+            return messageBuilder.setLanguage(session.getUser().getLanguage()).withDislikedMoviesText(session).withDislikedMoviesButtons(session, 0).build();
         }
     },
     MOVIE_MATCHES {

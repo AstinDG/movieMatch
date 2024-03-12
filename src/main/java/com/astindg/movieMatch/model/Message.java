@@ -15,6 +15,8 @@ public class Message {
     private List<Map<String, String>> buttons;
     private List<List<String>> keyboard;
     private File image;
+    private Integer editMessageId;
+    private boolean hasEditButtons;
 
     public Message() {
     }
@@ -37,5 +39,9 @@ public class Message {
 
     public boolean hasImage() {
         return image != null;
+    }
+
+    public boolean hasEditButtons() {
+        return hasEditButtons;
     }
 }

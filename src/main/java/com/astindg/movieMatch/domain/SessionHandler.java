@@ -151,8 +151,8 @@ public class SessionHandler {
         if (friendSessionOp.isEmpty()) {
             return;
         }
-
-        Set<Movie> friendMovies = friendSessionOp.get().getUser().getFavoriteMovies();
+        Session friendSession = friendSessionOp.get();
+        List<Movie> friendMovies = friendSession.getUser().getFavoriteMovies();
 
 
         if (friendMovies.contains(session.getLastMovieShown())) {
@@ -161,13 +161,26 @@ public class SessionHandler {
             session.getMoviesMatchWithCurrentFriend().add(session.getLastMovieShown());
 
             //notify friend if we`re his/her current friend
-            Session friendSession = friendSessionOp.get();
 
-            if (friendSession.getCurrentFriend().equals(session.getUser())) {
+            if (session.getCurrentFriend().equals(friendSession.getCurrentFriend())) {
                 friendSession.setNewMatchMovie(session.getLastMovieShown());
                 friendSession.getMoviesMatchWithCurrentFriend().add(session.getLastMovieShown());
             }
         }
 
+    }
+
+    protected boolean deleteFavoriteMovie(int movieId, Session session){
+        List<Movie> favoriteMovies = session.getUser().getFavoriteMovies();
+        if(favoriteMovies == null || favoriteMovies.isEmpty()){
+            return false;
+        }
+        for(Movie movie : favoriteMovies){
+            if(movie.getId().equals(movieId)){
+                this.userService.deleteFavoriteMovies(session.getUser(), movie);
+                return true;
+            }
+        }
+        return false;
     }
 }

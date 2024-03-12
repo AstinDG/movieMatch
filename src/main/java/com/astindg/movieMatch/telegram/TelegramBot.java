@@ -8,8 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.*;
 
@@ -20,6 +22,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     private final CommandHandler commandHandler;
     private final String botName;
     private final CommandTranslator translator;
+
     @Autowired
     public TelegramBot(String botToken, String botName, CommandHandler commandHandler, CommandTranslator translator) {
         super(botToken);
@@ -72,22 +75,35 @@ public class TelegramBot extends TelegramLongPollingBot {
         } else {
             message = commandHandler.getReply(user, command.get());
         }
-        if (message.hasImage()) {
-            sendImage(chatId, message);
-        } else {
-            sendMessage(chatId, message);
-        }
+        sendMessage(chatId, message);
+
     }
 
     public void sendMessage(Long chatId, Message message) {
-        SendMessage sendMessage = getSendMessage(message);
-        sendMessage.setChatId(chatId);
-        sendApiMethodAsync(sendMessage);
+        if (message.hasImage()) {
+            sendImage(chatId, message);
+        } else if(message.hasEditButtons()){
+            sendEditButtonsMessage(chatId, message);
+        } else {
+            SendMessage sendMessage = getSendMessage(message);
+            sendMessage.setChatId(chatId);
+            sendApiMethodAsync(sendMessage);
+        }
     }
 
     public void sendImage(Long chatId, Message message) {
         SendPhoto sendPhoto = getSendPhoto(message);
         sendPhoto.setChatId(chatId);
         executeAsync(sendPhoto);
+    }
+
+    public void sendEditButtonsMessage(Long chatId, Message message){
+        EditMessageReplyMarkup editMessage = getEditMessageMarkup(message);
+        editMessage.setChatId(chatId);
+        try {
+            executeAsync(editMessage);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
     }
 }

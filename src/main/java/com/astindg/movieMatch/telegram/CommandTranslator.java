@@ -27,7 +27,9 @@ public record CommandTranslator(Environment env) {
     private static final String MOVIE_MENU = "user.keyboard.initial.movie.";
     private static final String LIST_FRIEND = "user.keyboard.friend.list.";
     private static final String REMOVE_FRIEND = "user.keyboard.friend.delete.";
-    private static final String FAVORITES_MOVIES = "user.keyboard.movie.my.";
+    private static final String MOVIE_LISTS = "user.keyboard.movie.lists.";
+    private static final String FAVORITES_MOVIES = "user.keyboard.movie.lists.favorites.";
+    private static final String DISLIKED_MOVIES = "user.keyboard.movie.lists.disliked.";
     private static final String MATCHES_WITH_CURRENT_FRIEND = "user.keyboard.movie.matches_friend.";
     private static final String SETTINGS = "user.keyboard.initial.settings.";
     private static final String SETTINGS_LANGUAGE = "user.keyboard.settings.language.";
@@ -44,7 +46,9 @@ public record CommandTranslator(Environment env) {
         commandMapTemplate.put(MOVIE_MENU, Command.MOVIE_MENU);
         commandMapTemplate.put(LIST_FRIEND, Command.FRIENDS_LIST);
         commandMapTemplate.put(REMOVE_FRIEND, Command.FRIEND_REMOVE);
+        commandMapTemplate.put(MOVIE_LISTS, Command.MOVIE_LIST);
         commandMapTemplate.put(FAVORITES_MOVIES, Command.MOVIE_FAVORITES);
+        commandMapTemplate.put(DISLIKED_MOVIES, Command.MOVIE_DISLIKED);
         commandMapTemplate.put(MATCHES_WITH_CURRENT_FRIEND, Command.MOVIE_MATCHES);
         commandMapTemplate.put(SETTINGS, Command.SETTINGS);
         commandMapTemplate.put(SETTINGS_LANGUAGE, Command.LANGUAGE);
