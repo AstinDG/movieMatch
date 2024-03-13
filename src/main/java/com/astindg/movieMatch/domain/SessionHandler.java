@@ -170,17 +170,17 @@ public class SessionHandler {
 
     }
 
-    protected boolean deleteFavoriteMovie(int movieId, Session session){
+    protected Optional<Movie> deleteFavoriteMovie(int movieId, Session session){
         List<Movie> favoriteMovies = session.getUser().getFavoriteMovies();
         if(favoriteMovies == null || favoriteMovies.isEmpty()){
-            return false;
+            return Optional.empty();
         }
         for(Movie movie : favoriteMovies){
             if(movie.getId().equals(movieId)){
                 this.userService.deleteFavoriteMovies(session.getUser(), movie);
-                return true;
+                return Optional.of(movie);
             }
         }
-        return false;
+        return Optional.empty();
     }
 }

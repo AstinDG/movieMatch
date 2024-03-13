@@ -14,16 +14,22 @@ public class MessageBuilder {
     private static final String MSG_OPTION = "select_option";
     private static final String MSG_FRIEND_INVITE = "friend.invite";
     private static final String MSG_FRIEND_INVITE_BTN = "friend.invite.btn";
+    private static final String MSG_FRIEND_INVITE_INCORRECT_CODE = "friend.invite.incorrect_code";
+    private static final String MSG_FRIEND_INVITE_CODE_NOT_FOUND = "friend.invite.not_found";
+    private static final String MSG_FRIEND_INVITE_ALREADY_IN_LIST = "friend.invite.already_in_list_error";
     private static final String MSG_FRIEND_SELECT = "friend.select";
     private static final String MSG_FRIEND_SELECTED = "friend.selected";
     private static final String MSG_FRIEND_DELETE = "friend.delete";
+    private static final String MSG_FRIEND_DELETE_SUCCESS = "friend.delete.success";
     private static final String MSG_FRIEND_NEW = "friend.new";
     private static final String MSG_FRIEND_SET_ERROR = "friend.error.set_friend";
+    private static final String MSG_FRIEND_DELETE_ERROR = "friend.error.delete_friend";
     private static final String MSG_MOVIE = "movie";
     private static final String MSG_MOVIE_FAVORITE_HEADER = "movie.favorite_header";
     private static final String MSG_MOVIE_DISLIKED_HEADER = "movie.disliked_header";
     private static final int LIST_MOVIES_BUTTONS_LENGTH = 4;
     private static final String MSG_MOVIE_FAVORITE = "movie.favorite";
+    private static final String MSG_MOVIE_DELETED_FROM_FAVORITE_LIST= "movie.favorite.deleted_successfully";
     private static final String MSG_MOVIE_NEW_MATCH = "movie.notify_new_match";
     private static final String MSG_MOVIE_MATCH_NOT_STARTED_ERROR = "movie.error.null.list";
     private static final String MSG_MOVIE_EMPTY_ERROR = "movie.error.empty.list";
@@ -31,8 +37,12 @@ public class MessageBuilder {
     private static final String MSG_MOVIE_DISLIKED_EMPTY_ERROR = "movie.error.empty.disliked";
     private static final String MSG_FRIEND_NOT_SELECTED_ERROR = "movie.error.friend_not_selected";
     private static final String MSG_MATCHES_FRIEND_EMPTY_ERROR = "movie.error.matches_friend_empty";
+    private static final String MSG_NOT_FOUND_IN_FAVORITE_LIST_ERROR = "movie.error.favorite_not_found";
     private static final String MSG_SETTINGS_LANG = "settings.select_language";
+    private static final String MSG_SETTINGS_LANG_ERROR = "settings.select_language.error";
     private static final String MSG_UNKNOWN_COMMAND_ERROR = "error.unknown_command";
+    private static final String MSG_UNKNOWN_CALLBACK_ERROR = "error.unknown_callback";
+    private static final String MSG_TRY_AGAIN_OR_CONTACT_DEVS_PS = "error.try_again_or_contact_devs";
 
     private static final String KBD_INITIAL = "initial";
     private static final String KBD_FRIEND = "friend";
@@ -108,8 +118,7 @@ public class MessageBuilder {
         String movieButtonTemplate = messagesKeeper.getMessage(MSG_MOVIE_FAVORITE, this.language);
 
         int end = start + LIST_MOVIES_BUTTONS_LENGTH;
-        end = Math.min(end, movieList.size()); //check index out of Bounds
-
+        end = Math.min(end, movieList.size()); //check index out of bounds
 
         for (int index = start; index < end; index++) {
             Movie movie = movieList.get(index);
@@ -163,6 +172,17 @@ public class MessageBuilder {
         }
 
         return moviesSB.toString();
+    }
+
+    protected MessageBuilder withMovieDeletedFromFavoriteListText(Movie movie){
+        String template = messagesKeeper.getMessage(MSG_MOVIE_DELETED_FROM_FAVORITE_LIST, this.language);
+        this.messageText = String.format(template, movie.getMovieDetails(this.language).getName());
+        return this;
+    }
+
+    protected MessageBuilder withMovieNotFoundInFavoriteListText() {
+        this.messageText = messagesKeeper.getMessage(MSG_NOT_FOUND_IN_FAVORITE_LIST_ERROR, this.language);
+        return this;
     }
 
     protected MessageBuilder withSelectOptionText() {
@@ -229,6 +249,23 @@ public class MessageBuilder {
         return this;
     }
 
+    public MessageBuilder withIncorrectCodeText() {
+        this.messageText = messagesKeeper.getMessage(MSG_FRIEND_INVITE_INCORRECT_CODE, this.language);
+        return this;
+    }
+
+    public MessageBuilder withFriendNotFoundByCodeText(String enteredCode) {
+        String template = messagesKeeper.getMessage(MSG_FRIEND_INVITE_CODE_NOT_FOUND, this.language);
+        this.messageText = String.format(template, enteredCode);
+        return this;
+    }
+
+    public MessageBuilder withFriendHasAlreadyBeenAddedText(User friend) {
+        String template = messagesKeeper.getMessage(MSG_FRIEND_INVITE_ALREADY_IN_LIST, this.language);
+        this.messageText = String.format(template, friend.getName());
+        return this;
+    }
+
     protected MessageBuilder withSelectFriendText(Session session) {
         if (session.getUser().getFriends() == null || session.getUser().getFriends().isEmpty()) {
             //TODO make separate method
@@ -240,7 +277,14 @@ public class MessageBuilder {
     }
 
     protected MessageBuilder withErrorSelectFriendText() {
-        this.messageText = messagesKeeper.getMessage(MSG_FRIEND_SET_ERROR, this.language);
+        this.messageText = messagesKeeper.getMessage(MSG_FRIEND_SET_ERROR, this.language) +
+                messagesKeeper.getMessage(MSG_TRY_AGAIN_OR_CONTACT_DEVS_PS, this.language);
+        return this;
+    }
+
+    protected MessageBuilder withErrorDeleteFriendText() {
+        this.messageText = messagesKeeper.getMessage(MSG_FRIEND_DELETE_ERROR, this.language) +
+                messagesKeeper.getMessage(MSG_TRY_AGAIN_OR_CONTACT_DEVS_PS, this.language);
         return this;
     }
 
@@ -263,7 +307,6 @@ public class MessageBuilder {
             for (int i = 0; i < session.getUser().getFriends().size(); i++) {
                 User friend = friendList.get(i);
 
-                //TODO make separate method in ButtonsKeeper
                 friends.add(Map.of(friend.getName(), String.format("friend_%d", i)));
             }
             this.buttons = friends;
@@ -272,16 +315,25 @@ public class MessageBuilder {
         return this;
     }
 
-    protected MessageBuilder withFriendRemoveText() {
-        this.messageText = messagesKeeper.getMessage(MSG_FRIEND_DELETE, this.language);
+    protected MessageBuilder withFriendRemoveText(Session session) {
+        if (session.getUser().getFriends() == null || session.getUser().getFriends().isEmpty()) {
+            this.messageText = getMessageNoFriendYet();
+        } else {
+            this.messageText = messagesKeeper.getMessage(MSG_FRIEND_DELETE, this.language);
+        }
+        return this;
+    }
+
+    protected MessageBuilder withFriendRemovedText(User friend) {
+        String template = messagesKeeper.getMessage(MSG_FRIEND_DELETE_SUCCESS, this.language);
+        this.messageText = String.format(template, friend.getName());
         return this;
     }
 
     protected MessageBuilder withFriendRemoveButtons(Session session) {
         List<Map<String, String>> buttons = new ArrayList<>();
-        if (session.getUser().getFriends() == null) {
-            //TODO make separate method in MessageKeeper
-            this.messageText = "You have no friend yet...";
+        if (session.getUser().getFriends() == null || session.getUser().getFriends().isEmpty()) {
+            this.messageText = getMessageNoFriendYet();
         } else {
             int index = 0;
             for (User friend : session.getUser().getFriends()) {
@@ -292,6 +344,11 @@ public class MessageBuilder {
             this.buttons = buttons;
         }
         return this;
+    }
+
+    private String getMessageNoFriendYet(){
+        //TODO make separate method in MessageKeeper
+        return "You have no friend yet...";
     }
 
     protected MessageBuilder withNewMatchMovieMessage(Session session) {
@@ -330,6 +387,11 @@ public class MessageBuilder {
 
     protected MessageBuilder withErrorUnknownCommand() {
         this.messageText = messagesKeeper.getMessage(MSG_UNKNOWN_COMMAND_ERROR, this.language);
+        return this;
+    }
+
+    protected MessageBuilder withErrorUnknownCallback() {
+        this.messageText = messagesKeeper.getMessage(MSG_UNKNOWN_CALLBACK_ERROR, this.language);
         return this;
     }
 
@@ -412,6 +474,11 @@ public class MessageBuilder {
 
     public MessageBuilder withSelectLanguageText() {
         this.messageText = messagesKeeper.getMessage(MSG_SETTINGS_LANG, this.language);
+        return this;
+    }
+
+    public MessageBuilder withSelectingLanguageErrorText() {
+        this.messageText = messagesKeeper.getMessage(MSG_SETTINGS_LANG_ERROR, this.language);
         return this;
     }
 

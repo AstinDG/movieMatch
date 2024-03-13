@@ -92,8 +92,8 @@ public class CommandHandlerImpl implements CommandHandler {
         } else if (callbackData.startsWith("remove_movie_favorite_")) {
             message = deleteFavoriteMovie(user, callbackData);
         } else {
-            //TODO make separate method in MessageBuilder
-            message = new Message("Button temperary does`t work");
+            message = messageBuilder.setLanguage(session.getUser().getLanguage())
+                    .withErrorUnknownCallback().build();
         }
 
         userService.incrementMessageCounter();
@@ -101,17 +101,22 @@ public class CommandHandlerImpl implements CommandHandler {
     }
 
     private Message editButtons(User user, CallbackQuery callback) {
-        Session session = sessionHandler.findSession(user).get();
+        Optional<Session> session = sessionHandler.findSession(user);
+        if (session.isEmpty()) {
+            return getReply(user, Command.INITIAL);
+        }
+        Language usrLang = session.get().getUser().getLanguage();
         int start;
         try {
             start = Integer.parseInt(callback.getData().substring("show_movie_favorite_list_".length()));
         } catch (NumberFormatException ex) {
             //TODO make separate method in MessageBuilder
-            return new Message("cant convert number");
+            return messageBuilder.setLanguage(usrLang).withMovieNotFoundInFavoriteListText().build();
         }
 
-        Message editMessage = messageBuilder.setLanguage(session.getUser().getLanguage())
-                .withFavoriteMoviesButtons(session, start).build();;
+        Message editMessage = messageBuilder.setLanguage(usrLang)
+                .withFavoriteMoviesButtons(session.get(), start).build();
+
         editMessage.setEditMessageId(callback.getMessage().getMessageId());
         editMessage.setHasEditButtons(true);
 
@@ -123,18 +128,18 @@ public class CommandHandlerImpl implements CommandHandler {
         if (session.isEmpty()) {
             return getReply(user, Command.INITIAL);
         }
+        Language usrLang = session.get().getUser().getLanguage();
         int movieId;
         try {
             movieId = Integer.parseInt(callbackQuery.substring("remove_movie_favorite_".length()));
         } catch (NumberFormatException ex) {
-            //TODO make separate method in MessageBuilder
-            return new Message("cant find a movie with this id");
+            return messageBuilder.setLanguage(usrLang).withMovieNotFoundInFavoriteListText().build();
         }
-        boolean isDeleted = this.sessionHandler.deleteFavoriteMovie(movieId, session.get());
-        if (isDeleted) {
-            return new Message("Movie was deleted from favorite successfully");
+        Optional<Movie> deletedMovie = this.sessionHandler.deleteFavoriteMovie(movieId, session.get());
+        if (deletedMovie.isPresent()) {
+            return messageBuilder.setLanguage(usrLang).withMovieDeletedFromFavoriteListText(deletedMovie.get()).build();
         } else {
-            return new Message("Movie not found");
+            return messageBuilder.setLanguage(usrLang).withMovieNotFoundInFavoriteListText().build();
         }
     }
 
@@ -143,21 +148,21 @@ public class CommandHandlerImpl implements CommandHandler {
         if (session.isEmpty()) {
             return getReply(user, Command.INITIAL);
         }
+        Language usrLang = session.get().getUser().getLanguage();
         int movieId;
         try {
             movieId = Integer.parseInt(callbackQuery.substring("show_movie_favorite_".length()));
         } catch (NumberFormatException ex) {
-            //TODO make separate method in MessageBuilder
-            return new Message("cant find a movie with this id");
+            return messageBuilder.setLanguage(usrLang).withMovieNotFoundInFavoriteListText().build();
         }
 
         for (Movie movie : session.get().getUser().getFavoriteMovies()) {
             if (movie.getId().equals(movieId)) {
-                return messageBuilder.setLanguage(session.get().getUser().getLanguage()).withMovieMessage(movie).withRemoveFromFavoriteButton(movieId).build();
+                return messageBuilder.setLanguage(usrLang).withMovieMessage(movie).withRemoveFromFavoriteButton(movieId).build();
             }
         }
 
-        return new Message("Movie not found in favorite list");
+        return messageBuilder.setLanguage(usrLang).withMovieNotFoundInFavoriteListText().build();
     }
 
     private Message addFriendByCode(Session session, String code) {
@@ -167,16 +172,16 @@ public class CommandHandlerImpl implements CommandHandler {
         try {
             Long.parseLong(code);
         } catch (NumberFormatException ex) {
-            return new Message("Incorrect code");
+            return messageBuilder.setLanguage(session.getUser().getLanguage()).withIncorrectCodeText().build();
         }
         // the code is not equal to the user's own code and has the correct length
         if (!session.isCorrectLengthCode(code.length()) || code.equals(session.getInviteCode())) {
-            return new Message("Incorrect code");
+            return messageBuilder.setLanguage(session.getUser().getLanguage()).withIncorrectCodeText().build();
         }
 
         Optional<Session> sessionFriend = sessionHandler.findSessionFriendByCode(code);
         if (sessionFriend.isEmpty()) {
-            return new Message("Friend not found by code " + code);
+            return messageBuilder.setLanguage(session.getUser().getLanguage()).withFriendNotFoundByCodeText(code).build();
         }
 
         User user = session.getUser();
@@ -184,7 +189,7 @@ public class CommandHandlerImpl implements CommandHandler {
         if (user.getFriends() != null) {
             for (User f : user.getFriends()) {
                 if (f.equals(friend)) {
-                    return new Message(String.format("%s is your friend already", friend.getName()));
+                    return messageBuilder.setLanguage(user.getLanguage()).withFriendHasAlreadyBeenAddedText(friend).build();
                 }
             }
         } else {
@@ -249,22 +254,19 @@ public class CommandHandlerImpl implements CommandHandler {
         try {
             index = Integer.parseInt(callBackQuery.substring("friend_delete_".length()));
         } catch (NumberFormatException ex) {
-            //TODO make separate method in MessageBuilder
-            return new Message("Something went wrong til deleting a friend");
+            return messageBuilder.setLanguage(user.getLanguage()).withErrorDeleteFriendText().build();
         }
 
         Session sessionUser = sessionHandler.getUserSession(user);
         Optional<User> friend = sessionUser.getFriendByIndex(index);
         if (friend.isEmpty()) {
-            //TODO make separate method in MessageBuilder
-            return new Message("Friend not found!");
+            return messageBuilder.setLanguage(user.getLanguage()).withErrorDeleteFriendText().build();
         }
 
         user.getFriends().remove(friend.get());
         friend.get().getFriends().remove(user);
 
-        //TODO make separate method in MessageBuilder
-        return new Message(String.format("Friend %s was deleted successfully", friend.get().getName()));
+        return messageBuilder.setLanguage(user.getLanguage()).withFriendRemovedText(friend.get()).build();
     }
 
     private Message setLanguage(User user, String callBackQuery) {
@@ -280,8 +282,7 @@ public class CommandHandlerImpl implements CommandHandler {
             language = Language.valueOf(callBackQuery.substring("set_language_".length()));
         } catch (IllegalArgumentException exception) {
             exception.printStackTrace();
-            //TODO make separate method in MessageBuilder
-            return new Message("Unknown language!");
+            return messageBuilder.setLanguage(user.getLanguage()).withSelectingLanguageErrorText().build();
         }
 
         user.setLanguage(language);
