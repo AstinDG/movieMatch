@@ -171,13 +171,26 @@ public class SessionHandler {
     }
 
     protected Optional<Movie> deleteFavoriteMovie(int movieId, Session session){
-        List<Movie> favoriteMovies = session.getUser().getFavoriteMovies();
-        if(favoriteMovies == null || favoriteMovies.isEmpty()){
-            return Optional.empty();
+        Optional<Movie> movie = findMovie(movieId, session.getUser().getFavoriteMovies());
+        if(movie.isEmpty()){
+            return movie;
         }
-        for(Movie movie : favoriteMovies){
+        this.userService.deleteFavoriteMovies(session.getUser(), movie.get());
+        return movie;
+    }
+
+    protected Optional<Movie> deleteDislikedMovie(int movieId, Session session) {
+        Optional<Movie> movie = findMovie(movieId, session.getUser().getDislikedMovies());
+        if(movie.isEmpty()){
+            return movie;
+        }
+        this.userService.deleteDislikedMovie(session.getUser(), movie.get());
+        return movie;
+    }
+
+    private Optional<Movie> findMovie(int movieId, List<Movie> list){
+        for(Movie movie : list){
             if(movie.getId().equals(movieId)){
-                this.userService.deleteFavoriteMovies(session.getUser(), movie);
                 return Optional.of(movie);
             }
         }

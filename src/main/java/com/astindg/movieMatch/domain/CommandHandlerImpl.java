@@ -85,12 +85,12 @@ public class CommandHandlerImpl implements CommandHandler {
             message = setFriend(user, callbackData);
         } else if (callbackData.startsWith("set_language_")) {
             message = setLanguage(user, callbackData);
-        } else if(callbackData.startsWith("show_movie_favorite_list_")){
+        } else if (callbackData.startsWith("show_movie_favorite_list_")) {
             message = editButtons(user, callbackQuery);
-        } else if (callbackData.startsWith("show_movie_favorite_")) {
-            message = showFavoriteMovie(user, callbackData);
-        } else if (callbackData.startsWith("remove_movie_favorite_")) {
-            message = deleteFavoriteMovie(user, callbackData);
+        } else if (callbackData.startsWith("show_movie_")) {
+            message = showMovieWithRemoveButton(user, callbackData);
+        } else if (callbackData.startsWith("remove_movie_")) {
+            message = deleteMovie(user, callbackData);
         } else {
             message = messageBuilder.setLanguage(session.getUser().getLanguage())
                     .withErrorUnknownCallback().build();
@@ -110,7 +110,6 @@ public class CommandHandlerImpl implements CommandHandler {
         try {
             start = Integer.parseInt(callback.getData().substring("show_movie_favorite_list_".length()));
         } catch (NumberFormatException ex) {
-            //TODO make separate method in MessageBuilder
             return messageBuilder.setLanguage(usrLang).withMovieNotFoundInFavoriteListText().build();
         }
 
@@ -123,46 +122,86 @@ public class CommandHandlerImpl implements CommandHandler {
         return editMessage;
     }
 
-    private Message deleteFavoriteMovie(User user, String callbackQuery) {
+    private Message deleteMovie(User user, String callbackData) {
+        String[] data = callbackData.split("_");
+        String type = data[2];
+        boolean typeIsFavorite = type.equals("favorite");
+        String movieIdStr = data[3];
+
         Optional<Session> session = sessionHandler.findSession(user);
         if (session.isEmpty()) {
             return getReply(user, Command.INITIAL);
         }
         Language usrLang = session.get().getUser().getLanguage();
+        MessageBuilder builder = messageBuilder.setLanguage(usrLang);
         int movieId;
-        try {
-            movieId = Integer.parseInt(callbackQuery.substring("remove_movie_favorite_".length()));
-        } catch (NumberFormatException ex) {
-            return messageBuilder.setLanguage(usrLang).withMovieNotFoundInFavoriteListText().build();
-        }
-        Optional<Movie> deletedMovie = this.sessionHandler.deleteFavoriteMovie(movieId, session.get());
-        if (deletedMovie.isPresent()) {
-            return messageBuilder.setLanguage(usrLang).withMovieDeletedFromFavoriteListText(deletedMovie.get()).build();
+        if (typeIsFavorite) {
+            try {
+                movieId = Integer.parseInt(movieIdStr);
+            } catch (NumberFormatException ex) {
+                return builder.withMovieNotFoundInFavoriteListText().build();
+            }
+            Optional<Movie> deletedMovie = this.sessionHandler.deleteFavoriteMovie(movieId, session.get());
+            if (deletedMovie.isPresent()) {
+                return builder.withMovieDeletedFromFavoriteListText(deletedMovie.get()).build();
+            } else {
+                return builder.withMovieNotFoundInFavoriteListText().build();
+            }
         } else {
-            return messageBuilder.setLanguage(usrLang).withMovieNotFoundInFavoriteListText().build();
+            try {
+                movieId = Integer.parseInt(movieIdStr);
+            } catch (NumberFormatException ex) {
+                return builder.withMovieNotFoundInDislikedListText().build();
+            }
+            Optional<Movie> deletedMovie = this.sessionHandler.deleteDislikedMovie(movieId, session.get());
+            if(deletedMovie.isPresent()){
+                return builder.withMovieDeletedFromDislikedListText(deletedMovie.get()).build();
+            }
         }
+        return builder.withMovieNotFoundInFavoriteListText().build();
     }
 
-    private Message showFavoriteMovie(User user, String callbackQuery) {
+    private Message showMovieWithRemoveButton(User user, String callbackData) {
+        String[] data = callbackData.split("_");
+        String type = data[2];
+        boolean typeIsFavorite = type.equals("favorite");
+        String movieIdStr = data[3];
+
         Optional<Session> session = sessionHandler.findSession(user);
         if (session.isEmpty()) {
             return getReply(user, Command.INITIAL);
         }
         Language usrLang = session.get().getUser().getLanguage();
+
         int movieId;
         try {
-            movieId = Integer.parseInt(callbackQuery.substring("show_movie_favorite_".length()));
+            movieId = Integer.parseInt(movieIdStr);
         } catch (NumberFormatException ex) {
-            return messageBuilder.setLanguage(usrLang).withMovieNotFoundInFavoriteListText().build();
-        }
-
-        for (Movie movie : session.get().getUser().getFavoriteMovies()) {
-            if (movie.getId().equals(movieId)) {
-                return messageBuilder.setLanguage(usrLang).withMovieMessage(movie).withRemoveFromFavoriteButton(movieId).build();
+            if (typeIsFavorite) {
+                return messageBuilder.setLanguage(usrLang).withMovieNotFoundInFavoriteListText().build();
+            } else {
+                return messageBuilder.setLanguage(usrLang).withMovieNotFoundInDislikedListText().build();
             }
         }
 
-        return messageBuilder.setLanguage(usrLang).withMovieNotFoundInFavoriteListText().build();
+        List<Movie> list = typeIsFavorite ?
+                session.get().getUser().getFavoriteMovies() : session.get().getUser().getDislikedMovies();
+
+        for (Movie movie : list) {
+            if (movie.getId().equals(movieId)) {
+                if (typeIsFavorite) {
+                    return messageBuilder.setLanguage(usrLang).withMovieMessage(movie).withRemoveFromFavoriteButton(movieId).build();
+                } else {
+                    return messageBuilder.setLanguage(usrLang).withMovieMessage(movie).withRemoveFromDislikedButton(movieId).build();
+                }
+            }
+        }
+
+        if (typeIsFavorite) {
+            return messageBuilder.setLanguage(usrLang).withMovieNotFoundInFavoriteListText().build();
+        } else {
+            return messageBuilder.setLanguage(usrLang).withMovieNotFoundInDislikedListText().build();
+        }
     }
 
     private Message addFriendByCode(Session session, String code) {
