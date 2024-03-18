@@ -2,6 +2,7 @@ package com.astindg.movieMatch.model;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.tuple.Pair;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 
 import java.io.File;
@@ -12,7 +13,7 @@ import java.util.Map;
 @Setter
 public class Message {
     private String text;
-    private List<Map<String, String>> buttons;
+    private List<List<Pair<String, String>>> buttons;
     private List<List<String>> keyboard;
     private File image;
     private Integer editMessageId;

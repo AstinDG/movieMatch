@@ -85,7 +85,7 @@ public class CommandHandlerImpl implements CommandHandler {
             message = setFriend(user, callbackData);
         } else if (callbackData.startsWith("set_language_")) {
             message = setLanguage(user, callbackData);
-        } else if (callbackData.startsWith("show_movie_favorite_list_")) {
+        } else if (callbackData.startsWith("show_movie_favorite_list_") || callbackData.startsWith("show_movie_disliked_list_")) {
             message = editButtons(user, callbackQuery);
         } else if (callbackData.startsWith("show_movie_")) {
             message = showMovieWithRemoveButton(user, callbackData);
@@ -101,21 +101,36 @@ public class CommandHandlerImpl implements CommandHandler {
     }
 
     private Message editButtons(User user, CallbackQuery callback) {
+        String[] data = callback.getData().split("_");
+        String type = data[2];
+        boolean typeIsFavorite = type.equals("favorite");
+        String movieStartIndex = data[4];
+
         Optional<Session> session = sessionHandler.findSession(user);
         if (session.isEmpty()) {
             return getReply(user, Command.INITIAL);
         }
         Language usrLang = session.get().getUser().getLanguage();
         int start;
-        try {
-            start = Integer.parseInt(callback.getData().substring("show_movie_favorite_list_".length()));
-        } catch (NumberFormatException ex) {
-            return messageBuilder.setLanguage(usrLang).withMovieNotFoundInFavoriteListText().build();
+
+        Message editMessage;
+        if(typeIsFavorite) {
+            try {
+                start = Integer.parseInt(movieStartIndex);
+            } catch (NumberFormatException ex) {
+                return messageBuilder.setLanguage(usrLang).withMovieNotFoundInFavoriteListText().build();
+            }
+
+            editMessage = messageBuilder.setLanguage(usrLang).withFavoriteMoviesButtons(session.get(), start).build();
+        } else {
+            try {
+                start = Integer.parseInt(movieStartIndex);
+            } catch (NumberFormatException ex) {
+                return messageBuilder.setLanguage(usrLang).withMovieNotFoundInDislikedListText().build();
+            }
+
+            editMessage = messageBuilder.setLanguage(usrLang).withDislikedMoviesButtons(session.get(), start).build();
         }
-
-        Message editMessage = messageBuilder.setLanguage(usrLang)
-                .withFavoriteMoviesButtons(session.get(), start).build();
-
         editMessage.setEditMessageId(callback.getMessage().getMessageId());
         editMessage.setHasEditButtons(true);
 
