@@ -29,6 +29,11 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     void deleteFavoriteMovie(@Param("userId") Integer userId, @Param("movieId") Integer movieId);
 
     @Modifying
+    @Query(value = "delete from Disliked_movies WHERE user_id=:userId AND movie_id=:movieId", nativeQuery = true)
+    @Transactional
+    void deleteDislikedMovie(@Param("userId") Integer userId, @Param("movieId") Integer movieId);
+
+    @Modifying
     @Query(value = "insert into Disliked_movies(user_id, movie_id) VALUES (:userId, :movieId)", nativeQuery = true)
     @Transactional
     void saveDislikedMovie(@Param("userId") Integer userId, @Param("movieId") Integer movieId);

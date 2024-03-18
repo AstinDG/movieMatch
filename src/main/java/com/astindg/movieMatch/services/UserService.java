@@ -89,4 +89,9 @@ public class UserService {
         user.getFavoriteMovies().remove(movie);
         this.userRepository.deleteFavoriteMovie(user.getId(), movie.getId());
     }
+
+    public void deleteDislikedMovie(User user, Movie movie) {
+        user.getDislikedMovies().remove(movie);
+        this.userRepository.deleteDislikedMovie(user.getId(), movie.getId());
+    }
 }

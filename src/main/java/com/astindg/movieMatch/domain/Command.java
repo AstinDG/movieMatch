@@ -36,7 +36,7 @@ public enum Command {
     FRIEND_REMOVE {
         @Override
         public Message getAnswer(Session session, MessageBuilder messageBuilder) {
-            return messageBuilder.setLanguage(session.getUser().getLanguage()).withFriendRemoveText().withFriendRemoveButtons(session).build();
+            return messageBuilder.setLanguage(session.getUser().getLanguage()).withFriendRemoveText(session).withFriendRemoveButtons(session).build();
         }
     },
     MOVIE_MENU {

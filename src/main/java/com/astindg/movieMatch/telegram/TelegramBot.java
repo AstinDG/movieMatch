@@ -63,8 +63,11 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     private void sendReply(Update update) {
         Optional<Command> command = translator.translateCommand(update.getMessage().getText());
+        String firstName = update.getMessage().getFrom().getFirstName();
+        String lastName = update.getMessage().getFrom().getLastName();
+        //name format FirstName_LastName if last name is present
+        String name = (lastName != null) ? firstName + " " + lastName : firstName;
 
-        String name = update.getMessage().getFrom().getFirstName() + " " + update.getMessage().getFrom().getLastName();
         Long chatId = update.getMessage().getChatId();
         User user = new User();
         user.setName(name);
