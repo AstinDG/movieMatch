@@ -29,6 +29,7 @@ public class MessageBuilder {
     private static final String MSG_MOVIE_FAVORITE_HEADER = "movie.favorite_header";
     private static final String MSG_MOVIE_DISLIKED_HEADER = "movie.disliked_header";
     private static final int LIST_MOVIES_BUTTONS_LENGTH = 2;
+    private static final int LIST_FRIENDS_BUTTONS_LENGTH = 2;
     private static final String MSG_MOVIE_FAVORITE = "movie.favorite";
     private static final String MSG_MOVIE_DELETED_FROM_FAVORITE_LIST= "movie.favorite.deleted_successfully";
     private static final String MSG_MOVIE_DELETED_FROM_DISLIKED_LIST= "movie.disliked.deleted_successfully";
@@ -328,18 +329,28 @@ public class MessageBuilder {
         return this;
     }
 
-    protected MessageBuilder withFriendListButtons(Session session) {
-        if (session.getUser().getFriends() != null && !session.getUser().getFriends().isEmpty()) {
-            List<User> friendList = session.getUser().getFriends();
-            List<List<Pair<String, String>>> friends = new ArrayList<>();
+    protected MessageBuilder withFriendListButtons(Session session, Integer start) {
+        List<User> friends = session.getUser().getFriends();
+        List<List<Pair<String, String>>> friendsButtons = new ArrayList<>();
+        String type = "friend";
+        String callbackTemplate = "friend_set_%d";
+        String valueTemplate = "%d. %s";
+        int end = start + LIST_FRIENDS_BUTTONS_LENGTH;
 
-            for (int i = 0; i < session.getUser().getFriends().size(); i++) {
-                User friend = friendList.get(i);
+        for(int index = start; index < end; index++){
+            User friend = friends.get(index);
+            String buttonValue = String.format(valueTemplate, index+1, friend.getName());
+            String buttonCallback = String.format(callbackTemplate, friend.getId());
+            friendsButtons.add(List.of(Pair.of(buttonValue, buttonCallback)));
+        }
 
-                friends.add(List.of(Pair.of(friend.getName(), String.format("friend_%d", i))));
-            }
-            this.buttons = friends;
+        List<Pair<String, String>> buttonsSwitchPage = getSwitchPageButtons(start, end<friends.size(), type);
+        if(!buttonsSwitchPage.isEmpty()){
+            friendsButtons.add(buttonsSwitchPage);
+        }
 
+        if(!friendsButtons.isEmpty()){
+            this.buttons = friendsButtons;
         }
         return this;
     }

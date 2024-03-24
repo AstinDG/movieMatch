@@ -81,12 +81,14 @@ public class CommandHandlerImpl implements CommandHandler {
             message = messageBuilder.setLanguage(session.getUser().getLanguage()).withEnterInviteCodeText().build();
         } else if (callbackData.startsWith("friend_delete_")) {
             message = deleteFriend(user, callbackData);
-        } else if (callbackData.startsWith("friend_")) {
+        } else if (callbackData.startsWith("friend_set_")) {
             message = setFriend(user, callbackData);
         } else if (callbackData.startsWith("set_language_")) {
             message = setLanguage(user, callbackData);
+        } else if (callbackData.startsWith("show_friend_list_")){
+            message = editFriendButtons(user, callbackQuery);
         } else if (callbackData.startsWith("show_movie_favorite_list_") || callbackData.startsWith("show_movie_disliked_list_")) {
-            message = editButtons(user, callbackQuery);
+            message = editMovieButtons(user, callbackQuery);
         } else if (callbackData.startsWith("show_movie_")) {
             message = showMovieWithRemoveButton(user, callbackData);
         } else if (callbackData.startsWith("remove_movie_")) {
@@ -100,7 +102,31 @@ public class CommandHandlerImpl implements CommandHandler {
         return message;
     }
 
-    private Message editButtons(User user, CallbackQuery callback) {
+    private Message editFriendButtons(User user, CallbackQuery callback){
+        String[] data = callback.getData().split("_");
+        String friendStartIndex = data[3];
+
+        Optional<Session> session = sessionHandler.findSession(user);
+        if (session.isEmpty()) {
+            return getReply(user, Command.INITIAL);
+        }
+        Language usrLang = session.get().getUser().getLanguage();
+        int start;
+
+        try {
+            start = Integer.parseInt(friendStartIndex);
+        } catch (NumberFormatException exception) {
+            //TODO make method in messageBuilder
+            return new Message("Error");
+        }
+
+        Message editMessage = messageBuilder.setLanguage(usrLang).withFriendListButtons(session.get(), start).build();
+        editMessage.setEditMessageId(callback.getMessage().getMessageId());
+        editMessage.setHasEditButtons(true);
+        return editMessage;
+    }
+
+    private Message editMovieButtons(User user, CallbackQuery callback) {
         String[] data = callback.getData().split("_");
         String type = data[2];
         boolean typeIsFavorite = type.equals("favorite");
@@ -278,15 +304,15 @@ public class CommandHandlerImpl implements CommandHandler {
             return getReply(user, Command.INITIAL);
         }
 
-        int index;
+        int friendId;
         try {
-            index = Integer.parseInt(callbackQuery.substring("friend_".length()));
+            friendId = Integer.parseInt(callbackQuery.substring("friend_set_".length()));
         } catch (NumberFormatException ex) {
             return messageBuilder.setLanguage(user.getLanguage()).withErrorSelectFriendText().build();
         }
 
         user = session.get().getUser();
-        Optional<User> friend = session.get().selectFriend(index);
+        Optional<User> friend = session.get().selectFriend(friendId);
 
         if (friend.isEmpty()) {
             return messageBuilder.setLanguage(user.getLanguage()).withErrorSelectFriendText().build();
@@ -304,22 +330,18 @@ public class CommandHandlerImpl implements CommandHandler {
             user = sessionHandler.getUserSession(user).getUser();
         }
 
-        int index;
+        int friendId;
         try {
-            index = Integer.parseInt(callBackQuery.substring("friend_delete_".length()));
+            friendId = Integer.parseInt(callBackQuery.substring("friend_delete_".length()));
         } catch (NumberFormatException ex) {
             return messageBuilder.setLanguage(user.getLanguage()).withErrorDeleteFriendText().build();
         }
 
         Session sessionUser = sessionHandler.getUserSession(user);
-        Optional<User> friend = sessionUser.getFriendByIndex(index);
+        Optional<User> friend = sessionUser.deleteFriendById(friendId);
         if (friend.isEmpty()) {
             return messageBuilder.setLanguage(user.getLanguage()).withErrorDeleteFriendText().build();
         }
-
-        user.getFriends().remove(friend.get());
-        friend.get().getFriends().remove(user);
-
         return messageBuilder.setLanguage(user.getLanguage()).withFriendRemovedText(friend.get()).build();
     }
 

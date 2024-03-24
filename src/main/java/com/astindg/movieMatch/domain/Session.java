@@ -77,13 +77,14 @@ public class Session {
         return INVITE_CODE_MAX_AGE_IN_MINUTES;
     }
 
-    protected Optional<User> selectFriend(int index) {
-        if (this.user.getFriends() != null && this.user.getFriends().size() > index) {
-            User friend = this.user.getFriends().get(index);
-            this.currentFriend = friend;
-            this.moviesMatchWithCurrentFriend = getNewMatches();
-
-            return Optional.of(friend);
+    protected Optional<User> selectFriend(int friendId) {
+        if (this.user.getFriends() != null) {
+            Optional<User> friend = this.user.getFriends().stream().filter(f -> f.getId().equals(friendId)).findFirst();
+            if(friend.isPresent()) {
+                this.currentFriend = friend.get();
+                this.moviesMatchWithCurrentFriend = getNewMatches();
+            }
+            return friend;
         } else {
             return Optional.empty();
         }
@@ -125,13 +126,13 @@ public class Session {
         return INVITE_CODE_MAX_AGE_IN_MINUTES > minutesPassed;
     }
 
-    protected Optional<User> getFriendByIndex(int index) {
-        if (this.user.getFriends() != null && this.user.getFriends().size() > index) {
-            User user = this.user.getFriends().get(index);
-            return Optional.of(user);
-        } else {
-            return Optional.empty();
+    protected Optional<User> deleteFriendById(int friendId) {
+        Optional<User> friend = user.getFriends().stream().filter(f -> f.getId().equals(friendId)).findFirst();
+        if(friend.isPresent()){
+            user.getFriends().remove(friend.get());
+            friend.get().getFriends().remove(user);
         }
+        return friend;
     }
 
     protected void releaseLastMovieShown() {
