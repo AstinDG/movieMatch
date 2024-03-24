@@ -120,7 +120,7 @@ public class CommandHandlerImpl implements CommandHandler {
             return new Message("Error");
         }
 
-        Message editMessage = messageBuilder.setLanguage(usrLang).withFriendListButtons(session.get(), start).build();
+        Message editMessage = messageBuilder.setLanguage(usrLang).buttons().friendList(session.get(), start).build();
         editMessage.setEditMessageId(callback.getMessage().getMessageId());
         editMessage.setHasEditButtons(true);
         return editMessage;
@@ -147,7 +147,7 @@ public class CommandHandlerImpl implements CommandHandler {
                 return messageBuilder.setLanguage(usrLang).withMovieNotFoundInFavoriteListText().build();
             }
 
-            editMessage = messageBuilder.setLanguage(usrLang).withFavoriteMoviesButtons(session.get(), start).build();
+            editMessage = messageBuilder.setLanguage(usrLang).buttons().favoriteMovies(session.get(), start).build();
         } else {
             try {
                 start = Integer.parseInt(movieStartIndex);
@@ -155,7 +155,7 @@ public class CommandHandlerImpl implements CommandHandler {
                 return messageBuilder.setLanguage(usrLang).withMovieNotFoundInDislikedListText().build();
             }
 
-            editMessage = messageBuilder.setLanguage(usrLang).withDislikedMoviesButtons(session.get(), start).build();
+            editMessage = messageBuilder.setLanguage(usrLang).buttons().dislikedMovies(session.get(), start).build();
         }
         editMessage.setEditMessageId(callback.getMessage().getMessageId());
         editMessage.setHasEditButtons(true);
@@ -231,9 +231,9 @@ public class CommandHandlerImpl implements CommandHandler {
         for (Movie movie : list) {
             if (movie.getId().equals(movieId)) {
                 if (typeIsFavorite) {
-                    return messageBuilder.setLanguage(usrLang).withMovieMessage(movie).withRemoveFromFavoriteButton(movieId).build();
+                    return messageBuilder.setLanguage(usrLang).withMovieMessage(movie).buttons().removeFromFavorite(movieId).build();
                 } else {
-                    return messageBuilder.setLanguage(usrLang).withMovieMessage(movie).withRemoveFromDislikedButton(movieId).build();
+                    return messageBuilder.setLanguage(usrLang).withMovieMessage(movie).buttons().removeFromDisliked(movieId).build();
                 }
             }
         }

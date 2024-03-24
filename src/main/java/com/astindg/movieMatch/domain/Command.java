@@ -24,13 +24,13 @@ public enum Command {
     FRIEND_ADD {
         @Override
         public Message getAnswer(Session session, MessageBuilder messageBuilder) {
-            return messageBuilder.setLanguage(session.getUser().getLanguage()).withInviteFriendTemplate(session).withEnterInviteCodeButton().build();
+            return messageBuilder.setLanguage(session.getUser().getLanguage()).withInviteFriendTemplate(session).buttons().inviteCode().build();
         }
     }, //special
     FRIEND_SELECT {
         @Override
         public Message getAnswer(Session session, MessageBuilder messageBuilder) {
-            return messageBuilder.setLanguage(session.getUser().getLanguage()).withSelectFriendText(session).withFriendListButtons(session, 0).build();
+            return messageBuilder.setLanguage(session.getUser().getLanguage()).withSelectFriendText(session).buttons().friendList(session, 0).build();
         }
     },
     FRIEND_REMOVE {
@@ -93,13 +93,13 @@ public enum Command {
     MOVIE_FAVORITES {
         @Override
         public Message getAnswer(Session session, MessageBuilder messageBuilder) {
-            return messageBuilder.setLanguage(session.getUser().getLanguage()).withFavoritesMoviesText(session).withFavoriteMoviesButtons(session, 0).build();
+            return messageBuilder.setLanguage(session.getUser().getLanguage()).withFavoritesMoviesText(session).buttons().favoriteMovies(session, 0).build();
         }
     },
     MOVIE_DISLIKED {
         @Override
         public Message getAnswer(Session session, MessageBuilder messageBuilder) {
-            return messageBuilder.setLanguage(session.getUser().getLanguage()).withDislikedMoviesText(session).withDislikedMoviesButtons(session, 0).build();
+            return messageBuilder.setLanguage(session.getUser().getLanguage()).withDislikedMoviesText(session).buttons().dislikedMovies(session, 0).build();
         }
     },
     MOVIE_MATCHES {
@@ -109,7 +109,7 @@ public enum Command {
             if(session.getCurrentFriend() == null){
                 return messageBuilder.setLanguage(language)
                         .withFriendNotSelectedError()
-                        .withFriendListButtons(session, 0)
+                        .buttons().friendList(session, 0)
                         .build();
             }
 
@@ -134,7 +134,7 @@ public enum Command {
     LANGUAGE {
         @Override
         public Message getAnswer(Session session, MessageBuilder messageBuilder) {
-            return messageBuilder.setLanguage(session.getUser().getLanguage()).withSelectLanguageText().withSelectLanguageButtons().build();
+            return messageBuilder.setLanguage(session.getUser().getLanguage()).withSelectLanguageText().buttons().selectLanguage().build();
         }
 
     };

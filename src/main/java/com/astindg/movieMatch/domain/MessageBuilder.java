@@ -31,8 +31,8 @@ public class MessageBuilder {
     private static final int LIST_MOVIES_BUTTONS_LENGTH = 5;
     private static final int LIST_FRIENDS_BUTTONS_LENGTH = 5;
     private static final String MSG_MOVIE_FAVORITE = "movie.favorite";
-    private static final String MSG_MOVIE_DELETED_FROM_FAVORITE_LIST= "movie.favorite.deleted_successfully";
-    private static final String MSG_MOVIE_DELETED_FROM_DISLIKED_LIST= "movie.disliked.deleted_successfully";
+    private static final String MSG_MOVIE_DELETED_FROM_FAVORITE_LIST = "movie.favorite.deleted_successfully";
+    private static final String MSG_MOVIE_DELETED_FROM_DISLIKED_LIST = "movie.disliked.deleted_successfully";
     private static final String MSG_MOVIE_NEW_MATCH = "movie.notify_new_match";
     private static final String MSG_MOVIE_MATCH_NOT_STARTED_ERROR = "movie.error.null.list";
     private static final String MSG_MOVIE_EMPTY_ERROR = "movie.error.empty.list";
@@ -47,14 +47,6 @@ public class MessageBuilder {
     private static final String MSG_UNKNOWN_COMMAND_ERROR = "error.unknown_command";
     private static final String MSG_UNKNOWN_CALLBACK_ERROR = "error.unknown_callback";
     private static final String MSG_TRY_AGAIN_OR_CONTACT_DEVS_PS = "error.try_again_or_contact_devs";
-
-    private static final String BTN_INVITE = "friend.invite_code.";
-    private static final String BTN_LANGUAGE = "settings.select_language.";
-    private static final String BTN_MOVIE_REMOVE_FAVORITE = "movie.remove.favorite.";
-    private static final String BTN_MOVIE_REMOVE_DISLIKED = "movie.remove.disliked.";
-    private static final String BTN_SWITCH_PAGE_PREVIOUS = "switch_page.previous.";
-    private static final String BTN_SWITCH_PAGE_NEXT = "switch_page.next.";
-
 
     private final MessagesKeeper messagesKeeper;
     private final KeyboardsKeeper keyboardsKeeper;
@@ -100,61 +92,6 @@ public class MessageBuilder {
         return String.format(headerTemplate, list.size());
     }
 
-    protected MessageBuilder withFavoriteMoviesButtons(Session session, Integer start) {
-        this.buttons = getMovieButtons(start, "movie_favorite",
-                session.getUser().getFavoriteMovies());
-        return this;
-    }
-
-    protected MessageBuilder withDislikedMoviesButtons(Session session, Integer start) {
-        this.buttons = getMovieButtons(start, "movie_disliked",
-                session.getUser().getDislikedMovies());
-        return this;
-    }
-
-    private List<List<Pair<String, String>>> getMovieButtons(int start, String type, List<Movie> movieList) {
-        List<List<Pair<String, String>>> buttons = new ArrayList<>();
-        String movieButtonTemplate = messagesKeeper.getMessage(MSG_MOVIE_FAVORITE, this.language);
-
-        int end = start + LIST_MOVIES_BUTTONS_LENGTH;
-        end = Math.min(end, movieList.size()); //check index out of bounds
-
-        for (int index = start; index < end; index++) {
-            Movie movie = movieList.get(index);
-            MovieDetails details = movie.getMovieDetails(this.language);
-            String text = String.format(movieButtonTemplate, index + 1,
-                    details.getName(), details.getGenre(), movie.getYearOfRelease());
-
-            String callback = String.format("show_%s_%d", type, movie.getId());
-
-            buttons.add(List.of(Pair.of(text, callback)));
-        }
-        List<Pair<String, String>> buttonsSwitchPage = getSwitchPageButtons(start, end<movieList.size(), type);
-        if(!buttonsSwitchPage.isEmpty()){
-            buttons.add(buttonsSwitchPage);
-        }
-
-        return (buttons.size() > 0) ? buttons : null;
-    }
-
-    private List<Pair<String, String>> getSwitchPageButtons(int startIndex, boolean hasNext, String type){
-        Pair<String, String> translatedButtonNext = buttonsKeeper.getButton(BTN_SWITCH_PAGE_NEXT, this.language).get(0).get(0);
-        Pair<String, String> translatedButtonPrevious = buttonsKeeper.getButton(BTN_SWITCH_PAGE_PREVIOUS, this.language).get(0).get(0);
-        String callbackTemplate = translatedButtonNext.getRight();
-        List<Pair<String, String>> buttonsSwitchPage = new ArrayList<>();
-
-        if(startIndex > 0) {
-            String callbackPrevious = String.format(callbackTemplate, type, startIndex - LIST_MOVIES_BUTTONS_LENGTH);
-            buttonsSwitchPage.add(Pair.of(translatedButtonPrevious.getLeft(), callbackPrevious));
-        }
-        if(hasNext) {
-            String callbackNext = String.format(callbackTemplate, type, startIndex + LIST_MOVIES_BUTTONS_LENGTH);
-            buttonsSwitchPage.add(Pair.of(translatedButtonNext.getLeft(), callbackNext));
-        }
-
-        return buttonsSwitchPage;
-    }
-
     protected MessageBuilder withMovieMatchesWithFriend(Session session) {
         List<Movie> movies = session.getMoviesMatchWithCurrentFriend();
 
@@ -186,13 +123,13 @@ public class MessageBuilder {
         return moviesSB.toString();
     }
 
-    protected MessageBuilder withMovieDeletedFromFavoriteListText(Movie movie){
+    protected MessageBuilder withMovieDeletedFromFavoriteListText(Movie movie) {
         String template = messagesKeeper.getMessage(MSG_MOVIE_DELETED_FROM_FAVORITE_LIST, this.language);
         this.messageText = String.format(template, movie.getMovieDetails(this.language).getName());
         return this;
     }
 
-    protected MessageBuilder withMovieDeletedFromDislikedListText(Movie movie){
+    protected MessageBuilder withMovieDeletedFromDislikedListText(Movie movie) {
         String template = messagesKeeper.getMessage(MSG_MOVIE_DELETED_FROM_DISLIKED_LIST, this.language);
         this.messageText = String.format(template, movie.getMovieDetails(this.language).getName());
         return this;
@@ -203,7 +140,7 @@ public class MessageBuilder {
         return this;
     }
 
-    protected MessageBuilder withMovieNotFoundInDislikedListText(){
+    protected MessageBuilder withMovieNotFoundInDislikedListText() {
         this.messageText = messagesKeeper.getMessage(MSG_NOT_FOUND_IN_DISLIKED_LIST_ERROR, this.language);
         return this;
     }
@@ -250,13 +187,6 @@ public class MessageBuilder {
             String template = messagesKeeper.getMessage(MSG_FRIEND_INVITE, this.language);
             this.messageText = String.format(template, session.getInviteCode(), session.getInviteCodeMaxAge());
         }
-        return this;
-    }
-
-    protected MessageBuilder withEnterInviteCodeButton() {
-
-        this.buttons = buttonsKeeper.getButton(BTN_INVITE, this.language);
-
         return this;
     }
 
@@ -314,33 +244,6 @@ public class MessageBuilder {
         return this;
     }
 
-    protected MessageBuilder withFriendListButtons(Session session, Integer start) {
-        List<User> friends = session.getUser().getFriends();
-        List<List<Pair<String, String>>> friendsButtons = new ArrayList<>();
-        String type = "friend";
-        String callbackTemplate = "friend_set_%d";
-        String valueTemplate = "%d. %s";
-        int end = start + LIST_FRIENDS_BUTTONS_LENGTH;
-        end = Math.min(end, friends.size()); //check index out of bounds
-
-        for(int index = start; index < end; index++){
-            User friend = friends.get(index);
-            String buttonValue = String.format(valueTemplate, index+1, friend.getName());
-            String buttonCallback = String.format(callbackTemplate, friend.getId());
-            friendsButtons.add(List.of(Pair.of(buttonValue, buttonCallback)));
-        }
-
-        List<Pair<String, String>> buttonsSwitchPage = getSwitchPageButtons(start, end<friends.size(), type);
-        if(!buttonsSwitchPage.isEmpty()){
-            friendsButtons.add(buttonsSwitchPage);
-        }
-
-        if(!friendsButtons.isEmpty()){
-            this.buttons = friendsButtons;
-        }
-        return this;
-    }
-
     protected MessageBuilder withFriendRemoveText(Session session) {
         if (session.getUser().getFriends() == null || session.getUser().getFriends().isEmpty()) {
             this.messageText = getMessageNoFriendsYet();
@@ -372,7 +275,7 @@ public class MessageBuilder {
         return this;
     }
 
-    private String getMessageNoFriendsYet(){
+    private String getMessageNoFriendsYet() {
         return messagesKeeper.getMessage(MSG_FRIEND_EMPTY_LIST, this.language);
     }
 
@@ -436,34 +339,6 @@ public class MessageBuilder {
         return this;
     }
 
-    public MessageBuilder withRemoveFromFavoriteButton(int movieId) {
-        Pair<String, String> removeFromFavoriteBtn = buttonsKeeper.getButton(BTN_MOVIE_REMOVE_FAVORITE, this.language).get(0).get(0);
-        String buttonValue = removeFromFavoriteBtn.getLeft();
-        String buttonCallbackTemplate = removeFromFavoriteBtn.getRight();
-
-        this.buttons = getRemoveFromListButton(movieId, buttonValue, buttonCallbackTemplate);
-        return this;
-    }
-
-    public MessageBuilder withRemoveFromDislikedButton(int movieId) {
-        Pair<String, String> removeFromDislikedBtn = buttonsKeeper.getButton(BTN_MOVIE_REMOVE_DISLIKED, this.language).get(0).get(0);
-        String buttonValue = removeFromDislikedBtn.getLeft();
-        String buttonCallbackTemplate = removeFromDislikedBtn.getRight();
-
-        this.buttons = getRemoveFromListButton(movieId, buttonValue, buttonCallbackTemplate);
-        return this;
-    }
-
-    private List<List<Pair<String, String>>> getRemoveFromListButton(int movieId, String message, String callbackTemplate) {
-        List<Pair<String, String>> button = new ArrayList<>();
-
-        button.add(
-                Pair.of(message, String.format(callbackTemplate, movieId))
-        );
-
-        return List.of(button);
-    }
-
     protected MessageBuilder withMovieMatchNotStarted() {
         this.messageText = messagesKeeper.getMessage(MSG_MOVIE_MATCH_NOT_STARTED_ERROR, this.language);
         return this;
@@ -481,11 +356,6 @@ public class MessageBuilder {
 
     public MessageBuilder withSelectingLanguageErrorText() {
         this.messageText = messagesKeeper.getMessage(MSG_SETTINGS_LANG_ERROR, this.language);
-        return this;
-    }
-
-    public MessageBuilder withSelectLanguageButtons() {
-        this.buttons = buttonsKeeper.getButton(BTN_LANGUAGE, this.language);
         return this;
     }
 
@@ -510,11 +380,148 @@ public class MessageBuilder {
         return message;
     }
 
-    public Keyboards keyboards(){
+    public Keyboards keyboards() {
         return new Keyboards();
     }
 
-    public class Keyboards{
+    public Buttons buttons() {
+        return new Buttons();
+    }
+
+    public class Buttons {
+        private static final String BTN_INVITE = "friend.invite_code.";
+        private static final String BTN_LANGUAGE = "settings.select_language.";
+        private static final String BTN_MOVIE_REMOVE_FAVORITE = "movie.remove.favorite.";
+        private static final String BTN_MOVIE_REMOVE_DISLIKED = "movie.remove.disliked.";
+        private static final String BTN_SWITCH_PAGE_PREVIOUS = "switch_page.previous.";
+        private static final String BTN_SWITCH_PAGE_NEXT = "switch_page.next.";
+
+        private Buttons() {
+
+        }
+
+        public MessageBuilder inviteCode() {
+            MessageBuilder.this.buttons = buttonsKeeper.getButton(BTN_INVITE, MessageBuilder.this.language);
+            return MessageBuilder.this;
+        }
+
+        public MessageBuilder friendList(Session session, Integer start) {
+            List<User> friends = session.getUser().getFriends();
+            List<List<Pair<String, String>>> friendsButtons = new ArrayList<>();
+            String type = "friend";
+            String callbackTemplate = "friend_set_%d";
+            String valueTemplate = "%d. %s";
+            int end = start + LIST_FRIENDS_BUTTONS_LENGTH;
+            end = Math.min(end, friends.size()); //check index out of bounds
+
+            for (int index = start; index < end; index++) {
+                User friend = friends.get(index);
+                String buttonValue = String.format(valueTemplate, index + 1, friend.getName());
+                String buttonCallback = String.format(callbackTemplate, friend.getId());
+                friendsButtons.add(List.of(Pair.of(buttonValue, buttonCallback)));
+            }
+
+            List<Pair<String, String>> buttonsSwitchPage = getSwitchPageButtons(start, end < friends.size(), type);
+            if (!buttonsSwitchPage.isEmpty()) {
+                friendsButtons.add(buttonsSwitchPage);
+            }
+
+            if (!friendsButtons.isEmpty()) {
+                MessageBuilder.this.buttons = friendsButtons;
+            }
+            return MessageBuilder.this;
+        }
+
+        public MessageBuilder selectLanguage() {
+            MessageBuilder.this.buttons = buttonsKeeper.getButton(BTN_LANGUAGE, MessageBuilder.this.language);
+            return MessageBuilder.this;
+        }
+
+        public MessageBuilder removeFromFavorite(int movieId) {
+            Pair<String, String> removeFromFavoriteBtn = buttonsKeeper.getButton(BTN_MOVIE_REMOVE_FAVORITE, MessageBuilder.this.language).get(0).get(0);
+            String buttonValue = removeFromFavoriteBtn.getLeft();
+            String buttonCallbackTemplate = removeFromFavoriteBtn.getRight();
+
+            MessageBuilder.this.buttons = getRemoveFromListButton(movieId, buttonValue, buttonCallbackTemplate);
+            return MessageBuilder.this;
+        }
+
+        public MessageBuilder removeFromDisliked(int movieId) {
+            Pair<String, String> removeFromDislikedBtn = buttonsKeeper.getButton(BTN_MOVIE_REMOVE_DISLIKED, MessageBuilder.this.language).get(0).get(0);
+            String buttonValue = removeFromDislikedBtn.getLeft();
+            String buttonCallbackTemplate = removeFromDislikedBtn.getRight();
+
+            MessageBuilder.this.buttons = getRemoveFromListButton(movieId, buttonValue, buttonCallbackTemplate);
+            return MessageBuilder.this;
+        }
+
+        private List<List<Pair<String, String>>> getRemoveFromListButton(int movieId, String message, String callbackTemplate) {
+            List<Pair<String, String>> button = new ArrayList<>();
+
+            button.add(
+                    Pair.of(message, String.format(callbackTemplate, movieId))
+            );
+
+            return List.of(button);
+        }
+
+        public MessageBuilder favoriteMovies(Session session, Integer start) {
+            MessageBuilder.this.buttons = getMovieButtons(start, "movie_favorite",
+                    session.getUser().getFavoriteMovies());
+            return MessageBuilder.this;
+        }
+
+        public MessageBuilder dislikedMovies(Session session, Integer start) {
+            MessageBuilder.this.buttons = getMovieButtons(start, "movie_disliked",
+                    session.getUser().getDislikedMovies());
+            return MessageBuilder.this;
+        }
+
+        private List<List<Pair<String, String>>> getMovieButtons(int start, String type, List<Movie> movieList) {
+            List<List<Pair<String, String>>> buttons = new ArrayList<>();
+            String movieButtonTemplate = messagesKeeper.getMessage(MSG_MOVIE_FAVORITE, MessageBuilder.this.language);
+
+            int end = start + LIST_MOVIES_BUTTONS_LENGTH;
+            end = Math.min(end, movieList.size()); //check index out of bounds
+
+            for (int index = start; index < end; index++) {
+                Movie movie = movieList.get(index);
+                MovieDetails details = movie.getMovieDetails(MessageBuilder.this.language);
+                String text = String.format(movieButtonTemplate, index + 1,
+                        details.getName(), details.getGenre(), movie.getYearOfRelease());
+
+                String callback = String.format("show_%s_%d", type, movie.getId());
+
+                buttons.add(List.of(Pair.of(text, callback)));
+            }
+            List<Pair<String, String>> buttonsSwitchPage = getSwitchPageButtons(start, end < movieList.size(), type);
+            if (!buttonsSwitchPage.isEmpty()) {
+                buttons.add(buttonsSwitchPage);
+            }
+
+            return (buttons.size() > 0) ? buttons : null;
+        }
+
+        private List<Pair<String, String>> getSwitchPageButtons(int startIndex, boolean hasNext, String type) {
+            Pair<String, String> translatedButtonNext = buttonsKeeper.getButton(BTN_SWITCH_PAGE_NEXT, MessageBuilder.this.language).get(0).get(0);
+            Pair<String, String> translatedButtonPrevious = buttonsKeeper.getButton(BTN_SWITCH_PAGE_PREVIOUS, MessageBuilder.this.language).get(0).get(0);
+            String callbackTemplate = translatedButtonNext.getRight();
+            List<Pair<String, String>> buttonsSwitchPage = new ArrayList<>();
+
+            if (startIndex > 0) {
+                String callbackPrevious = String.format(callbackTemplate, type, startIndex - LIST_MOVIES_BUTTONS_LENGTH);
+                buttonsSwitchPage.add(Pair.of(translatedButtonPrevious.getLeft(), callbackPrevious));
+            }
+            if (hasNext) {
+                String callbackNext = String.format(callbackTemplate, type, startIndex + LIST_MOVIES_BUTTONS_LENGTH);
+                buttonsSwitchPage.add(Pair.of(translatedButtonNext.getLeft(), callbackNext));
+            }
+
+            return buttonsSwitchPage;
+        }
+    }
+
+    public class Keyboards {
         private static final String KBD_INITIAL = "initial";
         private static final String KBD_FRIEND = "friend";
         private static final String KBD_MOVIE = "movie";
@@ -531,6 +538,7 @@ public class MessageBuilder {
             MessageBuilder.this.keyboard = keyboardsKeeper.getKeyboard(KBD_INITIAL, MessageBuilder.this.language);
             return MessageBuilder.this;
         }
+
         public MessageBuilder friends() {
             MessageBuilder.this.keyboard = keyboardsKeeper.getKeyboard(KBD_FRIEND, MessageBuilder.this.language);
             return MessageBuilder.this;
