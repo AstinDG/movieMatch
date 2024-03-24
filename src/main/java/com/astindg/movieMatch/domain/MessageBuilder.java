@@ -28,8 +28,8 @@ public class MessageBuilder {
     private static final String MSG_MOVIE = "movie";
     private static final String MSG_MOVIE_FAVORITE_HEADER = "movie.favorite_header";
     private static final String MSG_MOVIE_DISLIKED_HEADER = "movie.disliked_header";
-    private static final int LIST_MOVIES_BUTTONS_LENGTH = 2;
-    private static final int LIST_FRIENDS_BUTTONS_LENGTH = 2;
+    private static final int LIST_MOVIES_BUTTONS_LENGTH = 5;
+    private static final int LIST_FRIENDS_BUTTONS_LENGTH = 5;
     private static final String MSG_MOVIE_FAVORITE = "movie.favorite";
     private static final String MSG_MOVIE_DELETED_FROM_FAVORITE_LIST= "movie.favorite.deleted_successfully";
     private static final String MSG_MOVIE_DELETED_FROM_DISLIKED_LIST= "movie.disliked.deleted_successfully";
@@ -47,14 +47,6 @@ public class MessageBuilder {
     private static final String MSG_UNKNOWN_COMMAND_ERROR = "error.unknown_command";
     private static final String MSG_UNKNOWN_CALLBACK_ERROR = "error.unknown_callback";
     private static final String MSG_TRY_AGAIN_OR_CONTACT_DEVS_PS = "error.try_again_or_contact_devs";
-
-    private static final String KBD_INITIAL = "initial";
-    private static final String KBD_FRIEND = "friend";
-    private static final String KBD_MOVIE = "movie";
-    private static final String KBD_MOVIE_LISTS = "movie.lists";
-    private static final String KBD_NEW_MATCH = "new_match";
-    private static final String KBD_MATCH = "match";
-    private static final String KBD_SETTINGS = "settings";
 
     private static final String BTN_INVITE = "friend.invite_code.";
     private static final String BTN_LANGUAGE = "settings.select_language.";
@@ -253,13 +245,6 @@ public class MessageBuilder {
         return this;
     }
 
-    protected MessageBuilder withInitialKeyboard() {
-
-        this.keyboard = keyboardsKeeper.getKeyboard(KBD_INITIAL, this.language);
-
-        return this;
-    }
-
     protected MessageBuilder withInviteFriendTemplate(Session session) {
         if (session.getInviteCode() != null) {
             String template = messagesKeeper.getMessage(MSG_FRIEND_INVITE, this.language);
@@ -336,6 +321,7 @@ public class MessageBuilder {
         String callbackTemplate = "friend_set_%d";
         String valueTemplate = "%d. %s";
         int end = start + LIST_FRIENDS_BUTTONS_LENGTH;
+        end = Math.min(end, friends.size()); //check index out of bounds
 
         for(int index = start; index < end; index++){
             User friend = friends.get(index);
@@ -398,11 +384,6 @@ public class MessageBuilder {
         String template = messagesKeeper.getMessage(MSG_MOVIE_NEW_MATCH, this.language);
 
         this.messageText = String.format(template, friend.getName(), movieName);
-        return this;
-    }
-
-    protected MessageBuilder withNewMatchKeyBoard() {
-        this.keyboard = keyboardsKeeper.getKeyboard(KBD_NEW_MATCH, this.language);
         return this;
     }
 
@@ -493,31 +474,6 @@ public class MessageBuilder {
         return this;
     }
 
-    protected MessageBuilder withMovieMatchKeyboard() {
-        this.keyboard = keyboardsKeeper.getKeyboard(KBD_MATCH, this.language);
-        return this;
-    }
-
-    protected MessageBuilder withFriendMenuKeyboard() {
-        this.keyboard = keyboardsKeeper.getKeyboard(KBD_FRIEND, this.language);
-        return this;
-    }
-
-    protected MessageBuilder withMovieMenuKeyboard() {
-        this.keyboard = keyboardsKeeper.getKeyboard(KBD_MOVIE, this.language);
-        return this;
-    }
-
-    protected MessageBuilder withMovieListsKeyboard() {
-        this.keyboard = keyboardsKeeper.getKeyboard(KBD_MOVIE_LISTS, this.language);
-        return this;
-    }
-
-    protected MessageBuilder withSettingsKeyboard() {
-        this.keyboard = keyboardsKeeper.getKeyboard(KBD_SETTINGS, this.language);
-        return this;
-    }
-
     public MessageBuilder withSelectLanguageText() {
         this.messageText = messagesKeeper.getMessage(MSG_SETTINGS_LANG, this.language);
         return this;
@@ -552,5 +508,57 @@ public class MessageBuilder {
         this.language = null;
 
         return message;
+    }
+
+    public Keyboards keyboards(){
+        return new Keyboards();
+    }
+
+    public class Keyboards{
+        private static final String KBD_INITIAL = "initial";
+        private static final String KBD_FRIEND = "friend";
+        private static final String KBD_MOVIE = "movie";
+        private static final String KBD_MOVIE_LISTS = "movie.lists";
+        private static final String KBD_NEW_MATCH = "new_match";
+        private static final String KBD_MATCH = "match";
+        private static final String KBD_SETTINGS = "settings";
+
+        private Keyboards() {
+
+        }
+
+        public MessageBuilder initial() {
+            MessageBuilder.this.keyboard = keyboardsKeeper.getKeyboard(KBD_INITIAL, MessageBuilder.this.language);
+            return MessageBuilder.this;
+        }
+        public MessageBuilder friends() {
+            MessageBuilder.this.keyboard = keyboardsKeeper.getKeyboard(KBD_FRIEND, MessageBuilder.this.language);
+            return MessageBuilder.this;
+        }
+
+        public MessageBuilder movie() {
+            MessageBuilder.this.keyboard = keyboardsKeeper.getKeyboard(KBD_MOVIE, MessageBuilder.this.language);
+            return MessageBuilder.this;
+        }
+
+        public MessageBuilder movieLists() {
+            MessageBuilder.this.keyboard = keyboardsKeeper.getKeyboard(KBD_MOVIE_LISTS, MessageBuilder.this.language);
+            return MessageBuilder.this;
+        }
+
+        public MessageBuilder newMatch() {
+            MessageBuilder.this.keyboard = keyboardsKeeper.getKeyboard(KBD_NEW_MATCH, MessageBuilder.this.language);
+            return MessageBuilder.this;
+        }
+
+        public MessageBuilder movieMatch() {
+            MessageBuilder.this.keyboard = keyboardsKeeper.getKeyboard(KBD_MATCH, MessageBuilder.this.language);
+            return MessageBuilder.this;
+        }
+
+        protected MessageBuilder settings() {
+            MessageBuilder.this.keyboard = keyboardsKeeper.getKeyboard(KBD_SETTINGS, MessageBuilder.this.language);
+            return MessageBuilder.this;
+        }
     }
 }

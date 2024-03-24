@@ -61,7 +61,7 @@ public class CommandHandlerImpl implements CommandHandler {
         Message message;
 
         if (!session.isLookingForFriend()) {
-            message = messageBuilder.setLanguage(session.getUser().getLanguage()).withErrorUnknownCommand().withInitialKeyboard().build();
+            message = messageBuilder.setLanguage(session.getUser().getLanguage()).withErrorUnknownCommand().keyboards().initial().build();
         } else {
             message = addFriendByCode(session, text);
         }
@@ -294,7 +294,7 @@ public class CommandHandlerImpl implements CommandHandler {
 
         return messageBuilder.setLanguage(user.getLanguage())
                 .withNotifyNewFriendText(sessionFriend.get()).
-                withFriendMenuKeyboard().build();
+                keyboards().friends().build();
 
     }
 
@@ -320,7 +320,7 @@ public class CommandHandlerImpl implements CommandHandler {
         return messageBuilder.setLanguage(user.getLanguage())
                 .withFriendSelectedText(session.get())
                 .appendWithInitialMessage(session.get())
-                .withMovieMenuKeyboard().build();
+                .keyboards().movie().build();
     }
 
     private Message deleteFriend(User user, String callBackQuery) {

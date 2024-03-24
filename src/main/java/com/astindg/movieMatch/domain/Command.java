@@ -6,19 +6,19 @@ import com.astindg.movieMatch.model.Message;
 public enum Command {
     INITIAL {
         public Message getAnswer(Session session, MessageBuilder messageBuilder) {
-            return messageBuilder.setLanguage(session.getUser().getLanguage()).withInitialTemplate(session).withInitialKeyboard().build();
+            return messageBuilder.setLanguage(session.getUser().getLanguage()).withInitialTemplate(session).keyboards().initial().build();
         }
     },
     FRIENDS_MENU {
         @Override
         public Message getAnswer(Session session, MessageBuilder messageBuilder) {
-            return messageBuilder.setLanguage(session.getUser().getLanguage()).withSelectOptionText().withFriendMenuKeyboard().build();
+            return messageBuilder.setLanguage(session.getUser().getLanguage()).withSelectOptionText().keyboards().friends().build();
         }
     },
     FRIENDS_LIST {
         @Override
         public Message getAnswer(Session session, MessageBuilder messageBuilder) {
-            return messageBuilder.setLanguage(session.getUser().getLanguage()).withFriendListText(session).withFriendMenuKeyboard().build();
+            return messageBuilder.setLanguage(session.getUser().getLanguage()).withFriendListText(session).keyboards().friends().build();
         }
     },
     FRIEND_ADD {
@@ -42,7 +42,7 @@ public enum Command {
     MOVIE_MENU {
         @Override
         public Message getAnswer(Session session, MessageBuilder messageBuilder) {
-            return messageBuilder.setLanguage(session.getUser().getLanguage()).withSelectOptionText().withMovieMenuKeyboard().build();
+            return messageBuilder.setLanguage(session.getUser().getLanguage()).withSelectOptionText().keyboards().movie().build();
         }
     },
     MOVIE_MATCH {
@@ -56,9 +56,9 @@ public enum Command {
 
                 return message;
             } else if (session.getMovieList() == null || session.getLastMovieShown() == null) {
-                return messageBuilder.setLanguage(language).withNoMoviesText().withMovieMatchKeyboard().build();
+                return messageBuilder.setLanguage(language).withNoMoviesText().keyboards().movieMatch().build();
             } else {
-                return messageBuilder.setLanguage(language).withRandomMovie(session).withMovieMatchKeyboard().build();
+                return messageBuilder.setLanguage(language).withRandomMovie(session).keyboards().movieMatch().build();
             }
         }
     }, //special
@@ -68,13 +68,13 @@ public enum Command {
             Language language = session.getUser().getLanguage();
 
             if (session.getHasNewMatches()) {
-                return messageBuilder.setLanguage(language).withNewMatchMovieMessage(session).withNewMatchKeyBoard().build();
+                return messageBuilder.setLanguage(language).withNewMatchMovieMessage(session).keyboards().newMatch().build();
             } else if (session.getLastMovieShown() != null) {
-                return messageBuilder.setLanguage(language).withRandomMovie(session).withMovieMatchKeyboard().build();
+                return messageBuilder.setLanguage(language).withRandomMovie(session).keyboards().movieMatch().build();
             } else if (session.getMovieList() == null) {
-                return messageBuilder.setLanguage(language).withMovieMatchNotStarted().withInitialKeyboard().build();
+                return messageBuilder.setLanguage(language).withMovieMatchNotStarted().keyboards().initial().build();
             } else {
-                return messageBuilder.setLanguage(language).withNoMoviesText().withMovieMatchKeyboard().build();
+                return messageBuilder.setLanguage(language).withNoMoviesText().keyboards().movieMatch().build();
             }
         }
     }, //special
@@ -87,7 +87,7 @@ public enum Command {
     MOVIE_LIST {
         @Override
         public Message getAnswer(Session session, MessageBuilder messageBuilder) {
-            return messageBuilder.setLanguage(session.getUser().getLanguage()).withSelectOptionText().withMovieListsKeyboard().build();
+            return messageBuilder.setLanguage(session.getUser().getLanguage()).withSelectOptionText().keyboards().movieLists().build();
         }
     },
     MOVIE_FAVORITES {
@@ -115,20 +115,20 @@ public enum Command {
 
             return messageBuilder.setLanguage(language)
                     .withMovieMatchesWithFriend(session)
-                    .withMovieMenuKeyboard()
+                    .keyboards().movie()
                     .build();
         }
     },
     RETURN_MAIN_MENU {
         @Override
         public Message getAnswer(Session session, MessageBuilder messageBuilder) {
-            return messageBuilder.setLanguage(session.getUser().getLanguage()).withSelectOptionText().withInitialKeyboard().build();
+            return messageBuilder.setLanguage(session.getUser().getLanguage()).withSelectOptionText().keyboards().initial().build();
         }
     },
     SETTINGS {
         @Override
         public Message getAnswer(Session session, MessageBuilder messageBuilder) {
-            return messageBuilder.setLanguage(session.getUser().getLanguage()).withSelectOptionText().withSettingsKeyboard().build();
+            return messageBuilder.setLanguage(session.getUser().getLanguage()).withSelectOptionText().keyboards().settings().build();
         }
     },
     LANGUAGE {
