@@ -30,7 +30,7 @@ public enum Command {
     FRIEND_SELECT {
         @Override
         public Message getAnswer(Session session, MessageBuilder messageBuilder) {
-            return messageBuilder.setLanguage(session.getUser().getLanguage()).withSelectFriendText(session).withFriendListButtons(session).build();
+            return messageBuilder.setLanguage(session.getUser().getLanguage()).withSelectFriendText(session).withFriendListButtons(session, 0).build();
         }
     },
     FRIEND_REMOVE {
@@ -109,7 +109,7 @@ public enum Command {
             if(session.getCurrentFriend() == null){
                 return messageBuilder.setLanguage(language)
                         .withFriendNotSelectedError()
-                        .withFriendListButtons(session)
+                        .withFriendListButtons(session, 0)
                         .build();
             }
 

@@ -1,6 +1,7 @@
 package com.astindg.movieMatch.domain;
 
 import com.astindg.movieMatch.model.*;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +28,8 @@ public class MessageBuilder {
     private static final String MSG_MOVIE = "movie";
     private static final String MSG_MOVIE_FAVORITE_HEADER = "movie.favorite_header";
     private static final String MSG_MOVIE_DISLIKED_HEADER = "movie.disliked_header";
-    private static final int LIST_MOVIES_BUTTONS_LENGTH = 4;
+    private static final int LIST_MOVIES_BUTTONS_LENGTH = 2;
+    private static final int LIST_FRIENDS_BUTTONS_LENGTH = 2;
     private static final String MSG_MOVIE_FAVORITE = "movie.favorite";
     private static final String MSG_MOVIE_DELETED_FROM_FAVORITE_LIST= "movie.favorite.deleted_successfully";
     private static final String MSG_MOVIE_DELETED_FROM_DISLIKED_LIST= "movie.disliked.deleted_successfully";
@@ -58,6 +60,8 @@ public class MessageBuilder {
     private static final String BTN_LANGUAGE = "settings.select_language.";
     private static final String BTN_MOVIE_REMOVE_FAVORITE = "movie.remove.favorite.";
     private static final String BTN_MOVIE_REMOVE_DISLIKED = "movie.remove.disliked.";
+    private static final String BTN_SWITCH_PAGE_PREVIOUS = "switch_page.previous.";
+    private static final String BTN_SWITCH_PAGE_NEXT = "switch_page.next.";
 
 
     private final MessagesKeeper messagesKeeper;
@@ -67,7 +71,7 @@ public class MessageBuilder {
     private Language language;
     private String messageText;
     private List<List<String>> keyboard;
-    private List<Map<String, String>> buttons;
+    private List<List<Pair<String, String>>> buttons;
     private File messageImage;
 
     @Autowired
@@ -105,20 +109,19 @@ public class MessageBuilder {
     }
 
     protected MessageBuilder withFavoriteMoviesButtons(Session session, Integer start) {
-        this.buttons = getMovieButtons(start, "favorite",
+        this.buttons = getMovieButtons(start, "movie_favorite",
                 session.getUser().getFavoriteMovies());
         return this;
     }
 
     protected MessageBuilder withDislikedMoviesButtons(Session session, Integer start) {
-        this.buttons = getMovieButtons(start, "disliked",
+        this.buttons = getMovieButtons(start, "movie_disliked",
                 session.getUser().getDislikedMovies());
         return this;
     }
 
-    private List<Map<String, String>> getMovieButtons(int start, String type, List<Movie> movieList) {
-        String callbackTemplate = "show_movie_%s_list_%d";
-        List<Map<String, String>> buttons = new ArrayList<>();
+    private List<List<Pair<String, String>>> getMovieButtons(int start, String type, List<Movie> movieList) {
+        List<List<Pair<String, String>>> buttons = new ArrayList<>();
         String movieButtonTemplate = messagesKeeper.getMessage(MSG_MOVIE_FAVORITE, this.language);
 
         int end = start + LIST_MOVIES_BUTTONS_LENGTH;
@@ -130,21 +133,34 @@ public class MessageBuilder {
             String text = String.format(movieButtonTemplate, index + 1,
                     details.getName(), details.getGenre(), movie.getYearOfRelease());
 
-            String callback = String.format("show_movie_%s_%d", type, movie.getId());
+            String callback = String.format("show_%s_%d", type, movie.getId());
 
-            buttons.add(Map.of(text, callback));
+            buttons.add(List.of(Pair.of(text, callback)));
         }
-
-        if (start > 0) {
-            String callbackPrev = String.format(callbackTemplate, type, start - LIST_MOVIES_BUTTONS_LENGTH);
-            buttons.add(Map.of("Prev", callbackPrev));
-        }
-        if (end < movieList.size()) {
-            String callbackNext = String.format(callbackTemplate, type, start + LIST_MOVIES_BUTTONS_LENGTH);
-            buttons.add(Map.of("Next", callbackNext));
+        List<Pair<String, String>> buttonsSwitchPage = getSwitchPageButtons(start, end<movieList.size(), type);
+        if(!buttonsSwitchPage.isEmpty()){
+            buttons.add(buttonsSwitchPage);
         }
 
         return (buttons.size() > 0) ? buttons : null;
+    }
+
+    private List<Pair<String, String>> getSwitchPageButtons(int startIndex, boolean hasNext, String type){
+        Pair<String, String> translatedButtonNext = buttonsKeeper.getButton(BTN_SWITCH_PAGE_NEXT, this.language).get(0).get(0);
+        Pair<String, String> translatedButtonPrevious = buttonsKeeper.getButton(BTN_SWITCH_PAGE_PREVIOUS, this.language).get(0).get(0);
+        String callbackTemplate = translatedButtonNext.getRight();
+        List<Pair<String, String>> buttonsSwitchPage = new ArrayList<>();
+
+        if(startIndex > 0) {
+            String callbackPrevious = String.format(callbackTemplate, type, startIndex - LIST_MOVIES_BUTTONS_LENGTH);
+            buttonsSwitchPage.add(Pair.of(translatedButtonPrevious.getLeft(), callbackPrevious));
+        }
+        if(hasNext) {
+            String callbackNext = String.format(callbackTemplate, type, startIndex + LIST_MOVIES_BUTTONS_LENGTH);
+            buttonsSwitchPage.add(Pair.of(translatedButtonNext.getLeft(), callbackNext));
+        }
+
+        return buttonsSwitchPage;
     }
 
     protected MessageBuilder withMovieMatchesWithFriend(Session session) {
@@ -313,18 +329,28 @@ public class MessageBuilder {
         return this;
     }
 
-    protected MessageBuilder withFriendListButtons(Session session) {
-        if (session.getUser().getFriends() != null && !session.getUser().getFriends().isEmpty()) {
-            List<User> friendList = session.getUser().getFriends();
-            List<Map<String, String>> friends = new ArrayList<>();
+    protected MessageBuilder withFriendListButtons(Session session, Integer start) {
+        List<User> friends = session.getUser().getFriends();
+        List<List<Pair<String, String>>> friendsButtons = new ArrayList<>();
+        String type = "friend";
+        String callbackTemplate = "friend_set_%d";
+        String valueTemplate = "%d. %s";
+        int end = start + LIST_FRIENDS_BUTTONS_LENGTH;
 
-            for (int i = 0; i < session.getUser().getFriends().size(); i++) {
-                User friend = friendList.get(i);
+        for(int index = start; index < end; index++){
+            User friend = friends.get(index);
+            String buttonValue = String.format(valueTemplate, index+1, friend.getName());
+            String buttonCallback = String.format(callbackTemplate, friend.getId());
+            friendsButtons.add(List.of(Pair.of(buttonValue, buttonCallback)));
+        }
 
-                friends.add(Map.of(friend.getName(), String.format("friend_%d", i)));
-            }
-            this.buttons = friends;
+        List<Pair<String, String>> buttonsSwitchPage = getSwitchPageButtons(start, end<friends.size(), type);
+        if(!buttonsSwitchPage.isEmpty()){
+            friendsButtons.add(buttonsSwitchPage);
+        }
 
+        if(!friendsButtons.isEmpty()){
+            this.buttons = friendsButtons;
         }
         return this;
     }
@@ -345,13 +371,14 @@ public class MessageBuilder {
     }
 
     protected MessageBuilder withFriendRemoveButtons(Session session) {
-        List<Map<String, String>> buttons = new ArrayList<>();
+        List<List<Pair<String, String>>> buttons = new ArrayList<>();
         if (session.getUser().getFriends() == null || session.getUser().getFriends().isEmpty()) {
             this.messageText = getMessageNoFriendsYet();
         } else {
             int index = 0;
             for (User friend : session.getUser().getFriends()) {
-                buttons.add(Map.of(friend.getName(), String.format("friend_delete_%d", index)));
+                String removeFriendCallback = String.format("friend_delete_%d", index);
+                buttons.add(List.of(Pair.of(friend.getName(), removeFriendCallback)));
                 index++;
             }
             this.buttons = buttons;
@@ -429,31 +456,31 @@ public class MessageBuilder {
     }
 
     public MessageBuilder withRemoveFromFavoriteButton(int movieId) {
-        Map<String, String> removeFromFavoriteBtn = buttonsKeeper.getButton(BTN_MOVIE_REMOVE_FAVORITE, this.language).get(0);
-        String buttonValue = removeFromFavoriteBtn.keySet().stream().findAny().orElse("Remove from favorite");
-        String buttonCallbackTemplate = removeFromFavoriteBtn.get(buttonValue);
+        Pair<String, String> removeFromFavoriteBtn = buttonsKeeper.getButton(BTN_MOVIE_REMOVE_FAVORITE, this.language).get(0).get(0);
+        String buttonValue = removeFromFavoriteBtn.getLeft();
+        String buttonCallbackTemplate = removeFromFavoriteBtn.getRight();
 
         this.buttons = getRemoveFromListButton(movieId, buttonValue, buttonCallbackTemplate);
         return this;
     }
 
     public MessageBuilder withRemoveFromDislikedButton(int movieId) {
-        Map<String, String> removeFromDislikedBtn = buttonsKeeper.getButton(BTN_MOVIE_REMOVE_DISLIKED, this.language).get(0);
-        String buttonValue = removeFromDislikedBtn.keySet().stream().findAny().orElse("Remove from disliked");
-        String buttonCallbackTemplate = removeFromDislikedBtn.get(buttonValue);
+        Pair<String, String> removeFromDislikedBtn = buttonsKeeper.getButton(BTN_MOVIE_REMOVE_DISLIKED, this.language).get(0).get(0);
+        String buttonValue = removeFromDislikedBtn.getLeft();
+        String buttonCallbackTemplate = removeFromDislikedBtn.getRight();
 
         this.buttons = getRemoveFromListButton(movieId, buttonValue, buttonCallbackTemplate);
         return this;
     }
 
-    private List<Map<String, String>> getRemoveFromListButton(int movieId, String message, String callbackTemplate) {
-        List<Map<String, String>> button = new ArrayList<>();
+    private List<List<Pair<String, String>>> getRemoveFromListButton(int movieId, String message, String callbackTemplate) {
+        List<Pair<String, String>> button = new ArrayList<>();
 
         button.add(
-                Map.of(message, String.format(callbackTemplate, movieId))
+                Pair.of(message, String.format(callbackTemplate, movieId))
         );
 
-        return button;
+        return List.of(button);
     }
 
     protected MessageBuilder withMovieMatchNotStarted() {

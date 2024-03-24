@@ -1,6 +1,7 @@
 package com.astindg.movieMatch.telegram;
 
 import com.astindg.movieMatch.model.Message;
+import org.apache.commons.lang3.tuple.Pair;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
@@ -63,18 +64,18 @@ public class MessageTranslator {
         return editMarkup;
     }
 
-    private static InlineKeyboardMarkup convertButtons(List<Map<String, String>> buttons){
+    private static InlineKeyboardMarkup convertButtons(List<List<Pair<String, String>>> buttons){
         List<List<InlineKeyboardButton>> keyboardButtons = new ArrayList<>();
 
-        for(Map<String, String> button : buttons){
-            List<InlineKeyboardButton> row = new ArrayList<>();
-            for(String buttonText : button.keySet()){
+        for(List<Pair<String, String>> row : buttons){
+            List<InlineKeyboardButton> buttonsRow = new ArrayList<>();
+            for(Pair<String, String> button : row){
                 InlineKeyboardButton btn = new InlineKeyboardButton();
-                btn.setText(buttonText);
-                btn.setCallbackData(button.get(buttonText));
-                row.add(btn);
+                btn.setText(button.getLeft());
+                btn.setCallbackData(button.getRight());
+                buttonsRow.add(btn);
             }
-            keyboardButtons.add(row);
+            keyboardButtons.add(buttonsRow);
         }
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         markup.setKeyboard(keyboardButtons);
