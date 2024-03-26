@@ -105,43 +105,41 @@ public class SessionHandler {
                 List<Movie> movieList = session.getMovieList();
                 int randomIndex = (int) (Math.random() * movieList.size());
 
-                session.setLastMovieShown(movieList.get(randomIndex));
+                session.setLastRandomMovie(movieList.get(randomIndex));
             }
         }
     }
 
     public void setDislikeLastMovieShown(Session session) {
-        if (session.getLastMovieShown() == null) {
+        if (session.getLastRandomMovie() == null) {
             return;
             //TODO trow exception
         }
 
         User user = session.getUser();
 
-        user.getDislikedMovies().add(session.getLastMovieShown());
+        user.getDislikedMovies().add(session.getLastRandomMovie());
 
-        userService.saveDislikedMovie(user, session.getLastMovieShown());
+        userService.saveDislikedMovie(user, session.getLastRandomMovie());
 
         session.releaseLastMovieShown();
-        selectRandomMovie(session);
     }
 
     protected void setLikeLastMovieSown(Session session) {
-        if (session.getLastMovieShown() == null) {
+        if (session.getLastRandomMovie() == null) {
             return;
             //TODO trow exception
         }
 
         User user = session.getUser();
 
-        user.getFavoriteMovies().add(session.getLastMovieShown());
+        user.getFavoriteMovies().add(session.getLastRandomMovie());
 
-        userService.saveLikedMovie(user, session.getLastMovieShown());
+        userService.saveLikedMovie(user, session.getLastRandomMovie());
 
         checkMatches(session);
 
         session.releaseLastMovieShown();
-        selectRandomMovie(session);
 
     }
 
@@ -155,16 +153,16 @@ public class SessionHandler {
         List<Movie> friendMovies = friendSession.getUser().getFavoriteMovies();
 
 
-        if (friendMovies.contains(session.getLastMovieShown())) {
+        if (friendMovies.contains(session.getLastRandomMovie())) {
             //notify user
-            session.setNewMatchMovie(session.getLastMovieShown());
-            session.getMoviesMatchWithCurrentFriend().add(session.getLastMovieShown());
+            session.setNewMatchMovie(session.getLastRandomMovie());
+            session.getMoviesMatchWithCurrentFriend().add(session.getLastRandomMovie());
 
             //notify friend if we`re his/her current friend
 
             if (session.getCurrentFriend().equals(friendSession.getCurrentFriend())) {
-                friendSession.setNewMatchMovie(session.getLastMovieShown());
-                friendSession.getMoviesMatchWithCurrentFriend().add(session.getLastMovieShown());
+                friendSession.setNewMatchMovie(session.getLastRandomMovie());
+                friendSession.getMoviesMatchWithCurrentFriend().add(session.getLastRandomMovie());
             }
         }
 

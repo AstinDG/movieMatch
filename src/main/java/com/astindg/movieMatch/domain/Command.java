@@ -6,43 +6,43 @@ import com.astindg.movieMatch.model.Message;
 public enum Command {
     INITIAL {
         public Message getAnswer(Session session, MessageBuilder messageBuilder) {
-            return messageBuilder.setLanguage(session.getUser().getLanguage()).withInitialTemplate(session).keyboards().initial().build();
+            return messageBuilder.setLanguage(session.getUser().getLanguage()).getText().initial(session).getKeyboards().initial().build();
         }
     },
     FRIENDS_MENU {
         @Override
         public Message getAnswer(Session session, MessageBuilder messageBuilder) {
-            return messageBuilder.setLanguage(session.getUser().getLanguage()).withSelectOptionText().keyboards().friends().build();
+            return messageBuilder.setLanguage(session.getUser().getLanguage()).getText().selectOption().getKeyboards().friends().build();
         }
     },
     FRIENDS_LIST {
         @Override
         public Message getAnswer(Session session, MessageBuilder messageBuilder) {
-            return messageBuilder.setLanguage(session.getUser().getLanguage()).withFriendListText(session).keyboards().friends().build();
+            return messageBuilder.setLanguage(session.getUser().getLanguage()).getText().friendList(session).getKeyboards().friends().build();
         }
     },
     FRIEND_ADD {
         @Override
         public Message getAnswer(Session session, MessageBuilder messageBuilder) {
-            return messageBuilder.setLanguage(session.getUser().getLanguage()).withInviteFriendTemplate(session).buttons().inviteCode().build();
+            return messageBuilder.setLanguage(session.getUser().getLanguage()).getText().inviteFriend(session).getButtons().inviteCode().build();
         }
     }, //special
     FRIEND_SELECT {
         @Override
         public Message getAnswer(Session session, MessageBuilder messageBuilder) {
-            return messageBuilder.setLanguage(session.getUser().getLanguage()).withSelectFriendText(session).buttons().friendList(session, 0).build();
+            return messageBuilder.setLanguage(session.getUser().getLanguage()).getText().selectFriend(session).getButtons().friendList(session, 0).build();
         }
     },
     FRIEND_REMOVE {
         @Override
         public Message getAnswer(Session session, MessageBuilder messageBuilder) {
-            return messageBuilder.setLanguage(session.getUser().getLanguage()).withFriendRemoveText(session).withFriendRemoveButtons(session).build();
+            return messageBuilder.setLanguage(session.getUser().getLanguage()).getText().friendRemove(session).getButtons().friendRemove(session).build();
         }
     },
     MOVIE_MENU {
         @Override
         public Message getAnswer(Session session, MessageBuilder messageBuilder) {
-            return messageBuilder.setLanguage(session.getUser().getLanguage()).withSelectOptionText().keyboards().movie().build();
+            return messageBuilder.setLanguage(session.getUser().getLanguage()).getText().selectOption().getKeyboards().movie().build();
         }
     },
     MOVIE_MATCH {
@@ -51,14 +51,14 @@ public enum Command {
             Language language = session.getUser().getLanguage();
             if (session.getCurrentFriend() == null) {
                 Message message = Command.FRIEND_SELECT.getAnswer(session, messageBuilder);
-                String errorText = messageBuilder.setLanguage(language).withFriendNotSelectedError().build().getText();
+                String errorText = messageBuilder.setLanguage(language).getText().friendNotSelectedError().build().getText();
                 message.setText(errorText + "\n\n" + message.getText());
 
                 return message;
-            } else if (session.getMovieList() == null || session.getLastMovieShown() == null) {
-                return messageBuilder.setLanguage(language).withNoMoviesText().keyboards().movieMatch().build();
+            } else if (session.getLastRandomMovie() == null) {
+                return messageBuilder.setLanguage(language).getText().moviesListEmpty().getKeyboards().movieMatch().build();
             } else {
-                return messageBuilder.setLanguage(language).withRandomMovie(session).keyboards().movieMatch().build();
+                return messageBuilder.setLanguage(language).getRandomMovie(session).getKeyboards().movieMatch().build();
             }
         }
     }, //special
@@ -68,13 +68,13 @@ public enum Command {
             Language language = session.getUser().getLanguage();
 
             if (session.getHasNewMatches()) {
-                return messageBuilder.setLanguage(language).withNewMatchMovieMessage(session).keyboards().newMatch().build();
-            } else if (session.getLastMovieShown() != null) {
-                return messageBuilder.setLanguage(language).withRandomMovie(session).keyboards().movieMatch().build();
+                return messageBuilder.setLanguage(language).getText().newMatch(session).getKeyboards().newMatch().build();
+            } else if (session.getLastRandomMovie() != null) {
+                return messageBuilder.setLanguage(language).getRandomMovie(session).getKeyboards().movieMatch().build();
             } else if (session.getMovieList() == null) {
-                return messageBuilder.setLanguage(language).withMovieMatchNotStarted().keyboards().initial().build();
+                return messageBuilder.setLanguage(language).getText().movieMatchNotStarted().getKeyboards().initial().build();
             } else {
-                return messageBuilder.setLanguage(language).withNoMoviesText().keyboards().movieMatch().build();
+                return messageBuilder.setLanguage(language).getText().moviesListEmpty().getKeyboards().movieMatch().build();
             }
         }
     }, //special
@@ -87,19 +87,19 @@ public enum Command {
     MOVIE_LIST {
         @Override
         public Message getAnswer(Session session, MessageBuilder messageBuilder) {
-            return messageBuilder.setLanguage(session.getUser().getLanguage()).withSelectOptionText().keyboards().movieLists().build();
+            return messageBuilder.setLanguage(session.getUser().getLanguage()).getText().selectOption().getKeyboards().movieLists().build();
         }
     },
     MOVIE_FAVORITES {
         @Override
         public Message getAnswer(Session session, MessageBuilder messageBuilder) {
-            return messageBuilder.setLanguage(session.getUser().getLanguage()).withFavoritesMoviesText(session).buttons().favoriteMovies(session, 0).build();
+            return messageBuilder.setLanguage(session.getUser().getLanguage()).getText().favoritesMovies(session).getButtons().favoriteMovies(session, 0).build();
         }
     },
     MOVIE_DISLIKED {
         @Override
         public Message getAnswer(Session session, MessageBuilder messageBuilder) {
-            return messageBuilder.setLanguage(session.getUser().getLanguage()).withDislikedMoviesText(session).buttons().dislikedMovies(session, 0).build();
+            return messageBuilder.setLanguage(session.getUser().getLanguage()).getText().dislikedMovies(session).getButtons().dislikedMovies(session, 0).build();
         }
     },
     MOVIE_MATCHES {
@@ -108,33 +108,33 @@ public enum Command {
             Language language = session.getUser().getLanguage();
             if(session.getCurrentFriend() == null){
                 return messageBuilder.setLanguage(language)
-                        .withFriendNotSelectedError()
-                        .buttons().friendList(session, 0)
+                        .getText().friendNotSelectedError()
+                        .getButtons().friendList(session, 0)
                         .build();
             }
 
             return messageBuilder.setLanguage(language)
-                    .withMovieMatchesWithFriend(session)
-                    .keyboards().movie()
+                    .getText().movieMatchesWithFriend(session)
+                    .getKeyboards().movie()
                     .build();
         }
     },
     RETURN_MAIN_MENU {
         @Override
         public Message getAnswer(Session session, MessageBuilder messageBuilder) {
-            return messageBuilder.setLanguage(session.getUser().getLanguage()).withSelectOptionText().keyboards().initial().build();
+            return messageBuilder.setLanguage(session.getUser().getLanguage()).getText().selectOption().getKeyboards().initial().build();
         }
     },
     SETTINGS {
         @Override
         public Message getAnswer(Session session, MessageBuilder messageBuilder) {
-            return messageBuilder.setLanguage(session.getUser().getLanguage()).withSelectOptionText().keyboards().settings().build();
+            return messageBuilder.setLanguage(session.getUser().getLanguage()).getText().selectOption().getKeyboards().settings().build();
         }
     },
     LANGUAGE {
         @Override
         public Message getAnswer(Session session, MessageBuilder messageBuilder) {
-            return messageBuilder.setLanguage(session.getUser().getLanguage()).withSelectLanguageText().buttons().selectLanguage().build();
+            return messageBuilder.setLanguage(session.getUser().getLanguage()).getText().selectLanguage().getButtons().selectLanguage().build();
         }
 
     };

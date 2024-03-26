@@ -25,7 +25,7 @@ public class Session {
     private List<Movie> moviesMatchWithCurrentFriend;
     private Boolean hasNewMatches = false;
     private Movie newMatchMovie;
-    private Movie lastMovieShown;
+    private Movie lastRandomMovie;
     private final MovieService movieService;
 
     private static final Logger log = LoggerFactory.getLogger(Session.class);
@@ -136,7 +136,7 @@ public class Session {
     }
 
     protected void releaseLastMovieShown() {
-        movieList.remove(lastMovieShown);
-        lastMovieShown = null;
+        movieList.remove(lastRandomMovie);
+        lastRandomMovie = null;
     }
 }

@@ -70,262 +70,15 @@ public class MessageBuilder {
         return this;
     }
 
-    protected MessageBuilder withFavoritesMoviesText(Session session) {
-        this.messageText = getMovieListHeaderText(MSG_MOVIE_FAVORITE_HEADER, MSG_MOVIE_FAVORITE_EMPTY_ERROR,
-                session.getUser().getFavoriteMovies()
-        );
-        return this;
+    public MessageBuilder getRandomMovie(Session session) {
+        Movie movie = session.getLastRandomMovie();
+
+        return getMovieMessage(movie);
     }
 
-    protected MessageBuilder withDislikedMoviesText(Session session) {
-        this.messageText = getMovieListHeaderText(MSG_MOVIE_DISLIKED_HEADER, MSG_MOVIE_DISLIKED_EMPTY_ERROR,
-                session.getUser().getDislikedMovies()
-        );
-        return this;
-    }
-
-    private String getMovieListHeaderText(String headerKey, String listEmptyKey, List<Movie> list) {
-        if (list == null || list.isEmpty()) {
-            return messagesKeeper.getMessage(listEmptyKey, this.language);
-        }
-        String headerTemplate = messagesKeeper.getMessage(headerKey, this.language);
-        return String.format(headerTemplate, list.size());
-    }
-
-    protected MessageBuilder withMovieMatchesWithFriend(Session session) {
-        List<Movie> movies = session.getMoviesMatchWithCurrentFriend();
-
-        if (movies == null || movies.isEmpty()) {
-            String template = messagesKeeper.getMessage(MSG_MATCHES_FRIEND_EMPTY_ERROR, this.language);
-            this.messageText = String.format(template, session.getCurrentFriend().getName());
-            return this;
-        }
-
-        this.messageText = getMovieListText(movies);
-        return this;
-    }
-
-    private String getMovieListText(List<Movie> movies) {
-        StringBuilder moviesSB = new StringBuilder();
-        int number = 1;
-
-        //TODO rename MSG_MOVIE_FAVORITE (used in withFavoritesMoviesText and withMovieMatchesWithFriend methods)
-        String template = messagesKeeper.getMessage(MSG_MOVIE_FAVORITE, this.language);
-
-        for (Movie movie : movies) {
-            MovieDetails movieDetails = movie.getMovieDetails(this.language);
-
-            moviesSB.append(String.format(template,
-                    number, movieDetails.getName(), movieDetails.getGenre(), movieDetails.getYearOfRelease()));
-            number++;
-        }
-
-        return moviesSB.toString();
-    }
-
-    protected MessageBuilder withMovieDeletedFromFavoriteListText(Movie movie) {
-        String template = messagesKeeper.getMessage(MSG_MOVIE_DELETED_FROM_FAVORITE_LIST, this.language);
-        this.messageText = String.format(template, movie.getMovieDetails(this.language).getName());
-        return this;
-    }
-
-    protected MessageBuilder withMovieDeletedFromDislikedListText(Movie movie) {
-        String template = messagesKeeper.getMessage(MSG_MOVIE_DELETED_FROM_DISLIKED_LIST, this.language);
-        this.messageText = String.format(template, movie.getMovieDetails(this.language).getName());
-        return this;
-    }
-
-    protected MessageBuilder withMovieNotFoundInFavoriteListText() {
-        this.messageText = messagesKeeper.getMessage(MSG_NOT_FOUND_IN_FAVORITE_LIST_ERROR, this.language);
-        return this;
-    }
-
-    protected MessageBuilder withMovieNotFoundInDislikedListText() {
-        this.messageText = messagesKeeper.getMessage(MSG_NOT_FOUND_IN_DISLIKED_LIST_ERROR, this.language);
-        return this;
-    }
-
-    protected MessageBuilder withSelectOptionText() {
-        this.messageText = messagesKeeper.getMessage(MSG_OPTION, this.language);
-        return this;
-    }
-
-    protected MessageBuilder withNotifyNewFriendText(Session friendsSession) {
-        String template = messagesKeeper.getMessage(MSG_FRIEND_NEW, this.language);
-        this.messageText = String.format(template, friendsSession.getUser().getName());
-        return this;
-    }
-
-    protected MessageBuilder withInitialTemplate(Session session) {
-        User user = session.getUser();
-        User friend = session.getCurrentFriend();
-        String friendName = (friend != null) ? friend.getName() : "---";
-        int countFriends = (user.getFriends() != null) ? user.getFriends().size() : 0;
-
-        String template = messagesKeeper.getMessage(MSG_INITIAL, this.language);
-        this.messageText = String.format(template, user.getName(), friendName, countFriends);
-
-        return this;
-    }
-
-    protected MessageBuilder appendWithInitialMessage(Session session) {
-        StringBuilder builder = new StringBuilder();
-        if (this.messageText != null) {
-            builder.append(this.messageText);
-            builder.append("\n\n");
-        }
-        withInitialTemplate(session);
-        builder.append(this.messageText);
-
-        this.messageText = builder.toString();
-
-        return this;
-    }
-
-    protected MessageBuilder withInviteFriendTemplate(Session session) {
-        if (session.getInviteCode() != null) {
-            String template = messagesKeeper.getMessage(MSG_FRIEND_INVITE, this.language);
-            this.messageText = String.format(template, session.getInviteCode(), session.getInviteCodeMaxAge());
-        }
-        return this;
-    }
-
-    public MessageBuilder withEnterInviteCodeText() {
-        this.messageText = messagesKeeper.getMessage(MSG_FRIEND_INVITE_BTN, this.language);
-        return this;
-    }
-
-    public MessageBuilder withIncorrectCodeText() {
-        this.messageText = messagesKeeper.getMessage(MSG_FRIEND_INVITE_INCORRECT_CODE, this.language);
-        return this;
-    }
-
-    public MessageBuilder withFriendNotFoundByCodeText(String enteredCode) {
-        String template = messagesKeeper.getMessage(MSG_FRIEND_INVITE_CODE_NOT_FOUND, this.language);
-        this.messageText = String.format(template, enteredCode);
-        return this;
-    }
-
-    public MessageBuilder withFriendHasAlreadyBeenAddedText(User friend) {
-        String template = messagesKeeper.getMessage(MSG_FRIEND_INVITE_ALREADY_IN_LIST, this.language);
-        this.messageText = String.format(template, friend.getName());
-        return this;
-    }
-
-    protected MessageBuilder withSelectFriendText(Session session) {
-        if (session.getUser().getFriends() == null || session.getUser().getFriends().isEmpty()) {
-            this.messageText = getMessageNoFriendsYet();
-            return this;
-        }
-        this.messageText = messagesKeeper.getMessage(MSG_FRIEND_SELECT, this.language);
-        return this;
-    }
-
-    protected MessageBuilder withErrorSelectFriendText() {
-        this.messageText = messagesKeeper.getMessage(MSG_FRIEND_SET_ERROR, this.language) +
-                messagesKeeper.getMessage(MSG_TRY_AGAIN_OR_CONTACT_DEVS_PS, this.language);
-        return this;
-    }
-
-    protected MessageBuilder withErrorDeleteFriendText() {
-        this.messageText = messagesKeeper.getMessage(MSG_FRIEND_DELETE_ERROR, this.language) +
-                messagesKeeper.getMessage(MSG_TRY_AGAIN_OR_CONTACT_DEVS_PS, this.language);
-        return this;
-    }
-
-    protected MessageBuilder withFriendSelectedText(Session session) {
-        String template = messagesKeeper.getMessage(MSG_FRIEND_SELECTED, this.language);
-        this.messageText = String.format(template, session.getCurrentFriend().getName());
-        return this;
-    }
-
-    protected MessageBuilder withFriendNotSelectedError() {
-        this.messageText = messagesKeeper.getMessage(MSG_FRIEND_NOT_SELECTED_ERROR, this.language);
-        return this;
-    }
-
-    protected MessageBuilder withFriendRemoveText(Session session) {
-        if (session.getUser().getFriends() == null || session.getUser().getFriends().isEmpty()) {
-            this.messageText = getMessageNoFriendsYet();
-        } else {
-            this.messageText = messagesKeeper.getMessage(MSG_FRIEND_DELETE, this.language);
-        }
-        return this;
-    }
-
-    protected MessageBuilder withFriendRemovedText(User friend) {
-        String template = messagesKeeper.getMessage(MSG_FRIEND_DELETE_SUCCESS, this.language);
-        this.messageText = String.format(template, friend.getName());
-        return this;
-    }
-
-    protected MessageBuilder withFriendRemoveButtons(Session session) {
-        List<List<Pair<String, String>>> buttons = new ArrayList<>();
-        if (session.getUser().getFriends() == null || session.getUser().getFriends().isEmpty()) {
-            this.messageText = getMessageNoFriendsYet();
-        } else {
-            int index = 0;
-            for (User friend : session.getUser().getFriends()) {
-                String removeFriendCallback = String.format("friend_delete_%d", index);
-                buttons.add(List.of(Pair.of(friend.getName(), removeFriendCallback)));
-                index++;
-            }
-            this.buttons = buttons;
-        }
-        return this;
-    }
-
-    private String getMessageNoFriendsYet() {
-        return messagesKeeper.getMessage(MSG_FRIEND_EMPTY_LIST, this.language);
-    }
-
-    protected MessageBuilder withNewMatchMovieMessage(Session session) {
-        Movie movie = session.getNewMatchMovie();
-        String movieName = movie.getMovieDetails(this.language).getName();
-        User friend = session.getCurrentFriend();
-
-        String template = messagesKeeper.getMessage(MSG_MOVIE_NEW_MATCH, this.language);
-
-        this.messageText = String.format(template, friend.getName(), movieName);
-        return this;
-    }
-
-    protected MessageBuilder withFriendListText(Session session) {
-        if (session.getUser().getFriends() == null || session.getUser().getFriends().isEmpty()) {
-            this.messageText = getMessageNoFriendsYet();
-            return this;
-        }
-
-        StringBuilder friendList = new StringBuilder();
-        int number = 1;
-        for (User friend : session.getUser().getFriends()) {
-            //TODO make separate method in MessageKeeper
-            friendList.append(String.format("%d. %s\n", number, friend.getName()));
-            number++;
-        }
-        this.messageText = friendList.toString();
-        return this;
-    }
-
-    protected MessageBuilder withErrorUnknownCommand() {
-        this.messageText = messagesKeeper.getMessage(MSG_UNKNOWN_COMMAND_ERROR, this.language);
-        return this;
-    }
-
-    protected MessageBuilder withErrorUnknownCallback() {
-        this.messageText = messagesKeeper.getMessage(MSG_UNKNOWN_CALLBACK_ERROR, this.language);
-        return this;
-    }
-
-    protected MessageBuilder withRandomMovie(Session session) {
-        Movie movie = session.getLastMovieShown();
-
-        return withMovieMessage(movie);
-    }
-
-    protected MessageBuilder withMovieMessage(Movie movie) {
+    public MessageBuilder getMovieMessage(Movie movie) {
         String template = messagesKeeper.getMessage(MSG_MOVIE, this.language);
-        MovieDetails movieDetails = movie.getMovieDetails(language);
+        MovieDetails movieDetails = movie.getMovieDetails(this.language);
 
         this.messageText = String.format(template,
                 movieDetails.getName(),
@@ -339,24 +92,19 @@ public class MessageBuilder {
         return this;
     }
 
-    protected MessageBuilder withMovieMatchNotStarted() {
-        this.messageText = messagesKeeper.getMessage(MSG_MOVIE_MATCH_NOT_STARTED_ERROR, this.language);
-        return this;
+    public MessageText getText() {
+        //TODO throw an exception if no language was specified
+        return new MessageText();
     }
 
-    protected MessageBuilder withNoMoviesText() {
-        this.messageText = messagesKeeper.getMessage(MSG_MOVIE_EMPTY_ERROR, this.language);
-        return this;
+    public Keyboards getKeyboards() {
+        //TODO throw an exception if buttons is already installed
+        return new Keyboards();
     }
 
-    public MessageBuilder withSelectLanguageText() {
-        this.messageText = messagesKeeper.getMessage(MSG_SETTINGS_LANG, this.language);
-        return this;
-    }
-
-    public MessageBuilder withSelectingLanguageErrorText() {
-        this.messageText = messagesKeeper.getMessage(MSG_SETTINGS_LANG_ERROR, this.language);
-        return this;
+    public Buttons getButtons() {
+        //TODO throw an exception if a keyboard is already installed
+        return new Buttons();
     }
 
     protected Message build() {
@@ -380,12 +128,248 @@ public class MessageBuilder {
         return message;
     }
 
-    public Keyboards keyboards() {
-        return new Keyboards();
-    }
+    public class MessageText {
+        private MessageText(){
 
-    public Buttons buttons() {
-        return new Buttons();
+        }
+
+        public MessageBuilder initial(Session session) {
+            User user = session.getUser();
+            User friend = session.getCurrentFriend();
+            String friendName = (friend != null) ? friend.getName() : "---";
+            int countFriends = (user.getFriends() != null) ? user.getFriends().size() : 0;
+
+            String template = messagesKeeper.getMessage(MSG_INITIAL, MessageBuilder.this.language);
+            MessageBuilder.this.messageText = String.format(template, user.getName(), friendName, countFriends);
+
+            return MessageBuilder.this;
+        }
+
+        public MessageBuilder selectOption() {
+            MessageBuilder.this.messageText = messagesKeeper.getMessage(MSG_OPTION, MessageBuilder.this.language);
+            return MessageBuilder.this;
+        }
+
+        public MessageBuilder unknownCommand() {
+            MessageBuilder.this.messageText = messagesKeeper.getMessage(MSG_UNKNOWN_COMMAND_ERROR, MessageBuilder.this.language);
+            return MessageBuilder.this;
+        }
+
+        public MessageBuilder unknownCallback() {
+            MessageBuilder.this.messageText = messagesKeeper.getMessage(MSG_UNKNOWN_CALLBACK_ERROR, MessageBuilder.this.language);
+            return MessageBuilder.this;
+        }
+
+        public MessageBuilder selectLanguage() {
+            MessageBuilder.this.messageText = messagesKeeper.getMessage(MSG_SETTINGS_LANG, MessageBuilder.this.language);
+            return MessageBuilder.this;
+        }
+
+        public MessageBuilder selectLanguageError() {
+            MessageBuilder.this.messageText = messagesKeeper.getMessage(MSG_SETTINGS_LANG_ERROR, MessageBuilder.this.language);
+            return MessageBuilder.this;
+        }
+
+        public MessageBuilder inviteCode() {
+            MessageBuilder.this.messageText = messagesKeeper.getMessage(MSG_FRIEND_INVITE_BTN, MessageBuilder.this.language);
+            return MessageBuilder.this;
+        }
+
+        public MessageBuilder inviteCodeError() {
+            MessageBuilder.this.messageText = messagesKeeper.getMessage(MSG_FRIEND_INVITE_INCORRECT_CODE, MessageBuilder.this.language);
+            return MessageBuilder.this;
+        }
+
+        /*######### Topic: Movie ##########*/
+        public MessageBuilder favoritesMovies(Session session) {
+            MessageBuilder.this.messageText = getMovieListText(MSG_MOVIE_FAVORITE_HEADER, MSG_MOVIE_FAVORITE_EMPTY_ERROR,
+                    session.getUser().getFavoriteMovies()
+            );
+            return MessageBuilder.this;
+        }
+
+        public MessageBuilder dislikedMovies(Session session) {
+            MessageBuilder.this.messageText = getMovieListText(MSG_MOVIE_DISLIKED_HEADER, MSG_MOVIE_DISLIKED_EMPTY_ERROR,
+                    session.getUser().getDislikedMovies()
+            );
+            return MessageBuilder.this;
+        }
+
+        private String getMovieListText(String headerKey, String listEmptyKey, List<Movie> list) {
+            if (list == null || list.isEmpty()) {
+                return messagesKeeper.getMessage(listEmptyKey, MessageBuilder.this.language);
+            }
+            String headerTemplate = messagesKeeper.getMessage(headerKey, MessageBuilder.this.language);
+            return String.format(headerTemplate, list.size());
+        }
+
+        public MessageBuilder movieMatchNotStarted() {
+            MessageBuilder.this.messageText = messagesKeeper.getMessage(MSG_MOVIE_MATCH_NOT_STARTED_ERROR, MessageBuilder.this.language);
+            return MessageBuilder.this;
+        }
+
+        public MessageBuilder moviesListEmpty() {
+            MessageBuilder.this.messageText = messagesKeeper.getMessage(MSG_MOVIE_EMPTY_ERROR, MessageBuilder.this.language);
+            return MessageBuilder.this;
+        }
+
+        public MessageBuilder movieMatchesWithFriend(Session session) {
+            List<Movie> movies = session.getMoviesMatchWithCurrentFriend();
+
+            if (movies == null || movies.isEmpty()) {
+                String template = messagesKeeper.getMessage(MSG_MATCHES_FRIEND_EMPTY_ERROR, MessageBuilder.this.language);
+                MessageBuilder.this.messageText = String.format(template, session.getCurrentFriend().getName());
+                return MessageBuilder.this;
+            }
+
+            StringBuilder moviesSB = new StringBuilder();
+            String template = messagesKeeper.getMessage(MSG_MOVIE_FAVORITE, MessageBuilder.this.language);
+            int number = 1;
+            for (Movie movie : movies) {
+                MovieDetails movieDetails = movie.getMovieDetails(MessageBuilder.this.language);
+
+                moviesSB.append(String.format(template,
+                        number, movieDetails.getName(), movieDetails.getGenre(), movieDetails.getYearOfRelease()));
+                number++;
+            }
+
+            MessageBuilder.this.messageText = moviesSB.toString();
+            return MessageBuilder.this;
+        }
+
+        public MessageBuilder movieDeletedFromFavorite(Movie movie) {
+            String template = messagesKeeper.getMessage(MSG_MOVIE_DELETED_FROM_FAVORITE_LIST, MessageBuilder.this.language);
+            MessageBuilder.this.messageText = String.format(template, movie.getMovieDetails(MessageBuilder.this.language).getName());
+            return MessageBuilder.this;
+        }
+
+        public MessageBuilder movieDeletedFromDisliked(Movie movie) {
+            String template = messagesKeeper.getMessage(MSG_MOVIE_DELETED_FROM_DISLIKED_LIST, MessageBuilder.this.language);
+            MessageBuilder.this.messageText = String.format(template, movie.getMovieDetails(MessageBuilder.this.language).getName());
+            return MessageBuilder.this;
+        }
+
+        public MessageBuilder movieNotFoundInFavorite() {
+            MessageBuilder.this.messageText = messagesKeeper.getMessage(MSG_NOT_FOUND_IN_FAVORITE_LIST_ERROR, MessageBuilder.this.language);
+            return MessageBuilder.this;
+        }
+
+        public MessageBuilder movieNotFoundInDisliked() {
+            MessageBuilder.this.messageText = messagesKeeper.getMessage(MSG_NOT_FOUND_IN_DISLIKED_LIST_ERROR, MessageBuilder.this.language);
+            return MessageBuilder.this;
+        }
+
+
+        public MessageBuilder newMatch(Session session) {
+            Movie movie = session.getNewMatchMovie();
+            String movieName = movie.getMovieDetails(MessageBuilder.this.language).getName();
+            User friend = session.getCurrentFriend();
+
+            String template = messagesKeeper.getMessage(MSG_MOVIE_NEW_MATCH, MessageBuilder.this.language);
+
+            MessageBuilder.this.messageText = String.format(template, friend.getName(), movieName);
+            return MessageBuilder.this;
+        }
+
+        /*## End of topic: Movie ##########*/
+
+        /*######### Topic: Friend #########*/
+
+        public MessageBuilder selectFriend(Session session) {
+            if (session.getUser().getFriends() == null || session.getUser().getFriends().isEmpty()) {
+                MessageBuilder.this.messageText = getMessageNoFriendsYet();
+                return MessageBuilder.this;
+            }
+            MessageBuilder.this.messageText = messagesKeeper.getMessage(MSG_FRIEND_SELECT, MessageBuilder.this.language);
+            return MessageBuilder.this;
+        }
+
+        public MessageBuilder friendSelected(Session session) {
+            String template = messagesKeeper.getMessage(MSG_FRIEND_SELECTED, MessageBuilder.this.language);
+            MessageBuilder.this.messageText = String.format(template, session.getCurrentFriend().getName());
+            return MessageBuilder.this;
+        }
+
+        public MessageBuilder notifyNewFriend(Session friendsSession) {
+            String template = messagesKeeper.getMessage(MSG_FRIEND_NEW, MessageBuilder.this.language);
+            MessageBuilder.this.messageText = String.format(template, friendsSession.getUser().getName());
+            return MessageBuilder.this;
+        }
+
+        public MessageBuilder inviteFriend(Session session) {
+            if (session.getInviteCode() != null) {
+                String template = messagesKeeper.getMessage(MSG_FRIEND_INVITE, MessageBuilder.this.language);
+                MessageBuilder.this.messageText = String.format(template, session.getInviteCode(), session.getInviteCodeMaxAge());
+            }
+            return MessageBuilder.this;
+        }
+
+        public MessageBuilder friendNotFound(String enteredCode) {
+            String template = messagesKeeper.getMessage(MSG_FRIEND_INVITE_CODE_NOT_FOUND, MessageBuilder.this.language);
+            MessageBuilder.this.messageText = String.format(template, enteredCode);
+            return MessageBuilder.this;
+        }
+
+        public MessageBuilder friendAlready(User friend) {
+            String template = messagesKeeper.getMessage(MSG_FRIEND_INVITE_ALREADY_IN_LIST, MessageBuilder.this.language);
+            MessageBuilder.this.messageText = String.format(template, friend.getName());
+            return MessageBuilder.this;
+        }
+
+        public MessageBuilder friendSelectError() {
+            MessageBuilder.this.messageText = messagesKeeper.getMessage(MSG_FRIEND_SET_ERROR, MessageBuilder.this.language) +
+                    messagesKeeper.getMessage(MSG_TRY_AGAIN_OR_CONTACT_DEVS_PS, MessageBuilder.this.language);
+            return MessageBuilder.this;
+        }
+
+        public MessageBuilder friendDeleteError() {
+            MessageBuilder.this.messageText = messagesKeeper.getMessage(MSG_FRIEND_DELETE_ERROR, MessageBuilder.this.language) +
+                    messagesKeeper.getMessage(MSG_TRY_AGAIN_OR_CONTACT_DEVS_PS, MessageBuilder.this.language);
+            return MessageBuilder.this;
+        }
+
+        public MessageBuilder friendNotSelectedError() {
+            MessageBuilder.this.messageText = messagesKeeper.getMessage(MSG_FRIEND_NOT_SELECTED_ERROR, MessageBuilder.this.language);
+            return MessageBuilder.this;
+        }
+
+        public MessageBuilder friendRemove(Session session) {
+            if (session.getUser().getFriends() == null || session.getUser().getFriends().isEmpty()) {
+                MessageBuilder.this.messageText = getMessageNoFriendsYet();
+            } else {
+                MessageBuilder.this.messageText = messagesKeeper.getMessage(MSG_FRIEND_DELETE, MessageBuilder.this.language);
+            }
+            return MessageBuilder.this;
+        }
+
+        public MessageBuilder friendRemoved(User removedFriend) {
+            String template = messagesKeeper.getMessage(MSG_FRIEND_DELETE_SUCCESS, MessageBuilder.this.language);
+            MessageBuilder.this.messageText = String.format(template, removedFriend.getName());
+            return MessageBuilder.this;
+        }
+
+        public MessageBuilder friendList(Session session) {
+            if (session.getUser().getFriends() == null || session.getUser().getFriends().isEmpty()) {
+                MessageBuilder.this.messageText = getMessageNoFriendsYet();
+                return MessageBuilder.this;
+            }
+
+            StringBuilder friendList = new StringBuilder();
+            int number = 1;
+            for (User friend : session.getUser().getFriends()) {
+                //TODO make separate method in MessageKeeper
+                friendList.append(String.format("%d. %s\n", number, friend.getName()));
+                number++;
+            }
+            MessageBuilder.this.messageText = friendList.toString();
+            return MessageBuilder.this;
+        }
+
+        private String getMessageNoFriendsYet() {
+            return messagesKeeper.getMessage(MSG_FRIEND_EMPTY_LIST, MessageBuilder.this.language);
+        }
+
+        /*## End of topic: Friend #########*/
     }
 
     public class Buttons {
@@ -402,6 +386,11 @@ public class MessageBuilder {
 
         public MessageBuilder inviteCode() {
             MessageBuilder.this.buttons = buttonsKeeper.getButton(BTN_INVITE, MessageBuilder.this.language);
+            return MessageBuilder.this;
+        }
+
+        public MessageBuilder selectLanguage() {
+            MessageBuilder.this.buttons = buttonsKeeper.getButton(BTN_LANGUAGE, MessageBuilder.this.language);
             return MessageBuilder.this;
         }
 
@@ -432,8 +421,17 @@ public class MessageBuilder {
             return MessageBuilder.this;
         }
 
-        public MessageBuilder selectLanguage() {
-            MessageBuilder.this.buttons = buttonsKeeper.getButton(BTN_LANGUAGE, MessageBuilder.this.language);
+        protected MessageBuilder friendRemove(Session session) {
+            List<List<Pair<String, String>>> buttons = new ArrayList<>();
+            if (session.getUser().getFriends() == null || session.getUser().getFriends().isEmpty()) {
+                MessageBuilder.this.messageText = getText().getMessageNoFriendsYet();
+            } else {
+                for (User friend : session.getUser().getFriends()) {
+                    String removeFriendCallback = String.format("friend_delete_%d", friend.getId());
+                    buttons.add(List.of(Pair.of(friend.getName(), removeFriendCallback)));
+                }
+                MessageBuilder.this.buttons = buttons;
+            }
             return MessageBuilder.this;
         }
 
