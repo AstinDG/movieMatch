@@ -64,9 +64,9 @@ public class Movie {
         this.detailsRu = detailsRu;
     }
 
-    public MovieDetails getMovieDetails(Language language){
+    public MovieDetails getMovieDetails(Language language) {
         MovieDetails details = null;
-        switch (language){
+        switch (language) {
             case EN -> details = this.detailsEn;
             case UA -> details = this.detailsUa;
             case RU -> details = this.detailsRu;
@@ -76,12 +76,10 @@ public class Movie {
     }
 
     public String getGenres(Language language) {
-        StringJoiner genres = new StringJoiner(GENRES_SEPARATOR);
-
-        for (Genre genre : this.genres){
-            genres.add(genre.getName(language));
-        }
-
-        return genres.toString();
+        StringJoiner genresJoiner = new StringJoiner(GENRES_SEPARATOR);
+        this.genres.forEach(genre ->
+                genresJoiner.add(genre.getName(language))
+        );
+        return genresJoiner.toString();
     }
 }

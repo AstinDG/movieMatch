@@ -105,43 +105,41 @@ public class SessionHandler {
                 List<Movie> movieList = session.getMovieList();
                 int randomIndex = (int) (Math.random() * movieList.size());
 
-                session.setLastMovieShown(movieList.get(randomIndex));
+                session.setLastRandomMovie(movieList.get(randomIndex));
             }
         }
     }
 
     public void setDislikeLastMovieShown(Session session) {
-        if (session.getLastMovieShown() == null) {
+        if (session.getLastRandomMovie() == null) {
             return;
             //TODO trow exception
         }
 
         User user = session.getUser();
 
-        user.getDislikedMovies().add(session.getLastMovieShown());
+        user.getDislikedMovies().add(session.getLastRandomMovie());
 
-        userService.saveDislikedMovie(user, session.getLastMovieShown());
+        userService.saveDislikedMovie(user, session.getLastRandomMovie());
 
         session.releaseLastMovieShown();
-        selectRandomMovie(session);
     }
 
     protected void setLikeLastMovieSown(Session session) {
-        if (session.getLastMovieShown() == null) {
+        if (session.getLastRandomMovie() == null) {
             return;
             //TODO trow exception
         }
 
         User user = session.getUser();
 
-        user.getFavoriteMovies().add(session.getLastMovieShown());
+        user.getFavoriteMovies().add(session.getLastRandomMovie());
 
-        userService.saveLikedMovie(user, session.getLastMovieShown());
+        userService.saveLikedMovie(user, session.getLastRandomMovie());
 
         checkMatches(session);
 
         session.releaseLastMovieShown();
-        selectRandomMovie(session);
 
     }
 
@@ -154,17 +152,17 @@ public class SessionHandler {
         Session friendSession = friendSessionOp.get();
         List<Movie> friendMovies = friendSession.getUser().getFavoriteMovies();
 
+        if(friendMovies != null) {
+            if (friendMovies.contains(session.getLastRandomMovie())) {
+                //notify user
+                session.setNewMatchMovie(session.getLastRandomMovie());
+                session.getMoviesMatchWithCurrentFriend().add(session.getLastRandomMovie());
 
-        if (friendMovies.contains(session.getLastMovieShown())) {
-            //notify user
-            session.setNewMatchMovie(session.getLastMovieShown());
-            session.getMoviesMatchWithCurrentFriend().add(session.getLastMovieShown());
-
-            //notify friend if we`re his/her current friend
-
-            if (session.getCurrentFriend().equals(friendSession.getCurrentFriend())) {
-                friendSession.setNewMatchMovie(session.getLastMovieShown());
-                friendSession.getMoviesMatchWithCurrentFriend().add(session.getLastMovieShown());
+                //notify friend if we`re his/her current friend
+                if (session.getCurrentFriend().equals(friendSession.getCurrentFriend())) {
+                    friendSession.setNewMatchMovie(session.getLastRandomMovie());
+                    friendSession.getMoviesMatchWithCurrentFriend().add(session.getLastRandomMovie());
+                }
             }
         }
 
@@ -172,28 +170,17 @@ public class SessionHandler {
 
     protected Optional<Movie> deleteFavoriteMovie(int movieId, Session session){
         Optional<Movie> movie = findMovie(movieId, session.getUser().getFavoriteMovies());
-        if(movie.isEmpty()){
-            return movie;
-        }
-        this.userService.deleteFavoriteMovies(session.getUser(), movie.get());
+        movie.ifPresent(m -> this.userService.deleteFavoriteMovies(session.getUser(), m));
         return movie;
     }
 
     protected Optional<Movie> deleteDislikedMovie(int movieId, Session session) {
         Optional<Movie> movie = findMovie(movieId, session.getUser().getDislikedMovies());
-        if(movie.isEmpty()){
-            return movie;
-        }
-        this.userService.deleteDislikedMovie(session.getUser(), movie.get());
+        movie.ifPresent(m -> this.userService.deleteDislikedMovie(session.getUser(), m));
         return movie;
     }
 
     private Optional<Movie> findMovie(int movieId, List<Movie> list){
-        for(Movie movie : list){
-            if(movie.getId().equals(movieId)){
-                return Optional.of(movie);
-            }
-        }
-        return Optional.empty();
+        return list.stream().filter(movie -> movie.getId().equals(movieId)).findAny();
     }
 }
