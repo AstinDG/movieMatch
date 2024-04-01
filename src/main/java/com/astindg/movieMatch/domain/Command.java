@@ -122,7 +122,7 @@ public enum Command {
     RETURN_MAIN_MENU {
         @Override
         public Message getAnswer(Session session, MessageBuilder messageBuilder) {
-            return messageBuilder.setLanguage(session.getUser().getLanguage()).getText().selectOption().getButtons().friendRemove(session).getKeyboards().initial().build();
+            return messageBuilder.setLanguage(session.getUser().getLanguage()).getText().selectOption().getKeyboards().initial().build();
         }
     },
     SETTINGS {
