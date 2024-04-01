@@ -300,7 +300,7 @@ public class CommandHandlerImpl implements CommandHandler {
 
     }
 
-    private Message setFriend(User user, String callbackQuery) {
+    private Message setFriend(User user, String callbackData) {
         Optional<Session> session = sessionHandler.findSession(user);
         if (session.isEmpty()) {
             return getReply(user, Command.INITIAL);
@@ -308,7 +308,7 @@ public class CommandHandlerImpl implements CommandHandler {
 
         int friendId;
         try {
-            friendId = Integer.parseInt(callbackQuery.substring("friend_set_".length()));
+            friendId = Integer.parseInt(callbackData.substring("friend_set_".length()));
         } catch (NumberFormatException ex) {
             return messageBuilder.setLanguage(user.getLanguage()).getText().friendSelectError().build();
         }
@@ -324,7 +324,7 @@ public class CommandHandlerImpl implements CommandHandler {
                 .getKeyboards().movie().build();
     }
 
-    private Message deleteFriend(User user, String callBackQuery) {
+    private Message deleteFriend(User user, String callbackData) {
         if (sessionHandler.findSession(user).isEmpty()) {
             return getReply(user, Command.INITIAL);
         } else {
@@ -333,7 +333,7 @@ public class CommandHandlerImpl implements CommandHandler {
 
         int friendId;
         try {
-            friendId = Integer.parseInt(callBackQuery.substring("friend_delete_".length()));
+            friendId = Integer.parseInt(callbackData.substring("friend_delete_".length()));
         } catch (NumberFormatException ex) {
             return messageBuilder.setLanguage(user.getLanguage()).getText().friendDeleteError().build();
         }
@@ -346,7 +346,7 @@ public class CommandHandlerImpl implements CommandHandler {
         return messageBuilder.setLanguage(user.getLanguage()).getText().friendRemoved(friend.get()).build();
     }
 
-    private Message setLanguage(User user, String callBackQuery) {
+    private Message setLanguage(User user, String callbackData) {
         Optional<Session> session = sessionHandler.findSession(user);
         if (session.isEmpty()) {
             return getReply(user, Command.INITIAL);
@@ -356,7 +356,7 @@ public class CommandHandlerImpl implements CommandHandler {
 
         Language language;
         try {
-            language = Language.valueOf(callBackQuery.substring("set_language_".length()));
+            language = Language.valueOf(callbackData.substring("set_language_".length()));
         } catch (IllegalArgumentException exception) {
             exception.printStackTrace();
             return messageBuilder.setLanguage(user.getLanguage()).getText().selectLanguageError().build();

@@ -26,6 +26,13 @@ public class Message {
         this.text = text;
     }
 
+    public Message(String text, List<List<Pair<String, String>>> buttons, List<List<String>> keyboard, File image) {
+        this.text = text;
+        this.buttons = buttons;
+        this.keyboard = keyboard;
+        this.image = image;
+    }
+
     public boolean hasButtons() {
         return (buttons != null && !buttons.isEmpty());
     }

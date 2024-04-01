@@ -13,7 +13,7 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public record CommandTranslator(Environment env) {
-    private static final Map<String, Command> commandMapTemplate = new HashMap<>();
+    private static final Map<String, Command> commandMap = new HashMap<>();
 
     private static final String INITIAL_COMMAND = "/start";
     private static final String ADD_FRIEND = "user.keyboard.friend.add.";
@@ -34,6 +34,8 @@ public record CommandTranslator(Environment env) {
     private static final String SETTINGS = "user.keyboard.initial.settings.";
     private static final String SETTINGS_LANGUAGE = "user.keyboard.settings.language.";
 
+    private static final Map<String, Command> commandMapTemplate = new HashMap<>();
+
     static {
         commandMapTemplate.put(ADD_FRIEND, Command.FRIEND_ADD);
         commandMapTemplate.put(RETURN, Command.RETURN_MAIN_MENU);
@@ -53,8 +55,6 @@ public record CommandTranslator(Environment env) {
         commandMapTemplate.put(SETTINGS, Command.SETTINGS);
         commandMapTemplate.put(SETTINGS_LANGUAGE, Command.LANGUAGE);
     }
-
-    private static final Map<String, Command> commandMap = new HashMap<>();
 
     public Optional<Command> translateCommand(String command) {
         Optional<Command> translatedCommand;

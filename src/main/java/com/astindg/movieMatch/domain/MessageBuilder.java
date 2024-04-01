@@ -1,6 +1,7 @@
 package com.astindg.movieMatch.domain;
 
 import com.astindg.movieMatch.model.*;
+import com.astindg.movieMatch.util.exceprions.MessageBuilderSetupException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -10,47 +11,16 @@ import java.util.*;
 
 @Component
 public class MessageBuilder {
-    private static final String MSG_INITIAL = "initial";
-    private static final String MSG_OPTION = "select_option";
-    private static final String MSG_FRIEND_INVITE = "friend.invite";
-    private static final String MSG_FRIEND_INVITE_BTN = "friend.invite.btn";
-    private static final String MSG_FRIEND_INVITE_INCORRECT_CODE = "friend.invite.incorrect_code";
-    private static final String MSG_FRIEND_INVITE_CODE_NOT_FOUND = "friend.invite.not_found";
-    private static final String MSG_FRIEND_INVITE_ALREADY_IN_LIST = "friend.invite.already_in_list_error";
-    private static final String MSG_FRIEND_SELECT = "friend.select";
-    private static final String MSG_FRIEND_SELECTED = "friend.selected";
-    private static final String MSG_FRIEND_DELETE = "friend.delete";
-    private static final String MSG_FRIEND_DELETE_SUCCESS = "friend.delete.success";
-    private static final String MSG_FRIEND_NEW = "friend.new";
-    private static final String MSG_FRIEND_SET_ERROR = "friend.error.set_friend";
-    private static final String MSG_FRIEND_DELETE_ERROR = "friend.error.delete_friend";
-    private static final String MSG_FRIEND_EMPTY_LIST = "friend.error.empty_list";
+
     private static final String MSG_MOVIE = "movie";
-    private static final String MSG_MOVIE_FAVORITE_HEADER = "movie.favorite_header";
-    private static final String MSG_MOVIE_DISLIKED_HEADER = "movie.disliked_header";
-    private static final int LIST_MOVIES_BUTTONS_LENGTH = 5;
-    private static final int LIST_FRIENDS_BUTTONS_LENGTH = 5;
-    private static final String MSG_MOVIE_FAVORITE = "movie.favorite";
-    private static final String MSG_MOVIE_DELETED_FROM_FAVORITE_LIST = "movie.favorite.deleted_successfully";
-    private static final String MSG_MOVIE_DELETED_FROM_DISLIKED_LIST = "movie.disliked.deleted_successfully";
-    private static final String MSG_MOVIE_NEW_MATCH = "movie.notify_new_match";
-    private static final String MSG_MOVIE_MATCH_NOT_STARTED_ERROR = "movie.error.null.list";
-    private static final String MSG_MOVIE_EMPTY_ERROR = "movie.error.empty.list";
-    private static final String MSG_MOVIE_FAVORITE_EMPTY_ERROR = "movie.error.empty.favorite";
-    private static final String MSG_MOVIE_DISLIKED_EMPTY_ERROR = "movie.error.empty.disliked";
-    private static final String MSG_FRIEND_NOT_SELECTED_ERROR = "movie.error.friend_not_selected";
-    private static final String MSG_MATCHES_FRIEND_EMPTY_ERROR = "movie.error.matches_friend_empty";
-    private static final String MSG_NOT_FOUND_IN_FAVORITE_LIST_ERROR = "movie.error.favorite_not_found";
-    private static final String MSG_NOT_FOUND_IN_DISLIKED_LIST_ERROR = "movie.error.disliked_not_found";
-    private static final String MSG_SETTINGS_LANG = "settings.select_language";
-    private static final String MSG_SETTINGS_LANG_ERROR = "settings.select_language.error";
-    private static final String MSG_UNKNOWN_COMMAND_ERROR = "error.unknown_command";
-    private static final String MSG_UNKNOWN_CALLBACK_ERROR = "error.unknown_callback";
-    private static final String MSG_TRY_AGAIN_OR_CONTACT_DEVS_PS = "error.try_again_or_contact_devs";
 
     private final MessagesKeeper messagesKeeper;
     private final KeyboardsKeeper keyboardsKeeper;
     private final ButtonsKeeper buttonsKeeper;
+
+    private final MessageText textObj;
+    private final Buttons buttonsObj;
+    private final Keyboards keyboardsObj;
 
     private Language language;
     private String messageText;
@@ -63,6 +33,9 @@ public class MessageBuilder {
         this.messagesKeeper = messagesKeeper;
         this.keyboardsKeeper = keyboardsKeeper;
         this.buttonsKeeper = buttonsKeeper;
+        this.textObj = new MessageText();
+        this.buttonsObj = new Buttons();
+        this.keyboardsObj = new Keyboards();
     }
 
     protected MessageBuilder setLanguage(Language language) {
@@ -70,13 +43,21 @@ public class MessageBuilder {
         return this;
     }
 
-    public MessageBuilder getRandomMovie(Session session) {
+    public MessageBuilder getRandomMovie(Session session) throws MessageBuilderSetupException {
+        if (this.language == null) {
+            throw new MessageBuilderSetupException("An error occurred while calling getRandomMovie(Session session): Language is required");
+        }
+
         Movie movie = session.getLastRandomMovie();
 
         return getMovieMessage(movie);
     }
 
-    public MessageBuilder getMovieMessage(Movie movie) {
+    public MessageBuilder getMovieMessage(Movie movie) throws MessageBuilderSetupException {
+        if (this.language == null) {
+            throw new MessageBuilderSetupException("An error occurred while calling getMovieMessage(Movie movie): Language is required");
+        }
+
         String template = messagesKeeper.getMessage(MSG_MOVIE, this.language);
         MovieDetails movieDetails = movie.getMovieDetails(this.language);
 
@@ -92,44 +73,90 @@ public class MessageBuilder {
         return this;
     }
 
-    public MessageText getText() {
-        //TODO throw an exception if no language was specified
-        return new MessageText();
+    public MessageText getText() throws MessageBuilderSetupException {
+        if (this.language == null) {
+            throw new MessageBuilderSetupException("An error occurred while calling getText(): Language is required");
+        }
+
+        return textObj;
     }
 
-    public Keyboards getKeyboards() {
-        //TODO throw an exception if buttons is already installed
-        return new Keyboards();
+    public Keyboards getKeyboards() throws MessageBuilderSetupException {
+        if (this.buttons != null) {
+            throw new MessageBuilderSetupException("An error occurred while calling getKeyboards(): Buttons are already installed");
+        }
+        if (this.language == null) {
+            throw new MessageBuilderSetupException("An error occurred while calling getKeyboards(): Language is required");
+        }
+
+        return this.keyboardsObj;
     }
 
-    public Buttons getButtons() {
-        //TODO throw an exception if a keyboard is already installed
-        return new Buttons();
+    public Buttons getButtons() throws MessageBuilderSetupException {
+        if (this.keyboard != null) {
+            throw new MessageBuilderSetupException("An error occurred while calling getButtons(): Keyboard are already installed");
+        }
+        if (this.language == null) {
+            throw new MessageBuilderSetupException("An error occurred while calling getButtons(): Language is required");
+        }
+
+        return this.buttonsObj;
     }
 
-    protected Message build() {
+    public Message build() {
+        Message message = new Message(this.messageText, this.buttons, this.keyboard, this.messageImage);
 
-        Message message = new Message();
-
-        message.setText(this.messageText);
-        this.messageText = null;
-
-        message.setKeyboard(this.keyboard);
-        this.keyboard = null;
-
-        message.setButtons(this.buttons);
-        this.buttons = null;
-
-        message.setImage(this.messageImage);
-        this.messageImage = null;
-
-        this.language = null;
+        resetFields();
 
         return message;
     }
 
+    private void resetFields() {
+        this.messageText = null;
+        this.keyboard = null;
+        this.buttons = null;
+        this.messageImage = null;
+        this.language = null;
+    }
+
     public class MessageText {
-        private MessageText(){
+
+        private static final String MSG_INITIAL = "initial";
+        private static final String MSG_OPTION = "select_option";
+        private static final String MSG_FRIEND_INVITE = "friend.invite";
+        private static final String MSG_FRIEND_INVITE_BTN = "friend.invite.btn";
+        private static final String MSG_FRIEND_INVITE_INCORRECT_CODE = "friend.invite.incorrect_code";
+        private static final String MSG_FRIEND_INVITE_CODE_NOT_FOUND = "friend.invite.not_found";
+        private static final String MSG_FRIEND_INVITE_ALREADY_IN_LIST = "friend.invite.already_in_list_error";
+        private static final String MSG_FRIEND_SELECT = "friend.select";
+        private static final String MSG_FRIEND_SELECTED = "friend.selected";
+        private static final String MSG_FRIEND_DELETE = "friend.delete";
+        private static final String MSG_FRIEND_DELETE_SUCCESS = "friend.delete.success";
+        private static final String MSG_FRIEND_NEW = "friend.new";
+        private static final String MSG_FRIEND_SET_ERROR = "friend.error.set_friend";
+        private static final String MSG_FRIEND_DELETE_ERROR = "friend.error.delete_friend";
+        private static final String MSG_FRIEND_EMPTY_LIST = "friend.error.empty_list";
+        private static final String MSG_MOVIE_FAVORITE_HEADER = "movie.favorite_header";
+        private static final String MSG_MOVIE_DISLIKED_HEADER = "movie.disliked_header";
+        private static final String MSG_MOVIE_FAVORITE = "movie.favorite";
+        private static final String MSG_MOVIE_DELETED_FROM_FAVORITE_LIST = "movie.favorite.deleted_successfully";
+        private static final String MSG_MOVIE_DELETED_FROM_DISLIKED_LIST = "movie.disliked.deleted_successfully";
+        private static final String MSG_MOVIE_NEW_MATCH = "movie.notify_new_match";
+        private static final String MSG_MOVIE_MATCH_NOT_STARTED_ERROR = "movie.error.null.list";
+        private static final String MSG_MOVIE_EMPTY_ERROR = "movie.error.empty.list";
+        private static final String MSG_MOVIE_FAVORITE_EMPTY_ERROR = "movie.error.empty.favorite";
+        private static final String MSG_MOVIE_DISLIKED_EMPTY_ERROR = "movie.error.empty.disliked";
+        private static final String MSG_FRIEND_NOT_SELECTED_ERROR = "movie.error.friend_not_selected";
+        private static final String MSG_MATCHES_FRIEND_EMPTY_ERROR = "movie.error.matches_friend_empty";
+        private static final String MSG_NOT_FOUND_IN_FAVORITE_LIST_ERROR = "movie.error.favorite_not_found";
+        private static final String MSG_NOT_FOUND_IN_DISLIKED_LIST_ERROR = "movie.error.disliked_not_found";
+        private static final String MSG_SETTINGS_LANG = "settings.select_language";
+        private static final String MSG_SETTINGS_LANG_ERROR = "settings.select_language.error";
+        private static final String MSG_UNKNOWN_COMMAND_ERROR = "error.unknown_command";
+        private static final String MSG_UNKNOWN_CALLBACK_ERROR = "error.unknown_callback";
+        private static final String MSG_TRY_AGAIN_OR_CONTACT_DEVS_PS = "error.try_again_or_contact_devs";
+
+        private MessageText() {
 
         }
 
@@ -379,6 +406,11 @@ public class MessageBuilder {
         private static final String BTN_MOVIE_REMOVE_DISLIKED = "movie.remove.disliked.";
         private static final String BTN_SWITCH_PAGE_PREVIOUS = "switch_page.previous.";
         private static final String BTN_SWITCH_PAGE_NEXT = "switch_page.next.";
+
+        private static final String MSG_MOVIE_FAVORITE = "movie.favorite";
+
+        private static final int LIST_MOVIES_BUTTONS_LENGTH = 5;
+        private static final int LIST_FRIENDS_BUTTONS_LENGTH = 5;
 
         private Buttons() {
 
