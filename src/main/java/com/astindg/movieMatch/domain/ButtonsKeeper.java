@@ -6,8 +6,7 @@ import org.springframework.core.env.Environment;
 
 import java.util.*;
 
-import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static java.nio.charset.StandardCharsets.UTF_8;
+import static com.astindg.movieMatch.util.PropertyReader.getProperty;
 
 public record ButtonsKeeper(Environment env) {
 
@@ -39,13 +38,13 @@ public record ButtonsKeeper(Environment env) {
         String buttonPropertyKey = BUTTONS_PROPERTY_KEY + INVITE_BUTTON_KEY;
 
         String buttonCallbackKey = buttonPropertyKey + CALLBACK_KEY;
-        String buttonCallback = getStringFromProperty(buttonCallbackKey);
+        String buttonCallback = getProperty(env, buttonCallbackKey);
 
         for (Language language : Language.values()) {
             List<List<Pair<String, String>>> buttons = new ArrayList<>();
 
             String buttonValueKey = buttonPropertyKey + language.toString().toLowerCase();
-            String buttonValue = getStringFromProperty(buttonValueKey);
+            String buttonValue = getProperty(env, buttonValueKey);
             buttons.add(List.of(Pair.of(buttonValue, buttonCallback)));
 
             inviteButtons.put(language, buttons);
@@ -72,8 +71,8 @@ public record ButtonsKeeper(Environment env) {
                     String languageCallbackKey = languagePropertyKey + CALLBACK_KEY;
                     languagePropertyKey = languagePropertyKey + language.toString().toLowerCase();
 
-                    String languageButtonValue = getStringFromProperty(languagePropertyKey);
-                    String languageCallback = getStringFromProperty(languageCallbackKey);
+                    String languageButtonValue = getProperty(env, languagePropertyKey);
+                    String languageCallback = getProperty(env, languageCallbackKey);
 
                     buttons.add(List.of(Pair.of(languageButtonValue, languageCallback)));
                 }
@@ -88,21 +87,21 @@ public record ButtonsKeeper(Environment env) {
         Map<Language, List<List<Pair<String, String>>>> removeDislikedButtons = new HashMap<>();
 
         String removeFavoriteBtnProp = BUTTONS_PROPERTY_KEY + MOVIE_REMOVE_FAVORITE_KEY;
-        String removeFavoriteBtnCallback = getStringFromProperty(removeFavoriteBtnProp + CALLBACK_KEY);
+        String removeFavoriteBtnCallback = getProperty(env, removeFavoriteBtnProp + CALLBACK_KEY);
         String removeDislikedBtnProp = BUTTONS_PROPERTY_KEY + MOVIE_REMOVE_DISLIKED_KEY;
-        String removeDislikedBtnCallback = getStringFromProperty(removeDislikedBtnProp + CALLBACK_KEY);
+        String removeDislikedBtnCallback = getProperty(env, removeDislikedBtnProp + CALLBACK_KEY);
 
         for(Language language : Language.values()){
             String lang = language.toString().toLowerCase();
 
             List<List<Pair<String, String>>> removeFavoriteBtn = new ArrayList<>();
-            String removeFavoriteBtnValue = getStringFromProperty(removeFavoriteBtnProp + lang);
+            String removeFavoriteBtnValue = getProperty(env, removeFavoriteBtnProp + lang);
             removeFavoriteBtn.add(List.of(Pair.of(removeFavoriteBtnValue, removeFavoriteBtnCallback)));
 
             removeFavoriteButtons.put(language, removeFavoriteBtn);
 
             List<List<Pair<String, String>>> removeDislikedBtn = new ArrayList<>();
-            String removeDislikedBtnValue = getStringFromProperty(removeDislikedBtnProp + lang);
+            String removeDislikedBtnValue = getProperty(env, removeDislikedBtnProp + lang);
             removeDislikedBtn.add(List.of(Pair.of(removeDislikedBtnValue, removeDislikedBtnCallback)));
 
             removeDislikedButtons.put(language, removeDislikedBtn);
@@ -117,11 +116,11 @@ public record ButtonsKeeper(Environment env) {
         Map<Language, List<List<Pair<String, String>>>> switchButtonNext = new HashMap<>();
         String previousButtonKey = BUTTONS_PROPERTY_KEY + SWITCH_BUTTON_PREV_KEY;
         String nextButtonKey = BUTTONS_PROPERTY_KEY + SWITCH_BUTTON_NEXT_KEY;
-        String switchButtonCallback = getStringFromProperty(BUTTONS_PROPERTY_KEY + SWITCH_BUTTONS + CALLBACK_KEY);
+        String switchButtonCallback = getProperty(env, BUTTONS_PROPERTY_KEY + SWITCH_BUTTONS + CALLBACK_KEY);
 
         for(Language language : Language.values()){
-            String previousButtonValue = getStringFromProperty(previousButtonKey + language.toString().toLowerCase());
-            String nextButtonValue = getStringFromProperty(nextButtonKey + language.toString().toLowerCase());
+            String previousButtonValue = getProperty(env, previousButtonKey + language.toString().toLowerCase());
+            String nextButtonValue = getProperty(env, nextButtonKey + language.toString().toLowerCase());
 
             switchButtonPrevious.put(language, List.of(List.of(Pair.of(previousButtonValue, switchButtonCallback))));
             switchButtonNext.put(language, List.of(List.of(Pair.of(nextButtonValue, switchButtonCallback))));
@@ -129,9 +128,5 @@ public record ButtonsKeeper(Environment env) {
 
         BUTTONS.put(SWITCH_BUTTON_PREV_KEY, switchButtonPrevious);
         BUTTONS.put(SWITCH_BUTTON_NEXT_KEY, switchButtonNext);
-    }
-
-    private String getStringFromProperty(String key){
-        return new String(Objects.requireNonNull(env.getProperty(key)).getBytes(ISO_8859_1), UTF_8);
     }
 }

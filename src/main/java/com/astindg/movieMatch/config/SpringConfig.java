@@ -15,18 +15,14 @@ import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
-import java.util.Objects;
-
-import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static java.nio.charset.StandardCharsets.UTF_8;
-
+import static com.astindg.movieMatch.util.PropertyReader.getProperty;
 
 @Configuration
 @ComponentScan("com.astindg.movieMatch")
 @PropertySource("classpath:application.properties")
 @EnableJpaRepositories("com.astindg.movieMatch.repositories")
 @EntityScan("com.astindg.movieMatch.model")
-public class SpringConfig {
+public class SpringConfig{
     private static final String BOT_TOKEN_PROPERTY_KEY = "movie_match.telegram_bot.token";
     private static final String BOT_NAME_PROPERTY_KEY = "movie_match.telegram_bot.name";
 
@@ -46,8 +42,8 @@ public class SpringConfig {
 
     @Bean
     public TelegramBot getTelegramBot(TelegramBotsApi api, CommandHandler commandHandler, CommandTranslator translator){
-        String botName = getProperty(BOT_NAME_PROPERTY_KEY);
-        String botToken = getProperty(BOT_TOKEN_PROPERTY_KEY);
+        String botName = getProperty(this.env, BOT_NAME_PROPERTY_KEY);
+        String botToken = getProperty(this.env, BOT_TOKEN_PROPERTY_KEY);
 
         TelegramBot bot = new TelegramBot(botToken, botName, commandHandler, translator);
         try {
@@ -56,14 +52,6 @@ public class SpringConfig {
             e.printStackTrace();
         }
         return bot;
-    }
-
-    private String getProperty(String key){
-        return new String(
-                Objects.requireNonNull(
-                        env.getProperty(key)
-                ).getBytes(ISO_8859_1), UTF_8
-        );
     }
 
 }

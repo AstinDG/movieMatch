@@ -5,8 +5,7 @@ import org.springframework.core.env.Environment;
 
 import java.util.*;
 
-import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static java.nio.charset.StandardCharsets.UTF_8;
+import static com.astindg.movieMatch.util.PropertyReader.getProperty;
 
 public record MessagesKeeper(Environment env) {
 
@@ -68,10 +67,8 @@ public record MessagesKeeper(Environment env) {
                         '.' +
                         language.toString().toLowerCase();
 
-                String message = new String(
-                        Objects.requireNonNull(env.getProperty(propertyKey)).getBytes(ISO_8859_1),
-                        UTF_8
-                );
+                String message = getProperty(env, propertyKey);
+
                 map.put(language, message);
             }
             messages.put(key, map);

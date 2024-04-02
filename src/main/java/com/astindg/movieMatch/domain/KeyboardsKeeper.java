@@ -3,12 +3,16 @@ package com.astindg.movieMatch.domain;
 import com.astindg.movieMatch.model.Language;
 import org.springframework.core.env.Environment;
 
-import java.util.*;
 
-import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static java.nio.charset.StandardCharsets.UTF_8;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static com.astindg.movieMatch.util.PropertyReader.getProperty;
 
 public record KeyboardsKeeper(Environment env) {
+
     private static final String KEYBOARDS_PROPERTY_KEY = "user.keyboard.";
     private static final String RETURN_BUTTON_KEY = "user.keyboard.button.return_main";
     private static final Map<String, List<List<String>>> KEYBOARDS_TEMPLATES = new HashMap<>();
@@ -93,20 +97,18 @@ public record KeyboardsKeeper(Environment env) {
         List<String> buttons = new ArrayList<>();
 
         for (String buttonKey : keyRow) {
-
-            String buttonPropertyKey;
+            StringBuilder buttonPropertyKey = new StringBuilder();
             if (buttonKey.endsWith("return_main")) {
-                buttonPropertyKey = buttonKey;
+                buttonPropertyKey.append(buttonKey);
             } else {
-                buttonPropertyKey = keyboardPropertyKey + '.' + buttonKey;
+                buttonPropertyKey.append(keyboardPropertyKey);
+                buttonPropertyKey.append('.');
+                buttonPropertyKey.append(buttonKey);
             }
-            buttonPropertyKey += '.' + language.toString().toLowerCase();
+            buttonPropertyKey.append('.');
+            buttonPropertyKey.append(language.toString().toLowerCase());
 
-            String buttonValue = new String(
-                    Objects.requireNonNull(
-                            env.getProperty(buttonPropertyKey)
-                    ).getBytes(ISO_8859_1), UTF_8
-            );
+            String buttonValue = getProperty(this.env, buttonPropertyKey.toString());
 
             buttons.add(buttonValue);
         }
