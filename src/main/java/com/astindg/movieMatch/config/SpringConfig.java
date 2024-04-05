@@ -22,7 +22,7 @@ import static com.astindg.movieMatch.util.PropertyReader.getProperty;
 @PropertySource("classpath:application.properties")
 @EnableJpaRepositories("com.astindg.movieMatch.repositories")
 @EntityScan("com.astindg.movieMatch.model")
-public class SpringConfig{
+public class SpringConfig {
     private static final String BOT_TOKEN_PROPERTY_KEY = "movie_match.telegram_bot.token";
     private static final String BOT_NAME_PROPERTY_KEY = "movie_match.telegram_bot.name";
 

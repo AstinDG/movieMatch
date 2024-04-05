@@ -98,13 +98,11 @@ public record KeyboardsKeeper(Environment env) {
 
         for (String buttonKey : keyRow) {
             StringBuilder buttonPropertyKey = new StringBuilder();
-            if (buttonKey.endsWith("return_main")) {
-                buttonPropertyKey.append(buttonKey);
-            } else {
+            if (!buttonKey.endsWith("return_main")) {
                 buttonPropertyKey.append(keyboardPropertyKey);
                 buttonPropertyKey.append('.');
-                buttonPropertyKey.append(buttonKey);
             }
+            buttonPropertyKey.append(buttonKey);
             buttonPropertyKey.append('.');
             buttonPropertyKey.append(language.toString().toLowerCase());
 

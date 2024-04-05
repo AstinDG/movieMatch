@@ -22,16 +22,25 @@
 
             }
 
+
         </style>
     </head>
     <body>
         <header class="header container-fluid bg-dark ">
             <div class="row">
-                <div class="header-stats col-md-2 offset-5 text-muted">
+                <div class="col-md-4"></div>
+                <div class="col-md-1"></div>
+                <div class="header-stats col-md-2 text-muted">
                     <div class="header-stats user_amount">Amount of users: <span>[[${usersAmount}]]</span></div>
                     <div class="header-stats message_count">Messages for last 5 minutes:
                         <span>[[${countMessages}]]</span></div>
                     <div class="header-stats movie_amount">Amount of movies: <span>[[${moviesAmount}]]</span></div>
+                </div>
+                <div class="col-md-4"></div>
+                <div class="col-md-1">
+                    <form th:action="@{/logout}" th:method="POST" style="margin-top: 25%;">
+                        <input type="submit" value="Logout">
+                    </form>
                 </div>
             </div>
         </header>
