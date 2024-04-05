@@ -11,4 +11,9 @@ public class DefaultController {
     public String get(){
         return "redirect:/admin";
     }
+
+    @GetMapping("/login")
+    public String login() {
+        return "login";
+    }
 }
