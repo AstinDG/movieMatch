@@ -30,8 +30,8 @@ public class UserService {
         this.userRepository.save(user);
     }
 
-    public User findByChatId(Long chatId){
-        return this.userRepository.findByChatId(chatId);
+    public Optional<User> findByChatId(Long chatId){
+        return Optional.ofNullable(this.userRepository.findByChatId(chatId));
     }
 
     public Integer getUsersAmount(){
@@ -93,5 +93,13 @@ public class UserService {
     public void deleteDislikedMovie(User user, Movie movie) {
         user.getDislikedMovies().remove(movie);
         this.userRepository.deleteDislikedMovie(user.getId(), movie.getId());
+    }
+
+    public void saveLanguage(User user) {
+        this.userRepository.saveLanguage(user.getId(), user.getLanguage().toString());
+    }
+
+    public void deleteFriend(User user, User friend) {
+        this.userRepository.deleteFriend(user.getId(), friend.getId());
     }
 }
