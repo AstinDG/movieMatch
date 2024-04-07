@@ -14,9 +14,19 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     User findByChatId(Long chatId);
 
     @Modifying
+    @Query(value = "UPDATE Users SET lang=:language where id=:userId", nativeQuery = true)
+    @Transactional
+    void saveLanguage(@Param("userId") Integer id, @Param("language") String language);
+
+    @Modifying
     @Query(value = "insert into Friends (user_id, friend) VALUES (:userId,:friendId)", nativeQuery = true)
     @Transactional
     void saveFriendByIds(@Param("userId") Integer userId, @Param("friendId") Integer friendId);
+
+    @Modifying
+    @Query(value = "delete from Friends WHERE (user_id=:userId AND friend=:friendId) OR (user_id=:friendId AND friend=:userId)", nativeQuery = true)
+    @Transactional
+    void deleteFriend(@Param("userId") Integer userId, @Param("friendId") Integer friendId);
 
     @Modifying
     @Query(value = "insert into Favorite_movies(user_id, movie_id) VALUES (:userId, :movieId)", nativeQuery = true)

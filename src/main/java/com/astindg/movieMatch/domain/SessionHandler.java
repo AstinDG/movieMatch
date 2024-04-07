@@ -7,6 +7,7 @@ import com.astindg.movieMatch.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -27,15 +28,16 @@ public class SessionHandler {
 
     protected Session getUserSession(User user) {
         if (!sessions.containsKey(user.getChatId())) {
-            User foundUser = userService.findByChatId(user.getChatId());
+            Optional<User> foundUser = userService.findByChatId(user.getChatId());
 
-            if (foundUser != null) {
-                user = foundUser;
+            if (foundUser.isPresent()) {
+                user = foundUser.get();
+            } else {
+                userService.save(user);
             }
 
             Session session = new Session(movieService);
             session.setUser(user);
-            userService.save(user);
             this.sessions.put(user.getChatId(), session);
 
             return session;
@@ -85,16 +87,6 @@ public class SessionHandler {
             Session session = this.sessions.get(user.getChatId());
             return Optional.of(session);
         } else {
-            User foundUser = userService.findByChatId(user.getChatId());
-
-            if (foundUser != null) {
-                user = foundUser;
-                Session session = new Session(movieService);
-                session.setUser(user);
-                this.sessions.put(user.getChatId(), session);
-                return Optional.of(session);
-            }
-
             return Optional.empty();
         }
     }
@@ -166,6 +158,14 @@ public class SessionHandler {
             }
         }
 
+    }
+
+    protected Optional<User> deleteFriend(Session session, Integer friendId){
+        Optional<User> deletedFriend = session.deleteFriendById(friendId);
+
+        deletedFriend.ifPresent(user -> userService.deleteFriend(session.getUser(), user));
+
+        return deletedFriend;
     }
 
     protected Optional<Movie> deleteFavoriteMovie(int movieId, Session session){

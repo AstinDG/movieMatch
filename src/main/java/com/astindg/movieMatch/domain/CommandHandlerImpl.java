@@ -6,6 +6,8 @@ import com.astindg.movieMatch.model.Movie;
 import com.astindg.movieMatch.model.User;
 import com.astindg.movieMatch.services.UserService;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
@@ -14,6 +16,7 @@ import java.util.*;
 
 @Component
 public class CommandHandlerImpl implements CommandHandler {
+    private static final Logger log = LoggerFactory.getLogger(CommandHandlerImpl.class);
 
     private final MessageBuilder messageBuilder;
     private final SessionHandler sessionHandler;
@@ -33,8 +36,8 @@ public class CommandHandlerImpl implements CommandHandler {
     }
 
     public Message getReply(User user, Command command) {
-
         Session session = sessionHandler.getUserSession(user);
+        log.debug("Command from " + session.getUser() + "- COMMAND:" + command.toString());
 
         switch (command) {
             case FRIEND_ADD -> {
@@ -76,19 +79,22 @@ public class CommandHandlerImpl implements CommandHandler {
         String callbackData = callbackQuery.getData();
 
         Session session = sessionHandler.getUserSession(user);
+        user = session.getUser();
+
+        log.debug("Callback from " + session.getUser() + " callbackData=" + callbackData);
 
         Message message;
         if (callbackData.equals("code_process")) {
             session.enableProcessingCode();
             message = messageBuilder.setLanguage(session.getUser().getLanguage()).getText().inviteCode().build();
         } else if (callbackData.startsWith("friend_delete_")) {
-            message = deleteFriend(user, callbackData);
+            message = deleteFriend(session, callbackData);
         } else if (callbackData.startsWith("friend_set_")) {
             message = setFriend(user, callbackData);
         } else if (callbackData.startsWith("set_language_")) {
             message = setLanguage(user, callbackData);
         } else if (callbackData.startsWith("show_friend_list_")){
-            message = editFriendButtons(user, callbackQuery);
+            message = editFriendButtons(session, callbackQuery);
         } else if (callbackData.startsWith("show_movie_favorite_list_") || callbackData.startsWith("show_movie_disliked_list_")) {
             message = editMovieButtons(user, callbackQuery);
         } else if (callbackData.startsWith("show_movie_")) {
@@ -104,15 +110,11 @@ public class CommandHandlerImpl implements CommandHandler {
         return message;
     }
 
-    private Message editFriendButtons(User user, CallbackQuery callback){
+    private Message editFriendButtons(Session session, CallbackQuery callback){
         String[] data = callback.getData().split("_");
         String friendStartIndex = data[3];
 
-        Optional<Session> session = sessionHandler.findSession(user);
-        if (session.isEmpty()) {
-            return getReply(user, Command.INITIAL);
-        }
-        Language usrLang = session.get().getUser().getLanguage();
+        Language usrLang = session.getUser().getLanguage();
         int start;
 
         try {
@@ -122,7 +124,7 @@ public class CommandHandlerImpl implements CommandHandler {
             return new Message("Error");
         }
 
-        Message editMessage = messageBuilder.setLanguage(usrLang).getButtons().friendList(session.get(), start).build();
+        Message editMessage = messageBuilder.setLanguage(usrLang).getButtons().friendList(session, start).build();
         editMessage.setEditMessageId(callback.getMessage().getMessageId());
         editMessage.setHasEditButtons(true);
         return editMessage;
@@ -324,46 +326,40 @@ public class CommandHandlerImpl implements CommandHandler {
                 .getKeyboards().movie().build();
     }
 
-    private Message deleteFriend(User user, String callbackData) {
-        if (sessionHandler.findSession(user).isEmpty()) {
-            return getReply(user, Command.INITIAL);
-        } else {
-            user = sessionHandler.getUserSession(user).getUser();
-        }
+    private Message deleteFriend(Session session, String callbackData) {
 
+        User user = session.getUser();
         int friendId;
         try {
             friendId = Integer.parseInt(callbackData.substring("friend_delete_".length()));
         } catch (NumberFormatException ex) {
+            log.warn("Incorrect callback from " + user + " CALLBACKDATA:" + callbackData);
             return messageBuilder.setLanguage(user.getLanguage()).getText().friendDeleteError().build();
         }
+        log.debug("Trying to delete friend... " + user + ", friendId=" + friendId);
+        Optional<User> friend = sessionHandler.deleteFriend(session, friendId);
 
-        Session sessionUser = sessionHandler.getUserSession(user);
-        Optional<User> friend = sessionUser.deleteFriendById(friendId);
         if (friend.isEmpty()) {
+            log.debug("Friend not found! " + user + ", friend_id=" + friendId);
             return messageBuilder.setLanguage(user.getLanguage()).getText().friendDeleteError().build();
         }
+        log.debug("Friend deleted successfully! " + user + ", friend_id=" + friendId);
         return messageBuilder.setLanguage(user.getLanguage()).getText().friendRemoved(friend.get()).build();
     }
 
     private Message setLanguage(User user, String callbackData) {
-        Optional<Session> session = sessionHandler.findSession(user);
-        if (session.isEmpty()) {
-            return getReply(user, Command.INITIAL);
-        } else {
-            user = session.get().getUser();
-        }
-
         Language language;
         try {
             language = Language.valueOf(callbackData.substring("set_language_".length()));
-        } catch (IllegalArgumentException exception) {
+        } catch (NumberFormatException exception) {
             exception.printStackTrace();
+            log.warn("Incorrect callback from " + user + " CALLBACKDATA:\"" + callbackData + "\"");
             return messageBuilder.setLanguage(user.getLanguage()).getText().selectLanguageError().build();
         }
-
+        log.debug("Switch language " + user + " to Lang(" + language + ")");
         user.setLanguage(language);
-        userService.save(user);
+        userService.saveLanguage(user);
+        log.debug("Switch language " + user + "saved");
 
         return getReply(user, Command.INITIAL);
     }
