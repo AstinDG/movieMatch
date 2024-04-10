@@ -1,7 +1,7 @@
 package com.astindg.movieMatch.domain;
 
 import com.astindg.movieMatch.model.*;
-import com.astindg.movieMatch.util.exceprions.MessageBuilderSetupException;
+import com.astindg.movieMatch.util.exceptions.MessageBuilderSetupException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -38,7 +38,7 @@ public class MessageBuilder {
         this.keyboardsObj = new Keyboards();
     }
 
-    protected MessageBuilder setLanguage(Language language) {
+    public MessageBuilder setLanguage(Language language) {
         this.language = language;
         return this;
     }
@@ -78,7 +78,7 @@ public class MessageBuilder {
             throw new MessageBuilderSetupException("An error occurred while calling getText(): Language is required");
         }
 
-        return textObj;
+        return this.textObj;
     }
 
     public Keyboards getKeyboards() throws MessageBuilderSetupException {
@@ -453,7 +453,7 @@ public class MessageBuilder {
             return MessageBuilder.this;
         }
 
-        protected MessageBuilder friendRemove(Session session) {
+        public MessageBuilder friendRemove(Session session) {
             List<List<Pair<String, String>>> buttons = new ArrayList<>();
             if (session.getUser().getFriends() == null || session.getUser().getFriends().isEmpty()) {
                 MessageBuilder.this.messageText = getText().getMessageNoFriendsYet();
@@ -594,7 +594,7 @@ public class MessageBuilder {
             return MessageBuilder.this;
         }
 
-        protected MessageBuilder settings() {
+        public MessageBuilder settings() {
             MessageBuilder.this.keyboard = keyboardsKeeper.getKeyboard(KBD_SETTINGS, MessageBuilder.this.language);
             return MessageBuilder.this;
         }

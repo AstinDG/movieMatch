@@ -1,9 +1,6 @@
 package com.astindg.movieMatch.domain;
 
-import com.astindg.movieMatch.model.Language;
-import com.astindg.movieMatch.model.Message;
-import com.astindg.movieMatch.model.Movie;
-import com.astindg.movieMatch.model.User;
+import com.astindg.movieMatch.model.*;
 import com.astindg.movieMatch.services.UserService;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;

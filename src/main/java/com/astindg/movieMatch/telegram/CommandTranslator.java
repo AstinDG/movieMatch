@@ -1,6 +1,6 @@
 package com.astindg.movieMatch.telegram;
 
-import com.astindg.movieMatch.domain.Command;
+import com.astindg.movieMatch.model.Command;
 import com.astindg.movieMatch.model.Language;
 import org.springframework.core.env.Environment;
 

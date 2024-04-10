@@ -1,4 +1,4 @@
-package com.astindg.movieMatch.util.exceprions;
+package com.astindg.movieMatch.util.exceptions;
 
 public class MessageBuilderSetupException extends RuntimeException{
     public MessageBuilderSetupException(String message){
