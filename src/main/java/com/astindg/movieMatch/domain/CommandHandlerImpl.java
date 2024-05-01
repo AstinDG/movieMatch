@@ -42,7 +42,7 @@ public class CommandHandlerImpl implements CommandHandler {
                 sessionHandler.initializeInviteCode(session);
             }
             case MOVIE_MATCH -> {
-                session.initializeMovieList();
+                sessionHandler.initializeMovieList(session);
                 sessionHandler.selectRandomMovie(session);
             }
             case MOVIE_LiKE -> {
