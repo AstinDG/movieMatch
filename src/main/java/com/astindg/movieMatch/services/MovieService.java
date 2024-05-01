@@ -1,9 +1,6 @@
 package com.astindg.movieMatch.services;
 
-import com.astindg.movieMatch.model.Genre;
-import com.astindg.movieMatch.model.Language;
-import com.astindg.movieMatch.model.Movie;
-import com.astindg.movieMatch.model.MovieDetails;
+import com.astindg.movieMatch.model.*;
 import com.astindg.movieMatch.repositories.MovieRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,6 +24,10 @@ public class MovieService {
     @Autowired
     public MovieService(MovieRepository movieRepository) {
         this.movieRepository = movieRepository;
+    }
+
+    public List<Movie> getAllNewMovies(User user){
+        return movieRepository.getAllNewMoviesByUserId(user.getId());
     }
 
     public List<Movie> findAll() {

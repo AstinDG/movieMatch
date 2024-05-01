@@ -1,5 +1,6 @@
 package com.astindg.movieMatch.domain;
 
+import com.astindg.movieMatch.model.Command;
 import com.astindg.movieMatch.model.Message;
 import com.astindg.movieMatch.model.User;
 import org.apache.commons.lang3.tuple.Pair;

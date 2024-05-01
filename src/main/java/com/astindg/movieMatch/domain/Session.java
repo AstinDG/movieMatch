@@ -26,36 +26,11 @@ public class Session {
     private Boolean hasNewMatches = false;
     private Movie newMatchMovie;
     private Movie lastRandomMovie;
-    private final MovieService movieService;
 
     private static final Logger log = LoggerFactory.getLogger(Session.class);
 
     protected static final int INVITE_CODE_LENGTH = 5;
     protected static final int INVITE_CODE_MAX_AGE_IN_MINUTES = 10;
-
-    public Session(MovieService movieService) {
-        this.movieService = movieService;
-    }
-
-    protected void initializeMovieList() {
-        List<Movie> movieList = new ArrayList<>();
-
-        Set<Movie> moviesShownBefore = new HashSet<>();
-        if (this.user.getFavoriteMovies() != null) {
-            moviesShownBefore.addAll(this.user.getFavoriteMovies());
-        }
-        if (this.user.getDislikedMovies() != null) {
-            moviesShownBefore.addAll(this.user.getDislikedMovies());
-        }
-
-        for (Movie movie : movieService.findAll()) {
-            if (!moviesShownBefore.contains(movie)) {
-                movieList.add(movie);
-            }
-        }
-
-        this.movieList = movieList;
-    }
 
     protected boolean isCorrectLengthCode(int length) {
         return INVITE_CODE_LENGTH == length;

@@ -6,6 +6,24 @@
               integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65"
               crossorigin="anonymous">
         <title>Addd movie</title>
+        <style>
+            .col {
+                padding-top: 20px;
+            }
+            .br-r {
+                border-right: 2px solid;
+            }
+            span {
+                display: table;
+                margin: 0 auto;
+            }
+            textarea, .row-name input{
+                width: -webkit-fill-available;
+            }
+            .row-submit-button {
+                margin-bottom: 40px;
+            }
+        </style>
     </head>
     <body>
         <header class="header container-fluid bg-dark ">
@@ -22,55 +40,107 @@
         </header>
 
         <form th:method="POST" th:action="@{/admin/movie}" th:object="${movie}" enctype="multipart/form-data">
-            <label for="yearOfRelease">Enter year of release: </label>
-            <input type="text" th:field="*{yearOfRelease}" id="yearOfRelease">
-            <div style="color:red" th:if="${#fields.hasErrors('yearOfRelease')}" th:errors="*{yearOfRelease}">Year Error</div>
+            <div class="container">
+                <div class="row row-language-mark">
+                    <div class="col col-sm-2 br-r"></div>
+                    <div class="col col-md-3 br-r"><span>English</span></div>
+                    <div class="col col-md-3 br-r"><span>Ukrainian</span></div>
+                    <div class="col col-md-3 br-r"><span>Russian</span></div>
+                </div>
 
-            <ul>
-                <li th:each="genre: ${genreMap.keySet()}">
-                    <input type="checkbox"
-                           th:field="*{genres}"
-                           th:value="${genre}" />
-                    <label
-                            th:for="${#ids.prev('genres')}"
-                            th:text="${genreMap.get(genre)}"></label>
-                </li>
-            </ul>
+                <div class="row row-name">
+                    <div class="col col-sm-2 br-r"><span>Name:</span></div>
+                    <div class="col col-md-3 br-r">
+                        <input class=".form-control-lg" type="text" th:field="*{detailsEn.name}" id="nameEn">
+                        <div style="color:red" th:if="${#fields.hasErrors('detailsEn.name')}" th:errors="*{detailsEn.name}">Name
+                            Error
+                        </div>
+                    </div>
+                    <div class="col col-md-3 br-r">
+                        <input class=".form-control-lg" type="text" th:field="*{detailsUa.name}" id="nameUa">
+                        <div style="color:red" th:if="${#fields.hasErrors('detailsUa.name')}" th:errors="*{detailsUa.name}">
+                            Помилка назви
+                        </div>
+                    </div>
+                    <div class="col col-md-3 br-r">
+                        <input class=".form-control-lg" type="text" th:field="*{detailsRu.name}" id="nameRu">
+                        <div style="color:red" th:if="${#fields.hasErrors('detailsRu.name')}" th:errors="*{detailsRu.name}">
+                            Ошибка названия
+                        </div>
+                    </div>
+                </div>
 
-            <label for="nameEn">Enter name: </label>
-            <input type="text" th:field="*{detailsEn.name}" id="nameEn">
-            <div style="color:red" th:if="${#fields.hasErrors('detailsEn.name')}" th:errors="*{detailsEn.name}">Name Error</div>
+                <div class="row row-image">
+                    <div class="col col-sm-2 br-r"><span>Image:</span></div>
+                    <div class="col col-md-3 br-r">
+                        <input type="file" id="imageEn" name="imageEn" accept="image/*" class="form-control-file">
+                    </div>
+                    <div class="col col-md-3 br-r">
+                        <input type="file" id="imageUa" name="imageUa" accept="image/*" class="form-control-file">
+                    </div>
+                    <div class="col col-md-3 br-r">
+                        <input type="file" id="imageRu" name="imageRu" accept="image/*" class="form-control-file">
+                    </div>
+                </div>
 
-            <label for="descriptionEn">Enter description: </label>
-            <textarea th:field="*{detailsEn.description}" id="descriptionEn" cols="20" rows="5"></textarea>
-            <div style="color:red" th:if="${#fields.hasErrors('detailsEn.description')}" th:errors="*{detailsEn.description}">Description Error</div>
+                <div class="row row-description">
+                    <div class="col col-sm-2 br-r"><span>Description:</span></div>
+                    <div class="col col-md-3 br-r">
+                        <textarea th:field="*{detailsEn.description}" id="descriptionEn" cols="20" rows="5"></textarea>
+                        <div style="color:red" th:if="${#fields.hasErrors('detailsEn.description')}"
+                             th:errors="*{detailsEn.description}">Description Error
+                        </div>
+                    </div>
+                    <div class="col col-md-3 br-r">
+                        <textarea th:field="*{detailsUa.description}" id="descriptionUa" cols="20" rows="5"></textarea>
+                        <div style="color:red" th:if="${#fields.hasErrors('detailsUa.description')}"
+                             th:errors="*{detailsUa.description}">Помилка опису
+                        </div>
+                    </div>
+                    <div class="col col-md-3 br-r">
+                        <textarea th:field="*{detailsRu.description}" id="descriptionRu" cols="20" rows="5"></textarea>
+                        <div style="color:red" th:if="${#fields.hasErrors('detailsRu.description')}"
+                             th:errors="*{detailsRu.description}">Ошибка описания
+                        </div>
+                    </div>
+                </div>
 
-            <label for="imageEn">Upload image: </label>
-            <input type="file" id="imageEn" name="imageEn" accept="image/*" class="form-control-file">
+                <div class="row row-genres">
+                    <div class="col col-sm-2"><span>Genres:</span></div>
+                    <div class="col col-md-6">
+                        <ul>
+                            <li th:each="genre: ${genreMap.keySet()}">
+                                <input type="checkbox"
+                                       th:field="*{genres}"
+                                       th:value="${genre}"/>
+                                <label
+                                        th:for="${#ids.prev('genres')}"
+                                        th:text="${genreMap.get(genre)}"></label>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col col-md-3"></div>
+                </div>
 
-            <label for="nameUa">Назва: </label>
-            <input type="text" th:field="*{detailsUa.name}" id="nameUa">
-            <div style="color:red" th:if="${#fields.hasErrors('detailsUa.name')}" th:errors="*{detailsUa.name}">Помилка назви</div>
+                <div class="row row-year-release">
+                    <div class="col col-sm-2">
+                        <label for="yearOfRelease">Enter year of release: </label>
+                    </div>
+                    <div class="col col-md-6">
+                        <input type="text" th:field="*{yearOfRelease}" id="yearOfRelease">
+                        <div style="color:red" th:if="${#fields.hasErrors('yearOfRelease')}" th:errors="*{yearOfRelease}">Year
+                            Error
+                        </div>
+                    </div>
+                    <div class="col col-md-3"></div>
+                </div>
 
-            <label for="descriptionUa">Опис: </label>
-            <textarea th:field="*{detailsUa.description}" id="descriptionUa" cols="20" rows="5"></textarea>
-            <div style="color:red" th:if="${#fields.hasErrors('detailsUa.description')}" th:errors="*{detailsUa.description}">Помилка опису</div>
-
-            <label for="imageUa">Завантаж картику: </label>
-            <input type="file" id="imageUa" name="imageUa" accept="image/*" class="form-control-file">
-
-            <label for="nameRu">Название: </label>
-            <input type="text" th:field="*{detailsRu.name}" id="nameRu">
-            <div style="color:red" th:if="${#fields.hasErrors('detailsRu.name')}" th:errors="*{detailsRu.name}">Ошибка названия</div>
-
-            <label for="descriptionRu">Описание: </label>
-            <textarea th:field="*{detailsRu.description}" id="descriptionRu" cols="20" rows="5"></textarea>
-            <div style="color:red" th:if="${#fields.hasErrors('detailsRu.description')}" th:errors="*{detailsRu.description}">Ошибка описания</div>
-
-            <label for="imageRu">Загрузи картинку: </label>
-            <input type="file" id="imageRu" name="imageRu" accept="image/*" class="form-control-file">
-
-            <input type="submit" value="Create!"/>
+                <div class="row row-submit-button">
+                    <div class="col col-md-6"></div>
+                    <div class="col col-md-3"><input type="submit" value="Create!"/></div>
+                    <div class="col col-md-3"></div>
+                </div>
+            </div>
         </form>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
