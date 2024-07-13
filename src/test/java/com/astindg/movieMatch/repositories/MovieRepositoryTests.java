@@ -1,15 +1,12 @@
 package com.astindg.movieMatch.repositories;
 
 import com.astindg.movieMatch.model.Movie;
-import com.astindg.movieMatch.model.MovieDetailsEn;
-import com.astindg.movieMatch.model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
